@@ -1,0 +1,27 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.color = (text, ...colors) => `${colors.join('')}${text}${Color.RESET}`;
+var Color;
+(function (Color) {
+    Color["RESET"] = "\u001B[0m";
+    Color["BOLD"] = "\u001B[1m";
+    Color["DIM"] = "\u001B[2m";
+    Color["UNDERLINE"] = "\u001B[4m";
+    Color["BLINK"] = "\u001B[5m";
+    Color["REVERSE"] = "\u001B[7m";
+    Color["HIDDEN"] = "\u001B[8m";
+    Color["BLACK"] = "\u001B[30m";
+    Color["RED"] = "\u001B[31m";
+    Color["GREEN"] = "\u001B[32m";
+    Color["YELLOW"] = "\u001B[33m";
+    Color["BLUE"] = "\u001B[34m";
+    Color["MAGENTA"] = "\u001B[35m";
+    Color["CYAN"] = "\u001B[36m";
+    Color["WHITE"] = "\u001B[37m";
+    Color["BG_RED"] = "\u001B[41m";
+    Color["BG_GREEN"] = "\u001B[42m";
+    Color["BG_YELLOW"] = "\u001B[43m";
+    Color["BG_BLUE"] = "\u001B[44m";
+    Color["BG_MAGENTA"] = "\u001B[45m";
+    Color["BG_CYAN"] = "\u001B[46m";
+})(Color = exports.Color || (exports.Color = {}));

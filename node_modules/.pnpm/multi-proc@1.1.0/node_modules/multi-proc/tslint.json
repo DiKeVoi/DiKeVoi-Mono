@@ -1,0 +1,22 @@
+{
+    "defaultSeverity": "warning",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "trailing-comma": true,
+        "interface-name": false,
+        "indent": [true, "spaces", 2],
+        "semicolon": true,
+        "quotemark": [true, "single"],
+        "return-undefined": true,
+        "only-arrow-functions": true,
+        "eofline": true,
+        "no-console": false
+    },
+    "rulesDirectory": [],
+    "linterOptions": {
+        "exclude": ["*.json"]
+    }
+}
