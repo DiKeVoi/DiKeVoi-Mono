@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# Trap errors and display failure message
+trap 'echo "❌ pre-commit checks failed!"; exit 1' ERR
+
+# Lint in frontend
+cd frontend && npm run lint
+
+# Lint in backend
+cd ../backend && black . && flake8 app/
