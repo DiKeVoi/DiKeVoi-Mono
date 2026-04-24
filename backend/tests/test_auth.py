@@ -124,3 +124,58 @@ def test_signin_user_not_found(client: TestClient, mock_supabase: MagicMock) -> 
     )
 
     assert response.status_code == 401
+
+
+def test_signup_db_failure(client: TestClient, mock_supabase: MagicMock) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = (
+        []
+    )
+    mock_supabase.table.return_value.insert.return_value.execute.return_value.data = []
+
+    response = client.post(
+        "/auth/signup",
+        json={"email": "newuser@example.com", "password": "securepass"},
+    )
+
+    assert response.status_code == 500
+
+
+def test_token_endpoint_success(client: TestClient, mock_supabase: MagicMock) -> None:
+    hashed = bcrypt.hashpw(b"securepass", bcrypt.gensalt()).decode()
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+        "id": "user-123",
+        "email": "user@example.com",
+        "password": hashed,
+    }
+
+    response = client.post(
+        "/auth/token",
+        data={"username": "user@example.com", "password": "securepass"},
+    )
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+
+def test_signup_with_optional_fields(
+    client: TestClient, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = (
+        []
+    )
+    mock_supabase.table.return_value.insert.return_value.execute.return_value.data = [
+        {"id": "new-id"}
+    ]
+
+    response = client.post(
+        "/auth/signup",
+        json={
+            "email": "newuser@example.com",
+            "password": "securepass",
+            "display_name": "Test User",
+            "gender": "male",
+            "photo_url": "http://example.com/photo.jpg",
+        },
+    )
+
+    assert response.status_code == 201

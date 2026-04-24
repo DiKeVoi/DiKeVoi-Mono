@@ -142,3 +142,103 @@ def test_delete_notification(
     response = client.delete("/notifications/notif-123", headers=auth_headers)
 
     assert response.status_code == 204
+
+
+def test_create_notification_db_failure(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.insert.return_value.execute.return_value.data = []
+
+    response = client.post(
+        "/notifications",
+        headers=auth_headers,
+        json={"title": "Hello", "body": "World"},
+    )
+
+    assert response.status_code == 500
+
+
+def test_get_notification_not_found(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        None
+    )
+
+    response = client.get("/notifications/nonexistent", headers=auth_headers)
+
+    assert response.status_code == 404
+
+
+def test_update_notification_no_fields(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        NOTIFICATION
+    )
+
+    response = client.patch("/notifications/notif-123", headers=auth_headers, json={})
+
+    assert response.status_code == 422
+
+
+def test_update_notification_forbidden(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    other = {**NOTIFICATION, "userId": "other-user"}
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        other
+    )
+
+    response = client.patch(
+        "/notifications/notif-123", headers=auth_headers, json={"is_read": True}
+    )
+
+    assert response.status_code == 403
+
+
+def test_delete_notification_not_found(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        None
+    )
+
+    response = client.delete("/notifications/nonexistent", headers=auth_headers)
+
+    assert response.status_code == 404
+
+
+def test_delete_notification_forbidden(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    other = {**NOTIFICATION, "userId": "other-user"}
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        other
+    )
+
+    response = client.delete("/notifications/notif-123", headers=auth_headers)
+
+    assert response.status_code == 403
+
+
+def test_update_notification_title_and_body(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        NOTIFICATION
+    )
+    updated = {**NOTIFICATION, "title": "New title", "body": "New body"}
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [
+        updated
+    ]
+
+    response = client.patch(
+        "/notifications/notif-123",
+        headers=auth_headers,
+        json={"title": "New title", "body": "New body"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["title"] == "New title"
+    assert response.json()["body"] == "New body"

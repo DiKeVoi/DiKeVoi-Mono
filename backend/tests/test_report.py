@@ -182,3 +182,79 @@ def test_delete_report_forbidden(
     response = client.delete("/reports/report-123", headers=auth_headers)
 
     assert response.status_code == 403
+
+
+def test_create_report_db_failure(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.insert.return_value.execute.return_value.data = []
+
+    response = client.post(
+        "/reports",
+        headers=auth_headers,
+        json={"reason": "Bad behaviour"},
+    )
+
+    assert response.status_code == 500
+
+
+def test_update_report_not_found(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        None
+    )
+
+    response = client.patch(
+        "/reports/nonexistent", headers=auth_headers, json={"reason": "Updated"}
+    )
+
+    assert response.status_code == 404
+
+
+def test_update_report_forbidden(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    other = {**REPORT, "reporterId": "other-user"}
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        other
+    )
+
+    response = client.patch(
+        "/reports/report-123", headers=auth_headers, json={"reason": "Updated"}
+    )
+
+    assert response.status_code == 403
+
+
+def test_delete_report_not_found(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        None
+    )
+
+    response = client.delete("/reports/nonexistent", headers=auth_headers)
+
+    assert response.status_code == 404
+
+
+def test_update_report_with_image_and_status(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        REPORT
+    )
+    updated = {**REPORT, "imageURL": "http://example.com/img.jpg", "status": "reviewed"}
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [
+        updated
+    ]
+
+    response = client.patch(
+        "/reports/report-123",
+        headers=auth_headers,
+        json={"image_url": "http://example.com/img.jpg", "status": "reviewed"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "reviewed"

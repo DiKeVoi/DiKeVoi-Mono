@@ -153,3 +153,60 @@ def test_delete_ride_post(
     response = client.delete("/ride-posts/post-123", headers=auth_headers)
 
     assert response.status_code == 204
+
+
+def test_create_ride_post_db_failure(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.insert.return_value.execute.return_value.data = []
+
+    response = client.post(
+        "/ride-posts",
+        headers=auth_headers,
+        json={
+            "type": "offer",
+            "origin_location": "A",
+            "destination_location": "B",
+            "departure_time": "2026-05-01T08:00:00",
+            "is_recurring": False,
+        },
+    )
+
+    assert response.status_code == 500
+
+
+def test_update_ride_post_no_fields(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+        "userId": "user-123"
+    }
+
+    response = client.patch("/ride-posts/post-123", headers=auth_headers, json={})
+
+    assert response.status_code == 422
+
+
+def test_delete_ride_post_not_found(
+    client: TestClient, auth_headers: dict, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
+        None
+    )
+
+    response = client.delete("/ride-posts/nonexistent", headers=auth_headers)
+
+    assert response.status_code == 404
+
+
+def test_list_ride_posts_filter_by_request_type(
+    client: TestClient, mock_supabase: MagicMock
+) -> None:
+    request_post = {**RIDE_POST, "type": "request"}
+    mock_supabase.table.return_value.select.return_value.eq.return_value.order.return_value.execute.return_value.data = [
+        request_post
+    ]
+
+    response = client.get("/ride-posts?type=request")
+
+    assert response.status_code == 200
