@@ -5,3 +5,4 @@ set -e
 trap 'echo "❌ pre-push checks failed!"; exit 1' ERR
 
 cd backend && source venv/bin/activate && pytest
+sed -i 's|<source>app</source>|<source>backend/app</source>|' coverage.xml
