@@ -38,6 +38,7 @@ export function HomeHeader() {
           activeOpacity={0.7}
           onPress={() => setShowNoti(!showNoti)}
           className="p-2 bg-slate-50 rounded-full"
+          testID="notification-bell"
         >
           <Bell size={22} color="#64748B" />
 
