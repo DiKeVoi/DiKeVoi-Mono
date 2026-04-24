@@ -8,5 +8,5 @@ trap 'echo "❌ pre-commit checks failed!"; exit 1' ERR
 cd frontend && npm run lint
 
 # Lint in backend
-cd ../backend && python3 -m black . || python -m black .
+cd ../backend && source venv/bin/activate && python3 -m black . || python -m black .
 python3 -m flake8 app/ || python -m flake8 app/
