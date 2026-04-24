@@ -4,4 +4,4 @@ set -e
 # Trap errors and display failure message
 trap 'echo "❌ pre-push checks failed!"; exit 1' ERR
 
-pytest
+cd backend && source venv/bin/activate && pytest
