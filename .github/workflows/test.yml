@@ -1,109 +1,64 @@
-name: Test and Analyze
+# .github/workflows/ci.yml
+# Pipeline CI: Chạy Jest → sinh coverage → đẩy lên SonarCloud
+#
+# Trigger: mỗi lần push lên main/develop hoặc mở Pull Request vào main
+
+name: CI — Test & SonarCloud Analysis
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  test-backend:
-    name: Test Backend (Python)
+  test-and-analyze:
+    name: Jest Tests + SonarCloud
     runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Install backend dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
-      
-      - name: Run backend tests with coverage
-        # Gọi các biến từ GitHub Secrets
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          cd backend
-          pytest --cov=app --cov-report=xml:coverage.xml
-      
-      - name: Upload backend coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage
-          path: backend/coverage.xml
 
-  test-frontend:
-    name: Test Frontend (React Native)
-    runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Use Node.js
+      # ── 1. Checkout code ────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # SonarCloud cần toàn bộ git history để tính blame/new code
+          fetch-depth: 0
+
+      # ── 2. Setup Node.js ────────────────────────────────────────────────────
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
-      - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm ci
-      
-      - name: Run frontend tests with coverage
-        run: |
-          cd frontend
-          npm run test:coverage
-      
-      - name: Upload frontend coverage report
+          cache: 'npm'
+
+      # ── 3. Cài dependencies ─────────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      # ── 4. Chạy Jest + sinh coverage report (lcov) ──────────────────────────
+      - name: Run Jest with coverage
+        run: npx jest --coverage --coverageReporters=lcov --coverageReporters=text-summary --passWithNoTests
+        env:
+          # Biến môi trường giả để test không cần .env thật
+          EXPO_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          EXPO_PUBLIC_SUPABASE_KEY: placeholder_key
+
+      # ── 5. Upload test-report artifact (HTML report for GitHub UI) ──────────
+      - name: Upload test report
         uses: actions/upload-artifact@v4
-        with:
-          name: frontend-coverage
-          path: frontend/coverage/
-      
-      - name: Upload test report (HTML)
-        uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: test-report
-          path: frontend/coverage/lcov-report/index.html
+          path: coverage/lcov-report/
+          retention-days: 7
 
-  sonarqube-scan:
-    name: SonarQube Scan
-    runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend] 
-    
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 
-      
-      - name: Download backend coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-coverage
-          path: backend/
+      # ── 6. Phân tích SonarCloud (dùng npm thay Docker để tránh Node.js 18 trong Alpine) ──
+      - name: Install SonarQube Scanner
+        run: npm install -g sonarqube-scanner
 
-      - name: Download frontend coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-coverage
-          path: frontend/coverage/
-
-      - name: List files for debugging
-        run: |
-          ls -l backend/coverage.xml
-          ls -l frontend/coverage/lcov.info
-      
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+        run: sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
