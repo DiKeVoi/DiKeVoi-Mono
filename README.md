@@ -49,3 +49,6 @@ This project uses **Jest** and **React Native Testing Library** for testing.
   ```bash
   npx jest --watch
   ```
+
+## Sonar Clound
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=dikevoi)
