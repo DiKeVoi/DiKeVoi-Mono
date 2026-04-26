@@ -1,33 +1,42 @@
+import { ScrollView } from "react-native";
 import { ThemedText, ThemedView } from "@/components";
 import { HomeHeader } from "@/components/home-header";
 import { MyRequests } from "@/components/my-requests";
 import { QuickActions } from "@/components/quickactions";
+
 export default function Home() {
   return (
-    <ThemedView className="flex justify-center pt-12">
-      {/* Mobile frame */}
-      <ThemedView className="relative flex flex-col w-full overflow-hidden max-h-screen">
-        {/* Scrollable content */}
-        <ThemedView className="flex-1 overflow-y-auto pb-24">
+    <ThemedView style={{ flex: 1, paddingTop: 16 }}>
+      <ThemedView
+        style={{
+          flex: 1,
+          flexDirection: "column",
+          width: "100%",
+        }}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: 96, 
+          }}
+        >
           <HomeHeader />
-          {/* Welcome Section */}
-          <ThemedView className="px-4 pt-4 pb-4">
-            <ThemedText className="text-2xl text-slate-900 font-bold">
+
+          <ThemedView style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}>
+            <ThemedText style={{ fontSize: 24, color: "#0f172a", fontWeight: "bold" }}>
               Chào buổi sáng!
             </ThemedText>
-            <ThemedText className="text-base text-slate-500 font-normal mt-1">
+            <ThemedText style={{ fontSize: 16, color: "#64748b", marginTop: 4 }}>
               Bạn muốn đi đâu hôm nay?
             </ThemedText>
           </ThemedView>
 
-          {/* Quick Actions */}
           <QuickActions />
 
-          {/* My Requests */}
-          <ThemedView className="mt-6 mb-12">
+          <ThemedView style={{ marginTop: 24, marginBottom: 48 }}>
             <MyRequests viewAll={false} />
           </ThemedView>
-        </ThemedView>
+        </ScrollView>
       </ThemedView>
     </ThemedView>
   );
