@@ -85,12 +85,17 @@ jobs:
         with:
           name: backend-coverage
           path: backend/
-      
+
       - name: Download frontend coverage
         uses: actions/download-artifact@v4
         with:
           name: frontend-coverage
-          path: frontend/
+          path: frontend/coverage/
+
+      - name: List files for debugging
+        run: |
+          ls -l backend/coverage.xml
+          ls -l frontend/coverage/lcov.info
       
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
