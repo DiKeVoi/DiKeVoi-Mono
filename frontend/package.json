@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "test:coverage": "jest-expo --coverage"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@expo-google-fonts/roboto": "^0.4.3",
