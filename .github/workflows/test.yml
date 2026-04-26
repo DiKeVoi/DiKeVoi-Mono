@@ -74,6 +74,12 @@ jobs:
           name: frontend-coverage
           path: frontend/coverage/
 
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: frontend/coverage/lcov-report/index.html
+
   sonarcloud-scan:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
