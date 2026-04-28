@@ -34,7 +34,6 @@
     "expo-system-ui": "~6.0.9",
     "expo-updates": "~29.0.16",
     "expo-web-browser": "~15.0.10",
-    "glob": "^13.0.6",
     "lucide-react-native": "^1.6.0",
     "nativewind": "^4.2.3",
     "prettier-plugin-tailwindcss": "^0.5.14",
@@ -50,44 +49,8 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
     "rimraf": "^6.1.3",
-    "tailwindcss": "^3.4.19"
-  },
-  "jest": {
-    "preset": "jest-expo",
-    "setupFilesAfterEnv": [
-      "./jest.setup.ts"
-    ],
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "app/**/*.{ts,tsx}",
-      "components/**/*.{ts,tsx}",
-      "hooks/**/*.{ts,tsx}",
-      "constants/**/*.{ts,tsx}",
-      "!app/**/_layout.tsx",
-      "!components/index.ts",
-      "!components/onboarding/first-page.tsx",
-      "!**/*.d.ts"
-    ],
-    "coverageProvider": "v8",
-    "coverageReporters": [
-      "lcov",
-      "text"
-    ],
-    "coverageDirectory": "coverage",
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1",
-      "^@components/(.*)$": "<rootDir>/components/$1",
-      "^@hooks/(.*)$": "<rootDir>/hooks/$1",
-      "^@constants/(.*)$": "<rootDir>/constants/$1",
-      "^@assets/(.*)$": "<rootDir>/assets/$1",
-      "^@screens/(.*)$": "<rootDir>/screens/$1",
-      "^@utils/(.*)$": "<rootDir>/utils/$1",
-      "^@scripts/(.*)$": "<rootDir>/scripts/$1",
-      "\\.svg$": "<rootDir>/__mocks__/svg-mock.js"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|lucide-react-native)"
-    ]
+    "tailwindcss": "^3.4.19",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@testing-library/react-native": "^13.3.3",
@@ -99,7 +62,6 @@
     "typescript": "~5.9.2"
   },
   "overrides": {
-    "glob": "^13.0.6",
     "rimraf": "^6.1.3"
   },
   "private": true

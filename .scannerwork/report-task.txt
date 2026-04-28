@@ -1,0 +1,7 @@
+organization=dikevoi
+projectKey=dikevoi
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.86098
+dashboardUrl=https://sonarcloud.io/dashboard?id=dikevoi
+ceTaskId=AZ3SUuY5tHaZy2hstZs9
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ3SUuY5tHaZy2hstZs9

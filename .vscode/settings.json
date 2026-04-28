@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "dikevoi-ci-4",
+        "projectKey": "dikevoi"
+    }
+}

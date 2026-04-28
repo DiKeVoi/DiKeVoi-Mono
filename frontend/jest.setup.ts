@@ -1,5 +1,5 @@
 jest.mock('expo-router', () => ({
-  Link: ({ children, asChild }: any) => (asChild ? children : children),
+  Link: ({ children, asChild }: any) => (children),
   Redirect: () => null,
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
   useLocalSearchParams: () => ({}),
