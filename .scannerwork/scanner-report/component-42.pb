@@ -1,0 +1,1 @@
+* 2tsXhr-frontend/components/onboarding/first-page.tsx
