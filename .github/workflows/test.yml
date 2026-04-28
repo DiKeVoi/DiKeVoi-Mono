@@ -102,6 +102,11 @@ jobs:
           name: frontend-coverage
           path: frontend/coverage/
 
+      - name: Remove test files from workspace
+        run: |
+          rm -rf frontend/__tests__
+          rm -rf backend/tests
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
         env:
