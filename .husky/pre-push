@@ -11,3 +11,5 @@ PYTHONPATH=backend pytest backend/tests \
   --cov-report=term-missing \
   --cov-report=xml:backend/coverage.xml \
   --cov-fail-under=80
+
+npm run test:coverage --prefix frontend
