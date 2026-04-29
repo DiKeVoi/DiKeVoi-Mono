@@ -1,0 +1,179 @@
+import os
+import stat
+import subprocess
+from pathlib import Path
+from typing import Optional, List
+
+
+class PyHusky:
+    """Core class for managing Git hooks with py-husky"""
+
+    HUSKY_DIR = ".py-husky"
+    SUPPORTED_HOOKS = [
+        "pre-commit",
+        "pre-push",
+        "commit-msg",
+        "pre-rebase",
+        "post-checkout",
+        "post-merge",
+        "prepare-commit-msg",
+    ]
+
+    def __init__(self, project_root: Optional[Path] = None):
+        self.project_root = project_root or Path.cwd()
+        self.husky_dir = self.project_root / self.HUSKY_DIR
+        self.git_dir = self.project_root / ".git"
+        self.hooks_dir = self.git_dir / "hooks"
+        self._debug_enabled = os.getenv("PY_HUSKY_DEBUG", "0") == "1"
+
+    def _log_debug(self, message: str):
+        """Log debug messages if debug mode is enabled"""
+        if self._debug_enabled:
+            print(f"[py-husky DEBUG] {message}")
+
+    def _log_error(self, message: str):
+        """Log error messages"""
+        print(f"[py-husky ERROR] {message}")
+
+    def _log_info(self, message: str):
+        """Log info messages"""
+        print(f"[py-husky] {message}")
+
+    def is_git_repository(self) -> bool:
+        """Check if current directory is a git repository"""
+        return self.git_dir.exists() and self.git_dir.is_dir()
+
+    def initialize(self) -> bool:
+        """Initialize py-husky in the project"""
+        if not self.is_git_repository():
+            self._log_error("Not a git repository. Please run 'git init' first.")
+            return False
+
+        self.husky_dir.mkdir(exist_ok=True)
+        self._log_info(f"Created {self.HUSKY_DIR} directory")
+
+        self._create_hook_wrapper()
+
+        self._log_info("py-husky initialized successfully!")
+        self._log_info(f"Add your hooks to {self.HUSKY_DIR}/ directory")
+
+        return True
+
+    def _create_hook_wrapper(self):
+        """Create the main hook wrapper script"""
+        for hook_name in self.SUPPORTED_HOOKS:
+            hook_path = self.hooks_dir / hook_name
+
+            hook_content = f'''#!/bin/sh
+
+HOOK_NAME="{hook_name}"
+PY_HUSKY_DIR=".py-husky"
+HOOK_SCRIPT="$PY_HUSKY_DIR/$HOOK_NAME"
+
+if [ -f "$HOOK_SCRIPT" ]; then
+    if [ -x "$HOOK_SCRIPT" ]; then
+        "$HOOK_SCRIPT" "$@"
+    else
+        sh "$HOOK_SCRIPT" "$@"
+    fi
+else
+    python -m py_husky.runner "$HOOK_NAME" "$@"
+fi
+'''
+
+            with open(hook_path, "w", newline="\n") as f:
+                f.write(hook_content)
+
+            hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
+            self._log_debug(f"Created hook wrapper: {hook_name}")
+
+    def add_hook(self, hook_name: str, commands: List[str]) -> bool:
+        """Add or update a hook with specified commands"""
+        if hook_name not in self.SUPPORTED_HOOKS:
+            self._log_error(f"Unsupported hook: {hook_name}")
+            self._log_info(f"Supported hooks: {', '.join(self.SUPPORTED_HOOKS)}")
+            return False
+
+        if not self.husky_dir.exists():
+            self._log_error(f"{self.HUSKY_DIR} directory not found. Run 'py-husky init' first.")
+            return False
+
+        hook_file = self.husky_dir / hook_name
+
+        # Create hook with error handling
+        hook_content = f'''#!/bin/sh
+set -e
+
+# Trap errors and display failure message
+trap 'echo "❌ {hook_name} checks failed!"; exit 1' ERR
+
+'''
+
+        for cmd in commands:
+            hook_content += f"{cmd}\n"
+
+        with open(hook_file, "w", newline="\n", encoding="utf-8") as f:
+            f.write(hook_content)
+
+        hook_file.chmod(hook_file.stat().st_mode | stat.S_IEXEC)
+
+        self._log_info(f"Added {hook_name} hook with {len(commands)} command(s)")
+        return True
+
+    def run_hook(self, hook_name: str, args: List[str]) -> int:
+        """Run a specific hook from .py-husky directory"""
+        hook_file = self.husky_dir / hook_name
+
+        if not hook_file.exists():
+            self._log_debug(f"No hook file found for {hook_name}")
+            return 0
+
+        self._log_info(f"Running {hook_name} hook...")
+
+        try:
+            if os.name == 'nt':
+                result = subprocess.run(
+                    ["sh", str(hook_file)] + args,
+                    cwd=self.project_root,
+                    capture_output=False
+                )
+            else:
+                result = subprocess.run(
+                    [str(hook_file)] + args,
+                    cwd=self.project_root,
+                    capture_output=False
+                )
+
+            if result.returncode != 0:
+                self._log_error(f"Hook {hook_name} failed with exit code {result.returncode}")
+                return result.returncode
+        except Exception as e:
+            self._log_error(f"Failed to execute hook {hook_name}: {e}")
+            return 1
+
+        self._log_info(f"{hook_name} hook completed successfully")
+        return 0
+
+    def uninstall(self) -> bool:
+        """Uninstall py-husky hooks"""
+        if not self.hooks_dir.exists():
+            self._log_error("Git hooks directory not found")
+            return False
+
+        removed_count = 0
+        for hook_name in self.SUPPORTED_HOOKS:
+            hook_path = self.hooks_dir / hook_name
+            if hook_path.exists():
+                try:
+                    with open(hook_path, "r") as f:
+                        content = f.read()
+
+                    if "py-husky" in content:
+                        hook_path.unlink()
+                        removed_count += 1
+                        self._log_debug(f"Removed hook: {hook_name}")
+                except Exception as e:
+                    self._log_error(f"Failed to remove {hook_name}: {e}")
+
+        self._log_info(f"Removed {removed_count} py-husky hook(s)")
+        return True

@@ -18,5 +18,5 @@ export type NotificationData = {
   title: string;
   time: Date;
   read: boolean;
-  category?: "success" | "matching" | "failed"; // Optional category for different types of notifications
+  category?: "success" | "matching" | "failed" | "accepted"; // Optional category for different types of notifications
 };

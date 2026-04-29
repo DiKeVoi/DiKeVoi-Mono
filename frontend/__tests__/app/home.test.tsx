@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import Home from '../../app/(main)/home';
+import Home from '../../app/(tabs)/home';
 
 describe('Home screen', () => {
   it('renders without crashing', () => {

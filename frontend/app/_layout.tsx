@@ -27,12 +27,22 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || error) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
+  
   if (!fontsLoaded && !error) return null;
 
   return (
     <ThemeProvider value={DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
+        {/* 1. Nhóm màn hình chưa đăng nhập (Onboarding, Login) */}
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+
+        {/* 2. Nhóm màn hình chính có thanh Tab Bar (Trang chủ, Matching, Tài khoản) */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* 3. Nhóm các màn hình phụ full màn hình (Request, Danh sách) */}
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+
+        {/* Màn hình modal cũ của bạn - cứ giữ lại nếu sau này cần dùng */}
         <Stack.Screen
           name="modal"
           options={{ presentation: "modal", title: "Modal" }}
