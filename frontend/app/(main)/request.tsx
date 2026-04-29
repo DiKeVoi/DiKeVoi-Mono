@@ -5,7 +5,7 @@ export default function Profile() {
   return (
     <ThemedView className="flex justify-center pt-12">
       <ThemedText className="text-2xl text-slate-900 font-bold">
-        Chọn đi ké hoặc cho đi ké, thời gian đi, lặp lại?
+        Tạo yêu cầu
         
       </ThemedText>
       <Link href="/map" asChild>
