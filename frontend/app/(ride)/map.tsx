@@ -71,6 +71,7 @@ export default function Request() {
         handleSelectPlace={handleSelectPlace}
         styles={styles}
         onConfirm={handleSubmitLocation}
+        confirmDisabled={!pickup.coords || !destination.coords}
       />
     </View>
   );

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, TouchableOpacity, Platform } from "react-native";
+import { ScrollView, View, TouchableOpacity, Platform, Button } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router"; // Thêm useLocalSearchParams
+import { router, useLocalSearchParams, Link } from "expo-router";
 
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
@@ -16,21 +16,19 @@ import {
   PrimaryButton 
 } from "@/components/request/form-components"; 
 
-export default function Request() {
-  // 1. Lấy tham số role từ navigation (passenger hoặc driver)
+export default function RequestScreen() {
+  // 1. Lấy tham số role từ navigation
   const { role: navRole } = useLocalSearchParams<{ role: string }>();
 
-  // 2. Khởi tạo state dựa trên tham số truyền vào
-  // Nếu navRole là 'driver' thì để 'driver', ngược lại mặc định là 'rider' (passenger)
+  // 2. State quản lý form
   const [role, setRole] = useState<"rider" | "driver">(
     navRole === "driver" ? "driver" : "rider"
   );
-
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [isRepeat, setIsRepeat] = useState(false);
   
-  // Cập nhật lại role nếu params thay đổi (đảm bảo đồng bộ khi quay lại màn hình)
+  // Đồng bộ role khi quay lại màn hình
   useEffect(() => {
     if (navRole === "driver") setRole("driver");
     if (navRole === "passenger") setRole("rider");
@@ -99,7 +97,7 @@ export default function Request() {
           />
         </View>
 
-        {/* Main Form Content */}
+        {/* Main Content */}
         <ScrollView 
           className="flex-1 px-4 pt-6"
           showsVerticalScrollIndicator={false}
@@ -109,24 +107,38 @@ export default function Request() {
             Bạn là ai?
           </ThemedText>
           
-          {/* RoleSelector giờ sẽ hiển thị đúng giá trị đã chọn từ Home */}
           <RoleSelector role={role} setRole={setRole} />
 
-          <IconInput
-            label="Điểm đi"
-            iconName="location-on"
-            placeholder="Nhập điểm khởi hành"
-            value={pickup}
-            onChangeText={setPickup}
-          />
+          <View className="mt-4">
+            <IconInput
+              label="Điểm đi"
+              iconName="location-on"
+              placeholder="Nhập điểm khởi hành"
+              value={pickup}
+              onChangeText={setPickup}
+            />
 
-          <IconInput
-            label="Điểm đến"
-            iconName="near-me"
-            placeholder="Nhập điểm đến"
-            value={destination}
-            onChangeText={setDestination}
-          />
+            <IconInput
+              label="Điểm đến"
+              iconName="near-me"
+              placeholder="Nhập điểm đến"
+              value={destination}
+              onChangeText={setDestination}
+            />
+
+            {/* Nút Chọn từ bản đồ (Merged từ Profile) */}
+            <View className="mb-6 -mt-2">
+              <Link href="/map" asChild>
+                <TouchableOpacity 
+                  className="bg-[#F9F871] py-3 rounded-xl flex-row justify-center items-center shadow-sm"
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="map" size={20} color="#152249" className="mr-2" />
+                  <ThemedText className="text-[#152249] font-bold">Chọn địa điểm trên bản đồ</ThemedText>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
 
           <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPicker(true)}>
             <View pointerEvents="none">
@@ -144,9 +156,7 @@ export default function Request() {
               {Platform.OS === "ios" && (
                 <View className="flex-row justify-end p-3 border-b border-slate-200 dark:border-[#152249]/30">
                   <TouchableOpacity onPress={() => setShowPicker(false)}>
-                    <ThemedText className="text-blue-600 dark:text-blue-400 font-bold text-base">
-                      Xong
-                    </ThemedText>
+                    <ThemedText className="text-blue-600 dark:text-blue-400 font-bold text-base">Xong</ThemedText>
                   </TouchableOpacity>
                 </View>
               )}
@@ -164,11 +174,13 @@ export default function Request() {
 
           <ToggleRow value={isRepeat} onValueChange={setIsRepeat} />
 
-          <PrimaryButton 
-            title="Tạo yêu cầu" 
-            iconName="send" 
-            onPress={handleSubmit} 
-          />
+          <View className="mt-4 mb-10">
+            <PrimaryButton 
+              title="Tạo yêu cầu" 
+              iconName="send" 
+              onPress={handleSubmit} 
+            />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
