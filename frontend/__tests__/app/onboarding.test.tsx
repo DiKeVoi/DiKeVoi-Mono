@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
-import Onboarding from '../../app/(tabs)/onboarding';
+import Onboarding from '../../app/(auth)/onboarding';
 
 describe('Onboarding', () => {
   it('renders without crashing', () => {

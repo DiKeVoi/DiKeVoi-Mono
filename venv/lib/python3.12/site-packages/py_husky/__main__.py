@@ -1,0 +1,7 @@
+"""
+Main entry point for py-husky when run as a module
+"""
+from py_husky.cli import main
+
+if __name__ == "__main__":
+    main()

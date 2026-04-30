@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import Request from '../../app/(main)/request';
+import Request from '../../app/(tabs)/matching/request';
 
 describe('Request screen', () => {
   it('renders without crashing', () => {

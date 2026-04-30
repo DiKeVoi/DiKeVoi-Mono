@@ -1,0 +1,11 @@
+"""
+py-husky: Git hooks made easy for Python projects
+"""
+
+__version__ = "0.1.0"
+__author__ = "Piyush Gautam"
+__email__ = "piyushgautamtg@gmail.com"
+
+from py_husky.core import PyHusky
+
+__all__ = ["PyHusky"]

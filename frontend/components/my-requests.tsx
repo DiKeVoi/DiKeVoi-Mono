@@ -162,7 +162,7 @@ export function MyRequests({ viewAll }: RequestProps) {
           Yêu cầu của tôi
         </ThemedText>
         {!viewAll && (
-          <Link href="/all-requests" asChild>
+          <Link href="/(tabs)/home/all-requests" asChild>
             <TouchableOpacity>
               <ThemedText className="text-blue-700 font-bold text-sm">
                 Xem tất cả

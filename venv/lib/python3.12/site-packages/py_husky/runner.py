@@ -1,0 +1,26 @@
+"""
+Hook runner module - executed by Git hooks to run configured commands
+"""
+import sys
+from pathlib import Path
+from py_husky.core import PyHusky
+
+
+def main():
+    """Main entry point for hook runner"""
+    if len(sys.argv) < 2:
+        print("[py-husky ERROR] Hook name not provided")
+        sys.exit(1)
+
+    hook_name = sys.argv[1]
+    hook_args = sys.argv[2:]
+
+    project_root = Path.cwd()
+    husky = PyHusky(project_root)
+
+    exit_code = husky.run_hook(hook_name, hook_args)
+    sys.exit(exit_code)
+
+
+if __name__ == "__main__":
+    main()
