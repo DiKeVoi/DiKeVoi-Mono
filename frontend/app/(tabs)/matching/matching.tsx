@@ -62,14 +62,14 @@ export default function MatchingScreen() {
   });
 
   const handleCancelSearch = () => {
-    router.push("/matching/results");
+    router.push("/(matching)/results");
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-[#221610]">
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 pt-4 pb-2">
-        <TouchableOpacity onPress={handleCancelSearch} className="p-2 -ml-2 active:opacity-50">
+        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 active:opacity-50">
           <MaterialIcons name="arrow-back-ios" size={24} color="#152249" />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-[#152249] dark:text-white">

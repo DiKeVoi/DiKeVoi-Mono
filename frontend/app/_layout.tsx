@@ -12,6 +12,7 @@ import { cssInterop } from "nativewind";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import "./global.css";
+import { NotificationProvider } from "@/hooks/NotificationContext";
 
 cssInterop(Image, { className: "style" });
 
@@ -31,6 +32,7 @@ export default function RootLayout() {
   if (!fontsLoaded && !error) return null;
 
   return (
+    <NotificationProvider>
     <ThemeProvider value={DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         {/* 1. Nhóm màn hình chưa đăng nhập (Onboarding, Login) */}
@@ -50,5 +52,6 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+    </NotificationProvider>
   );
 }

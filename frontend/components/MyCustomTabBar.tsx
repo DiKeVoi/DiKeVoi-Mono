@@ -5,12 +5,14 @@ import { Home, Plus, CircleUserRound } from 'lucide-react-native';
 // Khai báo 3 màn hình duy nhất bạn muốn hiện nút
 const VISIBLE_TABS = ["home/index", "matching/request", "account/profile"];
 
+
+
 export default function MyCustomTabBar({ state, descriptors, navigation }: any) {
   return (
-    <View className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex-row items-end justify-between">
+    <View className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex-row items-end justify-between">
       
       {state.routes.map((route: any, index: number) => {
-        // 1. Nếu màn hình này không nằm trong danh sách 3 nút chính -> BỎ QUA, KHÔNG VẼ NÚT
+        // 1. Nếu màn hình này không nằm trong danh sách 3 nút chính -> BỎ QUA
         if (!VISIBLE_TABS.includes(route.name)) return null;
 
         // 2. Kiểm tra xem Tab này có đang được chọn (active) không
@@ -25,13 +27,10 @@ export default function MyCustomTabBar({ state, descriptors, navigation }: any) 
           });
 
           if (!isFocused && !event.defaultPrevented) {
-            // ĐÂY LÀ KHÚC TƯƠNG TÁC: Gọi chuyển trang
             navigation.navigate(route.name);
           }
         };
 
-        // 4. Vẽ UI (Giao diện) cho từng nút
-        // --- NÚT TẠO CHUYẾN (NÚT GIỮA TO, LỒI LÊN) ---
         if (route.name === "matching/request") {
           return (
             <View key={route.key} className="relative -top-6 items-center">
@@ -42,11 +41,16 @@ export default function MyCustomTabBar({ state, descriptors, navigation }: any) 
               >
                 <Plus size={32} color="#F9F871" strokeWidth={3} />
               </TouchableOpacity>
-              <Text className="absolute -bottom-6 text-[10px] font-bold text-slate-500 whitespace-nowrap">
-                Tạo chuyến
-              </Text>
             </View>
           );
+        }
+        
+
+        const currentActiveRouteName = state.routes[state.index].name;
+        let isActuallyFocused = state.index === index;
+
+        if ((route.name === "account/profile" && currentActiveRouteName.includes("account")) || (route.name === "home/index" && currentActiveRouteName.includes("home"))) {
+          isActuallyFocused = true;
         }
 
         // --- NÚT TRANG CHỦ & TÀI KHOẢN ---
@@ -62,11 +66,11 @@ export default function MyCustomTabBar({ state, descriptors, navigation }: any) 
           >
             <Icon 
               size={28} 
-              color={isFocused ? "#152249" : "#94A3B8"} // Đổi màu nếu đang được focus
+              color={isActuallyFocused ? "#152249" : "#94A3B8"} 
               strokeWidth={2}
             />
             <Text 
-              className={`text-[10px] font-bold ${isFocused ? 'text-[#152249]' : 'text-slate-400'}`}
+              className={`text-[10px] font-bold ${isActuallyFocused ? 'text-[#152249]' : 'text-slate-400'}`}
             >
               {label}
             </Text>

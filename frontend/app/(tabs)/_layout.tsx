@@ -13,10 +13,10 @@ export default function TabLayout() {
       <Tabs.Screen name="matching/matching" />
       <Tabs.Screen name="matching/all-requests" />
       <Tabs.Screen name="matching/results" />
-      <Tabs.Screen name="matching/chat" />
       <Tabs.Screen name="matching/finish" />
       <Tabs.Screen name="matching/report-success" />
       <Tabs.Screen name="matching/connection-request" />
+
     </Tabs>
   );
 }

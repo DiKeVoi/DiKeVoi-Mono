@@ -42,9 +42,6 @@ const MATCH_RESULTS = [
   },
 ];
 
-// --- COMPONENTS PHỤ ---
-
-// 1. Nút Filter nhỏ gọn
 const FilterPill = ({ label }: { label: string }) => (
   <TouchableOpacity className="flex h-9 flex-row items-center justify-center gap-x-2 rounded-xl bg-slate-100 dark:bg-slate-800 px-4 mr-3 active:bg-slate-200">
     <Text className="text-slate-700 dark:text-slate-200 text-sm font-medium">
@@ -56,7 +53,6 @@ const FilterPill = ({ label }: { label: string }) => (
 
 // 2. Thẻ hiển thị 1 kết quả (Match Card) CÓ STATE
 const MatchCard = ({ item }: { item: typeof MATCH_RESULTS[0] }) => {
-  // Biến trạng thái để theo dõi nút bấm (mặc định là false: chưa gửi)
   const [isRequested, setIsRequested] = useState(false);
 
   return (

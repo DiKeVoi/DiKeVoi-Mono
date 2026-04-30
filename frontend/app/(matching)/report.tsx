@@ -126,7 +126,7 @@ export default function ReportScreen() {
             {/* Send Button */}
             <TouchableOpacity 
               activeOpacity={0.9}
-              onPress={() => router.push("/matching/report-success")}
+              onPress={() => router.push("/(matching)/report-success")}
               className="w-full bg-[#152249] h-16 rounded-full items-center justify-center flex-row gap-3 shadow-lg shadow-[#152249]/20 active:scale-[0.98]"
             >
               <MaterialIcons name="send" size={20} color="white" />

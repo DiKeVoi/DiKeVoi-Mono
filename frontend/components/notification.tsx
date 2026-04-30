@@ -1,46 +1,32 @@
 import { NotificationData } from "@/types/homeData";
 import { CircleCheck, CircleX, UserPlus, UserCheck } from "lucide-react-native";
-import React from "react";
-import { TouchableOpacity, View, FlatList } from "react-native";
+import React, { useState } from "react";
+import { TouchableOpacity, View, ScrollView } from "react-native";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
 import { useRouter } from "expo-router";
+import { useNotification } from "@/hooks/NotificationContext";
+
 
 export function Notification() {
-  const mockNotification: NotificationData[] = [
-    {
-      id: 1,
-      title: "Nguyễn Văn A yêu cầu kết nối với bạn",
-      time: new Date(),
-      read: false,
-      category: "matching",
-    },
-    {
-      id: 2,
-      title: "Nguyễn Văn A đã đồng ý kết nối với bạn",
-      time: new Date(),
-      read: false,
-      category: "accepted",
-    },
-    {
-      id: 3,
-      title: "Bạn đã hoàn thành chuyến đi với Nguyễn Văn A",
-      time: new Date(),
-      read: false,
-      category: "success",
-    },
-    {
-      id: 4,
-      title: "Nguyễn Văn A đã hủy chuyến đi với bạn.",
-      time: new Date(),
-      read: false,
-      category: "failed",
-    },
-  ];
-
   const router = useRouter();
+  
+  // 1. Lấy dữ liệu và các hàm xử lý từ Context
+  const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification();
 
-  // Hàm helper để render Icon dựa trên loại thông báo
+  // 2. Hàm xử lý khi bấm vào 1 thông báo cụ thể
+  const handlePressNotification = (item: NotificationData) => {
+    // Gọi hàm từ Context để đánh dấu đã đọc
+    markAsRead(item.id); 
+    
+    // Chuyển trang
+    if (item.category === "accepted") {
+      router.push("/(matching)/chat"); 
+    } else if (item.category === "matching") {
+      router.push("/(tabs)/matching/connection-request");
+    }
+  };
+
   const renderIcon = (category?: string) => {
     switch (category) {
       case "matching":
@@ -93,64 +79,68 @@ export function Notification() {
         <ThemedText className="text-sm font-bold tracking-widest text-slate-800">
           THÔNG BÁO
         </ThemedText>
+        {/* Số lượng sẽ tự cập nhật về 0 nếu đọc hết */}
         <ThemedText className="text-[10px] font-bold text-slate-400">
-          {mockNotification.length} MỚI
+          {unreadCount > 0 ? `${unreadCount} MỚI` : "ĐÃ ĐỌC HẾT"}
         </ThemedText>
       </View>
 
       {/* Notification List */}
       <View style={{ maxHeight: 350 }}>
-        <FlatList
-          data={mockNotification}
-          keyExtractor={(item) => item.id.toString()}
+        <ScrollView
           showsVerticalScrollIndicator={true}
           nestedScrollEnabled={true}
-          renderItem={({ item, index }) => (
+        >
+          {notifications.map((item: NotificationData, index: number) => (
             <TouchableOpacity
+              key={item.id.toString()}
               activeOpacity={0.5}
-              onPress={() => {
-                if (item.category === "accepted") {
-                  router.push("/(tabs)/matching/chat"); 
-                } else if (item.category === "matching") {
-                  router.push("/(tabs)/matching/connection-request");
-                }
-
-              }}
+              onPress={() => handlePressNotification(item)}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                className={`flex-row items-start px-6 py-5 ${
-                  index !== mockNotification.length - 1 ? "border-b border-slate-50" : ""
-                }`}
+              className={`flex-row items-start px-6 py-5 ${
+                index !== notifications.length - 1 ? "border-b border-slate-50" : ""
+              } ${!item.read ? "bg-slate-50/50" : "bg-white"}`} // Highlight nhẹ nền nếu chưa đọc
             >
               {renderIcon(item.category)}
 
-              <View className="flex-1 ml-4">
-                <ThemedText className="text-[14px] leading-5 text-slate-700">
-                  <ThemedText className="font-bold">{item.title}</ThemedText>
-                </ThemedText>
+              <View className="flex-1 ml-4 justify-center">
+                <View className="flex-row items-start justify-between gap-2">
+                  <ThemedText 
+                    className={`text-[14px] leading-5 flex-1 ${
+                      !item.read ? "font-bold text-[#152249]" : "font-normal text-slate-600"
+                    }`}
+                  >
+                    {item.title}
+                  </ThemedText>
+                  
+                  {/* CHẤM ĐỎ: Chỉ hiện khi read === false */}
+                  {!item.read && (
+                    <View className="w-2.5 h-2.5 bg-red-500 rounded-full mt-1.5 shadow-sm shadow-red-200" />
+                  )}
+                </View>
+                
                 <ThemedText className="text-[12px] text-slate-400 mt-1">
                   Vừa xong
                 </ThemedText>
               </View>
             </TouchableOpacity>
-          )}
-        />
+          ))}
+        </ScrollView>
       </View>
 
-      {/* Footer Button - Chia làm 2 hành động */}
+      {/* Footer Button */}
       <View className="flex-row border-t border-slate-50">
-        <TouchableOpacity className="flex-1 py-4 items-center border-r border-slate-50">
-          <ThemedText className="text-sm font-medium text-slate-500">
-            Đánh dấu đã đọc
-          </ThemedText>
-        </TouchableOpacity>
-{/*         
         <TouchableOpacity 
           className="flex-1 py-4 items-center"
+          onPress={markAllAsRead}
+          // Disable nút nếu không còn thông báo mới
+          disabled={unreadCount === 0}
+          style={{ opacity: unreadCount === 0 ? 0.5 : 1 }}
         >
-          <ThemedText className="text-sm font-bold text-[#152249]">
-            Xem tất cả
+          <ThemedText className="text-sm font-medium text-slate-500">
+            {unreadCount > 0 ? "Đánh dấu tất cả đã đọc" : "Không có thông báo mới"}
           </ThemedText>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
     </ThemedView>
   );
