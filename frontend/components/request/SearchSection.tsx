@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, FlatList, TouchableOpacity, Text, Button, StyleSheet } from 'react-native';
+import { View, TextInput, FlatList, TouchableOpacity, Text, Button } from 'react-native';
 
 interface SearchSectionProps {
   pickup: any;

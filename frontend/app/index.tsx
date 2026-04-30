@@ -27,6 +27,7 @@ export default function Index() {
           router.replace("/(tabs)/home");
         }
       } catch (error) {
+        console.log("Read hasViewed Onboading failed", error)
         // Nếu có lỗi đọc bộ nhớ, an toàn nhất là cứ đẩy ra Login
         router.replace("/(auth)/login");
       } finally {

@@ -50,7 +50,7 @@ export default function Request() {
     } else {
       setRoutePolyline([]);
     }
-  }, [pickup.coords, destination.coords]);
+  }, [pickup.coords, destination.coords, getRouting, setRoutePolyline]);
 
   return (
     <View style={styles.container}>

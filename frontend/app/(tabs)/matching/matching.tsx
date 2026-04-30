@@ -59,7 +59,7 @@ export default function MatchingScreen() {
       useNativeDriver: false, 
     }).start();
 
-  }, []);
+  });
 
   const handleCancelSearch = () => {
     router.push("/matching/results");

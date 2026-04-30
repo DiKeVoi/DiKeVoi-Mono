@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
