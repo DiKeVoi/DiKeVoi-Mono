@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 set -e
 
-# Trap errors
-trap 'echo "❌ pre-commit checks failed!"; exit 1' ERR
+# Bắt lỗi bằng EXIT thay vì ERR để tương thích với Husky
+finish() {
+  if [ $? -ne 0 ]; then
+    echo "❌ pre-commit checks failed!"
+  fi
+}
+trap finish EXIT
 
 # Frontend
+echo "Đang kiểm tra Frontend..."
 cd frontend
 npm run lint
 
 # Backend
+echo "Đang kiểm tra Backend..."
 cd ../backend
 
-source venv/bin/activate
+# SỬA LỖI TẠI ĐÂY: Dùng dấu chấm (.) thay vì chữ source
+. venv/bin/activate
 
 # Format with black
 if command -v python3 &> /dev/null; then
