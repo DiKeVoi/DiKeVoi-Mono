@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import Profile from '../../app/(main)/profile';
+import Profile from '../../app/(tabs)/account/profile';
 
 describe('Profile screen', () => {
   it('renders without crashing', () => {

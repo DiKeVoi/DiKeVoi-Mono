@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import AllRequests from '../../app/(main)/all-requests';
+import AllRequests from '../../app/(tabs)/home/all-requests';
 
 describe('AllRequests screen', () => {
   it('renders without crashing', () => {

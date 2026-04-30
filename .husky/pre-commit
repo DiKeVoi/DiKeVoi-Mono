@@ -1,12 +1,38 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
-# Trap errors and display failure message
-trap 'echo "❌ pre-commit checks failed!"; exit 1' ERR
+# Bắt lỗi bằng EXIT thay vì ERR để tương thích với Husky
+finish() {
+  if [ $? -ne 0 ]; then
+    echo "❌ pre-commit checks failed!"
+  fi
+}
+trap finish EXIT
 
-# Lint in frontend
-cd frontend && npm run lint
+# Frontend
+echo "Đang kiểm tra Frontend..."
+cd frontend
+npm run lint
 
-# Lint in backend
-cd ../backend && source venv/bin/activate && python3 -m black . || python -m black && echo "✅ Backend formatted with Black!" &&
-python3 -m flake8 app/ || python -m flake8 app/
+# Backend
+echo "Đang kiểm tra Backend..."
+cd ../backend
+
+# SỬA LỖI TẠI ĐÂY: Dùng dấu chấm (.) thay vì chữ source
+. venv/bin/activate
+
+# Format with black
+if command -v python3 &> /dev/null; then
+  python3 -m black .
+else
+  python -m black .
+fi
+
+echo "✅ Backend formatted with Black!"
+
+# Lint with flake8
+if command -v python3 &> /dev/null; then
+  python3 -m flake8 app/
+else
+  python -m flake8 app/
+fi

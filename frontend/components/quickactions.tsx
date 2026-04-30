@@ -2,11 +2,19 @@ import { Bike, MapPin } from "lucide-react-native";
 import { TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
+import { router } from "expo-router"; 
+
 export function QuickActions() {
   return (
     <ThemedView className="px-4 flex-row gap-4">
       {/* Di ke card */}
       <TouchableOpacity
+        onPress={() => 
+          router.push({
+            pathname: "/matching/request",
+            params: { role: "passenger" } 
+          })
+        }
         className="flex-1 p-4 rounded-xl justify-between"
         style={{ backgroundColor: "#152249", height: 120 }}
       >
@@ -23,6 +31,12 @@ export function QuickActions() {
 
       {/* Chia se cho card */}
       <TouchableOpacity
+        onPress={() => 
+          router.push({
+            pathname: "/matching/request",
+            params: { role: "driver" } 
+          })
+        }
         className="flex-1 p-4 rounded-xl justify-between"
         style={{ backgroundColor: "#F9F871", height: 120 }}
       >

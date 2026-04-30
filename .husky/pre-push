@@ -1,10 +1,18 @@
 #!/bin/sh
 set -e
 
-# Trap errors and display failure message
-trap 'echo "❌ pre-push checks failed!"; exit 1' ERR
+# Bắt lỗi bằng EXIT thay vì ERR
+finish() {
+  if [ $? -ne 0 ]; then
+    echo "❌ pre-push checks failed!"
+  fi
+}
+trap finish EXIT
 
-source backend/venv/bin/activate
+# Dùng dấu chấm (.) thay vì chữ source
+. backend/venv/bin/activate
+
+# Chạy test Backend
 PYTHONPATH=backend pytest backend/tests \
   --override-ini=addopts= \
   --cov=backend/app \
@@ -12,4 +20,5 @@ PYTHONPATH=backend pytest backend/tests \
   --cov-report=xml:backend/coverage.xml \
   --cov-fail-under=80
 
+# Chạy test Frontend
 npm run test:coverage --prefix frontend

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import HomeScreen from '../../app/(tabs)/index';
+import HomeScreen from '../../app/(tabs)/home/index';
 
 jest.mock('expo-router', () => ({
   ...jest.requireActual('expo-router'),
