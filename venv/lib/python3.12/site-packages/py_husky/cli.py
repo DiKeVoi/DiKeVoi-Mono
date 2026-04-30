@@ -1,0 +1,130 @@
+import sys
+import click
+from pathlib import Path
+from py_husky.core import PyHusky
+
+
+@click.group()
+@click.version_option(version="0.1.0", prog_name="py-husky")
+def main():
+    """py-husky: Git hooks made easy for Python projects"""
+    pass
+
+
+@main.command()
+@click.option(
+    "--path",
+    type=click.Path(exists=True),
+    default=".",
+    help="Path to the project directory (default: current directory)"
+)
+def init(path):
+    """Initialize py-husky in your project"""
+    project_path = Path(path).resolve()
+    husky = PyHusky(project_path)
+
+    if husky.initialize():
+        click.echo(click.style("✓ py-husky initialized successfully!", fg="green"))
+        click.echo("\nNext steps:")
+        click.echo(f"  1. Add hook scripts to {husky.HUSKY_DIR}/ directory")
+        click.echo("  2. Or use 'py-husky add <hook-name> <command>' to add hooks via CLI")
+        click.echo("\nExample:")
+        click.echo("  py-husky add pre-commit 'black .' 'flake8'")
+    else:
+        click.echo(click.style("✗ Failed to initialize py-husky", fg="red"))
+        sys.exit(1)
+
+
+@main.command()
+@click.argument("hook_name")
+@click.argument("commands", nargs=-1, required=True)
+@click.option(
+    "--path",
+    type=click.Path(exists=True),
+    default=".",
+    help="Path to the project directory (default: current directory)"
+)
+def add(hook_name, commands, path):
+    """Add a hook with specified commands
+
+    Example:
+        py-husky add pre-commit "black ." "flake8"
+    """
+    project_path = Path(path).resolve()
+    husky = PyHusky(project_path)
+
+    if husky.add_hook(hook_name, list(commands)):
+        click.echo(click.style(f"✓ Added {hook_name} hook", fg="green"))
+    else:
+        click.echo(click.style(f"✗ Failed to add {hook_name} hook", fg="red"))
+        sys.exit(1)
+
+
+@main.command()
+@click.option(
+    "--path",
+    type=click.Path(exists=True),
+    default=".",
+    help="Path to the project directory (default: current directory)"
+)
+def uninstall(path):
+    """Uninstall py-husky hooks from the project"""
+    project_path = Path(path).resolve()
+    husky = PyHusky(project_path)
+
+    click.confirm(
+        "Are you sure you want to uninstall py-husky hooks?",
+        abort=True
+    )
+
+    if husky.uninstall():
+        click.echo(click.style("✓ py-husky hooks uninstalled", fg="green"))
+    else:
+        click.echo(click.style("✗ Failed to uninstall py-husky", fg="red"))
+        sys.exit(1)
+
+
+@main.command()
+@click.option(
+    "--path",
+    type=click.Path(exists=True),
+    default=".",
+    help="Path to the project directory (default: current directory)"
+)
+def list_hooks(path):
+    """List all supported Git hooks"""
+    project_path = Path(path).resolve()
+    husky = PyHusky(project_path)
+
+    click.echo("Supported Git hooks:")
+    for hook in husky.SUPPORTED_HOOKS:
+        hook_file = husky.husky_dir / hook
+        status = "✓" if hook_file.exists() else "○"
+        click.echo(f"  {status} {hook}")
+
+    click.echo(f"\n✓ = Hook exists in {husky.HUSKY_DIR}/")
+    click.echo("○ = Hook not configured")
+
+
+@main.command()
+@click.option(
+    "--path",
+    type=click.Path(exists=True),
+    default=".",
+    help="Path to the project directory (default: current directory)"
+)
+def install(path):
+    """Install/reinstall Git hooks (useful after cloning a repository)"""
+    project_path = Path(path).resolve()
+    husky = PyHusky(project_path)
+
+    if not husky.is_git_repository():
+        click.echo(click.style("✗ Not a git repository", fg="red"))
+        sys.exit(1)
+
+    husky._create_hook_wrapper()
+    click.echo(click.style("✓ Git hooks installed successfully!", fg="green"))
+
+
+if __name__ == "__main__":
+    main()
