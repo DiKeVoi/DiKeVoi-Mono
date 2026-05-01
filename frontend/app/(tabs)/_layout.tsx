@@ -11,7 +11,7 @@ export default function TabLayout() {
       <Tabs.Screen name="matching/request" />
       <Tabs.Screen name="account/profile" />
       <Tabs.Screen name="matching/matching" />
-      <Tabs.Screen name="matching/all-requests" />
+      <Tabs.Screen name="matching/report" />
       <Tabs.Screen name="matching/results" />
       <Tabs.Screen name="matching/finish" />
       <Tabs.Screen name="matching/report-success" />
