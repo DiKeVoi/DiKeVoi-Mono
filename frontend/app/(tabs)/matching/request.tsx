@@ -45,7 +45,7 @@ export default function RequestScreen() {
     } else {
       clearRoute();
     }
-  }, [pickupLocation, destinationLocation]);
+  }, [pickupLocation, destinationLocation, calculateRoute, clearRoute]);
 
   // Đồng bộ role khi quay lại màn hình
   useEffect(() => {
