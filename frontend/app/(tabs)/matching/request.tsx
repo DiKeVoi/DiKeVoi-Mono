@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, TouchableOpacity, Platform } from "react-native";
+import { ScrollView, View, TouchableOpacity, Platform, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Image } from "expo-image";
-import { router, useLocalSearchParams, Link } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
@@ -15,6 +15,9 @@ import {
   ToggleRow, 
   PrimaryButton 
 } from "@/components/request/form-components"; 
+import { LocationPicker } from "@/components/request/location-picker";
+import { PresetLocation } from "@/hooks/useSearchPlaces";
+import { useRouting } from "@/hooks/useRouting";
 
 export default function RequestScreen() {
   // 1. Lấy tham số role từ navigation
@@ -24,10 +27,22 @@ export default function RequestScreen() {
   const [role, setRole] = useState<"rider" | "driver">(
     navRole === "driver" ? "driver" : "rider"
   );
-  const [pickup, setPickup] = useState("");
-  const [destination, setDestination] = useState("");
+  const [pickupLocation, setPickupLocation] = useState<PresetLocation | null>(null);
+  const [destinationLocation, setDestinationLocation] = useState<PresetLocation | null>(null);
   const [isRepeat, setIsRepeat] = useState(false);
   
+  // Hooks
+  const { routeInfo, loading, error, calculateRoute, clearRoute } = useRouting();
+
+  // Tính toán route khi cả hai địa điểm được chọn
+  useEffect(() => {
+    if (pickupLocation && destinationLocation) {
+      calculateRoute(pickupLocation, destinationLocation);
+    } else {
+      clearRoute();
+    }
+  }, [pickupLocation, destinationLocation]);
+
   // Đồng bộ role khi quay lại màn hình
   useEffect(() => {
     if (navRole === "driver") setRole("driver");
@@ -64,8 +79,12 @@ export default function RequestScreen() {
 
     console.log({
       vaiTro: role === "rider" ? "Đi ké" : "Cho đi ké",
-      diemDi: pickup,
-      diemDen: destination,
+      diemDi: pickupLocation?.name || "",
+      diemDen: destinationLocation?.name || "",
+      toaDoDiemDi: pickupLocation ? { lat: pickupLocation.latitude, lng: pickupLocation.longitude } : null,
+      toaDoDiemDen: destinationLocation ? { lat: destinationLocation.latitude, lng: destinationLocation.longitude } : null,
+      khoangCach: routeInfo?.distanceText || "",
+      thoiGianDuTinh: routeInfo?.durationText || "",
       thoiGian: formattedTime,
       lapLai: isRepeat
     });
@@ -110,35 +129,52 @@ export default function RequestScreen() {
           <RoleSelector role={role} setRole={setRole} />
 
           <View className="mt-4">
-            <IconInput
+            <LocationPicker
               label="Điểm đi"
               iconName="location-on"
-              placeholder="Nhập điểm khởi hành"
-              value={pickup}
-              onChangeText={setPickup}
+              placeholder="Chọn điểm khởi hành"
+              value={pickupLocation?.name || ""}
+              onSelect={setPickupLocation}
             />
 
-            <IconInput
+            <LocationPicker
               label="Điểm đến"
               iconName="near-me"
-              placeholder="Nhập điểm đến"
-              value={destination}
-              onChangeText={setDestination}
+              placeholder="Chọn điểm đến"
+              value={destinationLocation?.name || ""}
+              onSelect={setDestinationLocation}
             />
-
-            {/* Nút Chọn từ bản đồ (Merged từ Profile) */}
-            <View className="mb-6 -mt-2">
-              <Link href="/map" asChild>
-                <TouchableOpacity 
-                  className="bg-[#F9F871] py-3 rounded-xl flex-row justify-center items-center shadow-sm"
-                  activeOpacity={0.7}
-                >
-                  <MaterialIcons name="map" size={20} color="#152249" className="mr-2" />
-                  <ThemedText className="text-[#152249] font-bold">Chọn địa điểm trên bản đồ</ThemedText>
-                </TouchableOpacity>
-              </Link>
-            </View>
           </View>
+
+          {/* Hiển thị khoảng cách và thời gian */}
+          {pickupLocation && destinationLocation && (
+            <View className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+              {loading ? (
+                <View className="flex-row items-center justify-center gap-2">
+                  <ActivityIndicator size="small" color="#152249" />
+                  <ThemedText className="text-slate-600 dark:text-slate-400">Đang tính toán...</ThemedText>
+                </View>
+              ) : error ? (
+                <ThemedText className="text-red-500 text-center">{error}</ThemedText>
+              ) : routeInfo ? (
+                <View className="flex-row items-center justify-center gap-6">
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="straighten" size={20} color="#152249" />
+                    <ThemedText className="text-base font-semibold text-[#152249]">
+                      {routeInfo.distanceText}
+                    </ThemedText>
+                  </View>
+                  <View className="w-px h-6 bg-blue-300" />
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="schedule" size={20} color="#152249" />
+                    <ThemedText className="text-base font-semibold text-[#152249]">
+                      {routeInfo.durationText}
+                    </ThemedText>
+                  </View>
+                </View>
+              ) : null}
+            </View>
+          )}
 
           <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPicker(true)}>
             <View pointerEvents="none">
