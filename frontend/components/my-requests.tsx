@@ -1,5 +1,5 @@
 import { MyRequestData } from "@/types/homeData";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import {
   CircleCheck,
   Dot,
@@ -129,7 +129,10 @@ function RequestItemMatched({
             {withPerson?.name}
           </ThemedText>
         </View>
-        <TouchableOpacity className="w-10 h-10 bg-slate-100 rounded-full items-center justify-center">
+        <TouchableOpacity 
+          className="w-10 h-10 bg-slate-100 rounded-full items-center justify-center"
+          onPress={() => router.push("/(matching)/chat")}
+        >
           <MessageSquare size={18} color="#152249" />
         </TouchableOpacity>
       </View>

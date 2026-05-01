@@ -32,7 +32,7 @@ export default function FinishScreen() {
 
         <View className="flex-row items-center gap-3">
           <TouchableOpacity 
-            onPress={() => router.push("/matching/report")}
+            onPress={() => router.push("/(matching)/report")}
             className="p-2 rounded-full active:bg-slate-100"
           >
             <MaterialIcons name="flag" size={22} color="#ba1a1a" />

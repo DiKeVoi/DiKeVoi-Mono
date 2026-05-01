@@ -23,7 +23,10 @@ export default function LoginScreen() {
 
     setErrorMessage("");
     
-    router.replace("/(tabs)/home");
+    router.push({
+      pathname: "/(auth)/otp",
+      params: { email: trimmedEmail }
+    });
   };
 
   return (

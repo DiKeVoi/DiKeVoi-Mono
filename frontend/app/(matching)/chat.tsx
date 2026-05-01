@@ -55,37 +55,37 @@ export default function ChatScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
       
-      {/* 1. HEADER (Sử dụng Mock Data) */}
-      <View className="flex-row items-center px-4 py-3 bg-white border-b border-slate-50 z-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <MaterialIcons name="arrow-back" size={28} color="#152249" />
-        </TouchableOpacity>
-        
-        <View className="flex-row items-center flex-1">
-          <Image 
-            source={{ uri: MOCK_CHAT_DATA.partner.avatar }} 
-            className="w-12 h-12 rounded-full mr-3" 
-          />
-          <View>
-            <Text className="font-bold text-lg text-[#152249]">
-                {MOCK_CHAT_DATA.partner.name}
-            </Text>
-            <Text className="text-[10px] font-extrabold text-[#10B981] tracking-wider uppercase">
-              {MOCK_CHAT_DATA.partner.status}
-            </Text>
-          </View>
-        </View>
-      </View>
-
       <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0} 
       >
         
-        {/* 2. NEGOTIATION CARD (Sử dụng Mock Data) */}
+        {/* 1. HEADER */}
+        <View className="flex-row items-center px-4 py-3 bg-white border-b border-slate-50 z-50">
+          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+            <MaterialIcons name="arrow-back" size={28} color="#152249" />
+          </TouchableOpacity>
+          
+          <View className="flex-row items-center flex-1">
+            <Image 
+              source={{ uri: MOCK_CHAT_DATA.partner.avatar }} 
+              className="w-12 h-12 rounded-full mr-3" 
+            />
+            <View>
+              <Text className="font-bold text-lg text-[#152249]">
+                  {MOCK_CHAT_DATA.partner.name}
+              </Text>
+              <Text className="text-[10px] font-extrabold text-[#10B981] tracking-wider uppercase">
+                {MOCK_CHAT_DATA.partner.status}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 2. NEGOTIATION CARD */}
         <View className="px-4 py-4 z-40 bg-white">
           <View className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden pb-5">
             <View className="h-1.5 bg-slate-100 w-full flex-row">
@@ -106,14 +106,14 @@ export default function ChatScreen() {
 
             <View className="flex-row px-5 gap-3">
                 <TouchableOpacity 
-                    onPress={() => router.push("/matching/finish")} 
+                    onPress={() => router.push("/(matching)/finish")} 
                     className="flex-1 bg-[#152249] rounded-2xl py-3.5 items-center justify-center flex-row gap-2"
                     >
                     <MaterialIcons name="check-circle-outline" size={18} color="white" />
                     <Text className="text-white font-bold text-sm">Xác nhận chuyến đi</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => router.replace("/matching/results")}
+                    onPress={() => router.replace("/(matching)/results")}
                     className="flex-1 bg-white border border-slate-200 rounded-2xl py-3.5 items-center justify-center flex-row gap-2"
                     >
                     <MaterialIcons name="cancel" size={18} color="#475569" />
@@ -128,8 +128,10 @@ export default function ChatScreen() {
           ref={scrollViewRef}
           className="flex-1" 
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 180 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+          onLayout={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+          keyboardShouldPersistTaps="handled"
         >
           <View className="items-center my-4">
             <View className="bg-slate-100 px-4 py-1.5 rounded-full">
@@ -152,7 +154,7 @@ export default function ChatScreen() {
                 <View key={msg.id} className={`mb-4 flex-row ${isSelf ? "justify-end" : "justify-start"}`}>
                 {!isSelf && (
                     <Image 
-                    source={{ uri: MOCK_CHAT_DATA.partner.avatar }} // Avatar lấy từ Mock Data
+                    source={{ uri: MOCK_CHAT_DATA.partner.avatar }} 
                     className="w-8 h-8 rounded-full self-end mb-5 mr-2" 
                     />
                 )}
@@ -179,13 +181,10 @@ export default function ChatScreen() {
         </ScrollView>
 
         {/* 4. INPUT AREA */}
-        <View 
-          className="absolute bottom-0 left-0 right-0 px-4 py-4 bg-white/90" 
-          style={{ marginBottom: Platform.OS === 'ios' ? 115 : 95 }} 
-        >
+        <View className="px-4 py-3 bg-white border-t border-slate-100">
           <View className="flex-row items-center bg-white border border-slate-200 rounded-full px-5 py-2 shadow-sm">
             <TextInput 
-              className="flex-1 h-10 text-slate-700 text-base"
+              className="flex-1 min-h-[40px] text-slate-700 text-base"
               style={Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : {}}
               placeholder="Nhập tin nhắn..."
               placeholderTextColor="#94A3B8"
@@ -204,8 +203,6 @@ export default function ChatScreen() {
             </TouchableOpacity>
           </View>
         </View>
-
-        <View style={{ height: Platform.OS === 'ios' ? 90 : 70 }} />
 
       </KeyboardAvoidingView>
     </SafeAreaView>

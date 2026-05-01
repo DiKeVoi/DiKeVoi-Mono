@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, TouchableOpacity, Platform, ActivityIndicator } from "react-native";
+import { 
+  ScrollView, 
+  View, 
+  TouchableOpacity, 
+  Platform, 
+  KeyboardAvoidingView,
+  ActivityIndicator // Thêm import này
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -18,12 +25,9 @@ import {
 import { LocationPicker } from "@/components/request/location-picker";
 import { PresetLocation } from "@/hooks/useSearchPlaces";
 import { useRouting } from "@/hooks/useRouting";
-
 export default function RequestScreen() {
-  // 1. Lấy tham số role từ navigation
   const { role: navRole } = useLocalSearchParams<{ role: string }>();
 
-  // 2. State quản lý form
   const [role, setRole] = useState<"rider" | "driver">(
     navRole === "driver" ? "driver" : "rider"
   );
@@ -49,7 +53,6 @@ export default function RequestScreen() {
     if (navRole === "passenger") setRole("rider");
   }, [navRole]);
 
-  // --- STATE THỜI GIAN ---
   const [time, setTime] = useState(() => {
     const defaultDate = new Date();
     defaultDate.setHours(8, 30, 0, 0);
@@ -96,8 +99,8 @@ export default function RequestScreen() {
     <ThemedView className="flex-1">
       <SafeAreaView className="flex-1" edges={['top']}>
         
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 bg-white dark:bg-[#152249] border-b border-slate-200 dark:border-[#152249]/20">
+        {/* Header (Giữ cố định) */}
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white dark:bg-[#152249] border-b border-slate-200 dark:border-[#152249]/20 z-10">
           <TouchableOpacity 
             onPress={() => router.back()}
             className="p-2 -ml-2 rounded-full active:bg-slate-100 dark:active:bg-slate-800"
@@ -116,17 +119,21 @@ export default function RequestScreen() {
           />
         </View>
 
-        {/* Main Content */}
-        <ScrollView 
-          className="flex-1 px-4 pt-6"
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          className="flex-1"
         >
-          <ThemedText className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
-            Bạn là ai?
-          </ThemedText>
-          
-          <RoleSelector role={role} setRole={setRole} />
+          <ScrollView 
+            className="flex-1 px-4 pt-6"
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled" 
+            contentContainerStyle={{ paddingBottom: 100 }} 
+          >
+            <ThemedText className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              Bạn là ai?
+            </ThemedText>
+            
+            <RoleSelector role={role} setRole={setRole} />
 
           <View className="mt-4">
             <LocationPicker
@@ -176,48 +183,49 @@ export default function RequestScreen() {
             </View>
           )}
 
-          <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPicker(true)}>
-            <View pointerEvents="none">
-              <IconInput
-                label="Thời gian đi"
-                iconName="schedule"
-                placeholder="08:30"
-                value={timeDisplay}
+            <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPicker(true)}>
+              <View pointerEvents="none">
+                <IconInput
+                  label="Thời gian đi"
+                  iconName="schedule"
+                  placeholder="08:30"
+                  value={timeDisplay}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {showPicker && (
+              <View className="mb-6 bg-slate-50 dark:bg-[#152249]/20 rounded-xl overflow-hidden border border-slate-200 dark:border-[#152249]/30">
+                {Platform.OS === "ios" && (
+                  <View className="flex-row justify-end p-3 border-b border-slate-200 dark:border-[#152249]/30">
+                    <TouchableOpacity onPress={() => setShowPicker(false)}>
+                      <ThemedText className="text-blue-600 dark:text-blue-400 font-bold text-base">Xong</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                <DateTimePicker
+                  value={time}
+                  mode="time"
+                  is24Hour={true} 
+                  minuteInterval={30} 
+                  display="spinner" 
+                  onChange={onTimeChange}
+                  textColor="#152249" 
+                />
+              </View>
+            )}
+
+            <ToggleRow value={isRepeat} onValueChange={setIsRepeat} />
+
+            <View className="mt-4">
+              <PrimaryButton 
+                title="Tạo yêu cầu" 
+                iconName="send" 
+                onPress={handleSubmit} 
               />
             </View>
-          </TouchableOpacity>
-
-          {showPicker && (
-            <View className="mb-6 bg-slate-50 dark:bg-[#152249]/20 rounded-xl overflow-hidden border border-slate-200 dark:border-[#152249]/30">
-              {Platform.OS === "ios" && (
-                <View className="flex-row justify-end p-3 border-b border-slate-200 dark:border-[#152249]/30">
-                  <TouchableOpacity onPress={() => setShowPicker(false)}>
-                    <ThemedText className="text-blue-600 dark:text-blue-400 font-bold text-base">Xong</ThemedText>
-                  </TouchableOpacity>
-                </View>
-              )}
-              <DateTimePicker
-                value={time}
-                mode="time"
-                is24Hour={true} 
-                minuteInterval={30} 
-                display="spinner" 
-                onChange={onTimeChange}
-                textColor="#152249" 
-              />
-            </View>
-          )}
-
-          <ToggleRow value={isRepeat} onValueChange={setIsRepeat} />
-
-          <View className="mt-4 mb-10">
-            <PrimaryButton 
-              title="Tạo yêu cầu" 
-              iconName="send" 
-              onPress={handleSubmit} 
-            />
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </ThemedView>
   );

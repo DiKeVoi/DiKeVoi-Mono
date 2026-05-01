@@ -6,10 +6,15 @@ import { Notification } from "./notification";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
 import { usePathname } from "expo-router";
+// 1. Import hook từ Context bạn vừa tạo
+import { useNotification } from "@/hooks/NotificationContext"; 
 
 export function HomeHeader() {
   const [showNoti, setShowNoti] = useState(false);
   const pathname = usePathname();
+  
+  // 2. Lấy biến đếm số lượng thông báo chưa đọc ra
+  const { unreadCount } = useNotification(); 
   
   useEffect(() => {
     setShowNoti(false);
@@ -46,7 +51,11 @@ export function HomeHeader() {
         className="p-2 bg-slate-50 rounded-full"
       >
         <Bell size={22} color="#64748B" />
-        <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full" />
+        
+        {/* 3. ĐIỀU KIỆN HIỆN CHẤM ĐỎ: Chỉ render ra cục View màu đỏ này nếu unreadCount > 0 */}
+        {unreadCount > 0 && (
+          <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full" />
+        )}
       </TouchableOpacity>
 
         {showNoti && (
