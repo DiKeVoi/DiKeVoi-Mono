@@ -10,14 +10,16 @@ const INITIAL_NOTIFICATIONS: NotificationData[] = [
     title: "Nguyễn Văn A yêu cầu kết nối với bạn", 
     time: new Date(), 
     read: false, 
-    category: "matching" 
+    category: "matching",
+    targetId: "req_123"
   },
   { 
     id: 2, 
     title: "Nguyễn Văn A đã đồng ý kết nối với bạn", 
     time: new Date(), 
     read: false, 
-    category: "accepted" 
+    category: "accepted",
+    targetId: "c1"
   },
   {
     id: 3,
@@ -25,6 +27,7 @@ const INITIAL_NOTIFICATIONS: NotificationData[] = [
     time: new Date(),
     read: false,
     category: "success",
+    targetId: "c2"
   },
   {
     id: 4,
@@ -32,6 +35,7 @@ const INITIAL_NOTIFICATIONS: NotificationData[] = [
     time: new Date(),
     read: false,
     category: "failed",
+    targetId: "c3"
   },
 ];
 

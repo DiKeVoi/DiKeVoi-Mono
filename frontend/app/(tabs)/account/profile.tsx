@@ -14,6 +14,16 @@ const MOCK_USER = {
   appVersion: "1.0.0",
 };
 
+const handleLogout = async () => {
+    try {
+      console.log("Đã đăng xuất thành công!");
+
+      router.replace("/(auth)/login"); 
+    } catch (error) {
+      console.error("Lỗi khi đăng xuất:", error);
+    }
+  };
+
 export default function Profile() {
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-slate-900">
@@ -91,6 +101,7 @@ export default function Profile() {
           <TouchableOpacity 
             activeOpacity={0.7}
             className="flex-row items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700/50"
+            onPress = {() => router.push("/(tabs)/account/history")}
           >
             <View className="w-10 h-10 rounded-lg bg-[#152249]/10 dark:bg-[#F9F871]/10 items-center justify-center">
               <MaterialIcons name="history" size={24} color="#152249" />
@@ -113,6 +124,7 @@ export default function Profile() {
           <TouchableOpacity 
             activeOpacity={0.7}
             className="flex-row items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 py-4 rounded-xl border border-transparent"
+            onPress={handleLogout}
           >
             <MaterialIcons name="logout" size={20} color="#EF4444" />
             <ThemedText className="text-red-500 dark:text-red-400 font-bold text-base">

@@ -21,7 +21,10 @@ export function Notification() {
     
     // Chuyển trang
     if (item.category === "accepted") {
-      router.push("/(matching)/chat"); 
+      router.push({
+        pathname: "/(matching)/chat/[id]",
+        params: { id: item.targetId } 
+      });
     } else if (item.category === "matching") {
       router.push("/(tabs)/matching/connection-request");
     }
@@ -129,16 +132,24 @@ export function Notification() {
       </View>
 
       {/* Footer Button */}
-      <View className="flex-row border-t border-slate-50">
+      <View className="flex-row border-t border-slate-50 bg-slate-50/50">
         <TouchableOpacity 
-          className="flex-1 py-4 items-center"
+          className="flex-1 py-4 items-center border-r border-slate-100"
           onPress={markAllAsRead}
-          // Disable nút nếu không còn thông báo mới
           disabled={unreadCount === 0}
           style={{ opacity: unreadCount === 0 ? 0.5 : 1 }}
         >
-          <ThemedText className="text-sm font-medium text-slate-500">
-            {unreadCount > 0 ? "Đánh dấu tất cả đã đọc" : "Không có thông báo mới"}
+          <ThemedText className="text-[13px] font-bold text-slate-500">
+            Đã đọc hết
+          </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          className="flex-1 py-4 items-center"
+          onPress={() => router.push("/(tabs)/home/all-notifications")} // Đổi đường dẫn theo đúng file bạn tạo
+        >
+          <ThemedText className="text-[13px] font-bold text-blue-600">
+            Xem tất cả
           </ThemedText>
         </TouchableOpacity>
       </View>
