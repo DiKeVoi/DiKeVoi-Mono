@@ -6,6 +6,7 @@ module.exports = {
     "./app/**/*.{js,jsx,ts,tsx}",
   ],
   presets: [require("nativewind/preset")],
+  darkMode: "class",    //Preventing dark mode from being enabled by device settings.
   theme: {
     extend: {
       fontFamily: {
