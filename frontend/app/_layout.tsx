@@ -40,7 +40,10 @@ export default function RootLayout() {
 
         {/* 2. Nhóm màn hình chính có thanh Tab Bar (Trang chủ, Matching, Tài khoản) */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        
+
+        {/* 3. Nhóm các màn hình phụ full màn hình (Request, Danh sách) */}
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+
         {/* Màn hình modal cũ của bạn - cứ giữ lại nếu sau này cần dùng */}
         <Stack.Screen
           name="modal"

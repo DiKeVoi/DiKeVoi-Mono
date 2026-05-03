@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, ScrollView, TextInput, Platform, Keyboard
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 import { MessageBubble } from "@/components/MessageBubble"; 
 

@@ -1,6 +1,6 @@
 import { NotificationData } from "@/types/homeData";
 import { CircleCheck, CircleX, UserPlus, UserCheck } from "lucide-react-native";
-import React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity, View, ScrollView } from "react-native";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
