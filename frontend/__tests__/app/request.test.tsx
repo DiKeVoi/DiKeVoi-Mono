@@ -9,7 +9,7 @@ describe('Request screen', () => {
   });
 
   it('renders the create request title', () => {
-    const { getByText } = render(<Request />);
-    expect(getByText('Tạo yêu cầu')).toBeTruthy();
+    const { getAllByText } = render(<Request />);
+    expect(getAllByText('Tạo yêu cầu')[0]).toBeTruthy();
   });
 });

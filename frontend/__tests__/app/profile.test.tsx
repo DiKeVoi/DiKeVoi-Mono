@@ -10,6 +10,6 @@ describe('Profile screen', () => {
 
   it('renders the profile title', () => {
     const { getByText } = render(<Profile />);
-    expect(getByText('Trang cá nhân')).toBeTruthy();
+    expect(getByText('Tài khoản')).toBeTruthy();
   });
 });

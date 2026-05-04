@@ -39,6 +39,17 @@ jest.mock('expo-router/build/global-state/routing', () => ({
   navigate: jest.fn(),
 }));
 
+jest.mock('react-native-worklets', () => ({
+  createSerializable: jest.fn((val: any) => val),
+  isWorkletFunction: jest.fn(() => false),
+  RuntimeKind: { UI: 0, JS: 1 },
+  scheduleOnUI: jest.fn((fn: any) => fn),
+  serializableMappingCache: new Map(),
+  makeShareable: jest.fn((val: any) => val),
+  makeShareableCloneOnUIRecursive: jest.fn((val: any) => val),
+  makeShareableCloneRecursive: jest.fn((val: any) => val),
+}));
+
 jest.mock('react-native-reanimated', () =>
   require('react-native-reanimated/mock')
 );
