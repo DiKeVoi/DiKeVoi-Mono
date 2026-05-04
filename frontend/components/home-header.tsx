@@ -46,6 +46,7 @@ export function HomeHeader() {
 
       {/* Notification Bell Section */}
       <TouchableOpacity
+        testID="notification-bell"
         activeOpacity={0.7}
         onPress={() => setShowNoti(!showNoti)}
         className="p-2 bg-slate-50 rounded-full"
