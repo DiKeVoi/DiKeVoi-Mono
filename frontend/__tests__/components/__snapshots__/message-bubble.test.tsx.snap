@@ -1,0 +1,141 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MessageBubble component when type is "date" matches snapshot for date type 1`] = `
+<View
+  className="flex-row justify-center my-4"
+>
+  <View
+    className="bg-slate-100 px-3 py-1 rounded-full"
+  >
+    <Text
+      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest"
+    >
+      HÔM NAY
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`MessageBubble component when type is "other" matches snapshot for other type with avatar 1`] = `
+<View
+  className="mb-4 flex-row justify-start"
+>
+  <View
+    className="mr-3 justify-end pb-5"
+  >
+    <Image
+      className="w-8 h-8 rounded-full bg-slate-200"
+      source={
+        {
+          "uri": "https://i.pravatar.cc/150",
+        }
+      }
+    />
+  </View>
+  <View
+    className="max-w-[75%] items-start"
+  >
+    <View
+      className="px-4 py-3 shadow-sm bg-white border border-slate-100 rounded-2xl rounded-tl-none"
+    >
+      <Text
+        className="text-[14px] leading-5 text-slate-800"
+      >
+        Hey!
+      </Text>
+    </View>
+    <Text
+      className="text-[10px] text-slate-400 mt-1 px-1"
+    >
+      10:05
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`MessageBubble component when type is "other" matches snapshot for other type without avatar 1`] = `
+<View
+  className="mb-4 flex-row justify-start"
+>
+  <View
+    className="max-w-[75%] items-start"
+  >
+    <View
+      className="px-4 py-3 shadow-sm bg-white border border-slate-100 rounded-2xl rounded-tl-none"
+    >
+      <Text
+        className="text-[14px] leading-5 text-slate-800"
+      >
+        No avatar other
+      </Text>
+    </View>
+    <Text
+      className="text-[10px] text-slate-400 mt-1 px-1"
+    >
+      10:00
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`MessageBubble component when type is "self" matches snapshot for self type 1`] = `
+<View
+  className="mb-4 flex-row justify-end"
+>
+  <View
+    className="max-w-[75%] items-end"
+  >
+    <View
+      className="px-4 py-3 shadow-sm bg-[#152249] rounded-2xl rounded-tr-none"
+    >
+      <Text
+        className="text-[14px] leading-5 text-white"
+      >
+        Hello!
+      </Text>
+    </View>
+    <Text
+      className="text-[10px] text-slate-400 mt-1 px-1"
+    >
+      09:00
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`MessageBubble component when type is "system" matches snapshot for system type 1`] = `
+<View
+  className="flex-row justify-center my-4"
+>
+  <View
+    className="bg-[#F9F871]/20 border border-[#F9F871]/50 rounded-xl px-4 py-2 flex-row items-center gap-2 max-w-[85%]"
+  >
+    <Text
+      allowFontScaling={false}
+      selectable={false}
+      style={
+        [
+          {
+            "color": "#152249",
+            "fontSize": 14,
+          },
+          undefined,
+          {
+            "fontFamily": "material",
+            "fontStyle": "normal",
+            "fontWeight": "normal",
+          },
+          {},
+        ]
+      }
+    >
+      
+    </Text>
+    <Text
+      className="text-[11px] font-semibold text-[#152249] text-center flex-1"
+    >
+      System event.
+    </Text>
+  </View>
+</View>
+`;

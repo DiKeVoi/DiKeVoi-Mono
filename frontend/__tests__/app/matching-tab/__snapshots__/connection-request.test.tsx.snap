@@ -1,0 +1,440 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConnectionRequest screen matches snapshot 1`] = `
+<SafeAreaView
+  className="flex-1 bg-white"
+  edges={
+    [
+      "top",
+    ]
+  }
+>
+  <View
+    className="flex-row items-center px-6 py-4 bg-white border-b border-[#F1F5F9]/50"
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        selectable={false}
+        style={
+          [
+            {
+              "color": "#152249",
+              "fontSize": 20,
+            },
+            undefined,
+            {
+              "fontFamily": "material",
+              "fontStyle": "normal",
+              "fontWeight": "normal",
+            },
+            {},
+          ]
+        }
+      >
+        
+      </Text>
+    </View>
+    <Text
+      className="text-lg font-bold text-[#152249] ml-4"
+      style={
+        {
+          "fontFamily": "Plus Jakarta Sans",
+        }
+      }
+    >
+      Yêu cầu kết nối
+    </Text>
+  </View>
+  <RCTScrollView
+    className="flex-1"
+    contentContainerStyle={
+      {
+        "paddingBottom": 60,
+        "paddingHorizontal": 24,
+        "paddingTop": 24,
+      }
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <View>
+      <View
+        className="mb-6"
+      >
+        <View
+          className="flex-row items-center gap-3 mb-4"
+        >
+          <View
+            className="w-8 h-1 bg-[#F9F871] rounded-full"
+          />
+          <Text
+            className="text-[12px] font-bold text-slate-500 uppercase tracking-widest"
+          >
+            Thông tin người gửi
+          </Text>
+        </View>
+        <View
+          className="bg-white p-6 rounded-[32px] border border-slate-50 shadow-2xl"
+          style={
+            {
+              "elevation": 10,
+              "shadowColor": "#152249",
+              "shadowOpacity": 0.05,
+              "shadowRadius": 20,
+            }
+          }
+        >
+          <View
+            className="flex-row justify-between items-start mb-6"
+          >
+            <View
+              className="flex-row flex-1"
+            >
+              <Image
+                className="w-16 h-16 rounded-2xl"
+                source={
+                  {
+                    "uri": "https://i.pravatar.cc/150?u=avatar_a",
+                  }
+                }
+              />
+              <View
+                className="ml-4 flex-1"
+              >
+                <Text
+                  className="text-[20px] font-bold text-[#152249] mb-2"
+                >
+                  Nguyễn Văn A
+                </Text>
+                <View
+                  className="flex-row items-center gap-2"
+                >
+                  <View
+                    className="bg-[#152249] px-2.5 py-1 rounded-md"
+                  >
+                    <Text
+                      className="text-white text-[10px] font-bold uppercase"
+                    >
+                      Đi ké
+                    </Text>
+                  </View>
+                  <View
+                    className="bg-slate-100 p-1 rounded-md"
+                  >
+                    <Text
+                      allowFontScaling={false}
+                      selectable={false}
+                      style={
+                        [
+                          {
+                            "color": "#64748B",
+                            "fontSize": 14,
+                          },
+                          undefined,
+                          {
+                            "fontFamily": "material",
+                            "fontStyle": "normal",
+                            "fontWeight": "normal",
+                          },
+                          {},
+                        ]
+                      }
+                    >
+                      
+                    </Text>
+                  </View>
+                  <View
+                    className="bg-slate-100 px-2.5 py-1 rounded-md"
+                  >
+                    <Text
+                      className="text-slate-500 text-[10px] font-bold"
+                    >
+                      Nam
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View
+              className="items-end"
+            >
+              <Text
+                className="text-[10px] font-bold text-slate-400 mb-1"
+              >
+                10/10/2026
+              </Text>
+              <Text
+                className="text-[16px] font-bold text-[#152249]"
+              >
+                08:30 AM
+              </Text>
+            </View>
+          </View>
+          <View
+            className="flex-row items-center pt-4 border-t border-slate-50"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#152249",
+                    "fontSize": 18,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "material-community",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              󰟙
+            </Text>
+            <Text
+              className="ml-2 text-[14px] text-slate-500 font-medium"
+            >
+              KTX Khu B → Trường Đại học KHTN
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View>
+        <View
+          className="flex-row items-center gap-3 mb-4"
+        >
+          <View
+            className="w-8 h-1 bg-[#152249] rounded-full"
+          />
+          <Text
+            className="text-[12px] font-bold text-slate-500 uppercase tracking-widest"
+          >
+            Chi tiết chuyến đi của bạn
+          </Text>
+        </View>
+        <View
+          className="bg-[#F3F3F4] p-6 rounded-[24px] border-2 border-dashed border-[#C6C6CF4D]"
+        >
+          <View
+            className="flex-row items-center gap-2 mb-4"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#152249",
+                    "fontSize": 14,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "material",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              className="text-sm font-bold text-[#152249]"
+            >
+              KTX Khu B
+               → 
+              ĐH Bách Khoa
+            </Text>
+          </View>
+          <View
+            className="h-px bg-[#C6C6CF]/10 w-full mb-4"
+          />
+          <View>
+            <Text
+              className="text-[10px] font-bold text-[#76767F] uppercase tracking-widest mb-1"
+            >
+              Thời gian
+            </Text>
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#152249",
+                      "fontSize": 14,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "material",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+              <Text
+                className="text-sm font-bold text-[#1A1C1C]"
+              >
+                08:00 - 10/10/2026
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        className="mb-10 mt-10"
+      >
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "elevation": 5,
+              "opacity": 1,
+              "shadowColor": "#152249",
+              "shadowOpacity": 0.15,
+              "shadowRadius": 10,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#152249",
+                  "fontSize": 20,
+                },
+                undefined,
+                {
+                  "fontFamily": "material",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+          <Text
+            className="text-[#152249] font-black text-base uppercase"
+          >
+            Xác nhận kết nối
+          </Text>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "opacity": 1,
+            }
+          }
+        >
+          <Text
+            className="text-[#152249] font-bold text-base"
+          >
+            Hủy kết nối
+          </Text>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</SafeAreaView>
+`;
