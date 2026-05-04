@@ -35,10 +35,12 @@ const config: Config = {
     "^@utils/(.*)$": "<rootDir>/utils/$1",
     "^@scripts/(.*)$": "<rootDir>/scripts/$1",
     "\\.svg$": "<rootDir>/__mocks__/svg-mock.js",
+    "^expo/src/async-require/messageSocket$": "<rootDir>/__mocks__/empty.js",
   },
   transformIgnorePatterns: [
     "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|lucide-react-native)",
   ],
+  testEnvironment: "node",
 };
 
 export default config;
