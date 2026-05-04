@@ -10,12 +10,12 @@ finish() {
 trap finish EXIT
 
 # Frontend
-echo "Đang kiểm tra Frontend..."
+echo "Checking Frontend..."
 cd frontend
 npm run lint
 
 # Backend
-echo "Đang kiểm tra Backend..."
+echo "Checking Backend..."
 cd ../backend
 
 # SỬA LỖI TẠI ĐÂY: Dùng dấu chấm (.) thay vì chữ source
