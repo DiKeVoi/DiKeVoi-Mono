@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CircleCheck, CircleX, UserPlus, UserCheck, ArrowLeft, CheckCircle2 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useNotification } from "@/hooks/NotificationContext";
-import { NotificationData } from "@/types/homeData";
+import type { Notification } from "@/types/api";
 import { ThemedText } from "@/components/themed-text"; // Chỉnh lại đường dẫn nếu cần
 
 export default function AllNotificationsScreen() {
@@ -14,40 +14,43 @@ export default function AllNotificationsScreen() {
   const { notifications, markAllAsRead, markAsRead } = useNotification();
 
   // Logic chuyển trang giữ nguyên 100%
-  const handlePressNotification = (item: NotificationData) => {
-    markAsRead(item.id); 
-    
-    if (item.category === "accepted") {
+  const handlePressNotification = (item: Notification) => {
+    markAsRead(item.id);
+
+    if (item.type === "ride_confirmed" || item.type === "negotiation_accepted") {
       router.push({
         pathname: "/(matching)/chat/[id]",
-        params: { id: item.targetId || "c1" } 
+        params: { id: item.relatedId ?? "" }
       });
-    } else if (item.category === "matching") {
+    } else if (item.type === "ride_request") {
       router.push("/(tabs)/matching/connection-request");
     }
   };
 
-  const renderIcon = (category?: string) => {
-    switch (category) {
-      case "matching":
+  const renderIcon = (type?: string) => {
+    switch (type) {
+      case "ride_request":
         return (
           <View className="bg-blue-50 p-3 rounded-full">
             <UserPlus size={24} color="#2563EB" />
           </View>
         );
-      case "accepted":
+      case "ride_confirmed":
+      case "negotiation_accepted":
+      case "negotiation_offer":
         return (
           <View className="bg-yellow-50 p-3 rounded-full">
             <UserCheck size={24} color="#EAB308" />
           </View>
         );
-      case "failed":
+      case "ride_cancelled":
+      case "negotiation_rejected":
         return (
           <View className="bg-red-50 p-3 rounded-full">
             <CircleX size={24} color="#EF4444" />
           </View>
         );
-      case "success":
+      case "ride_completed":
         return (
           <View className="bg-green-50 p-3 rounded-full">
             <CircleCheck size={24} color="#10B981" />
@@ -95,28 +98,28 @@ export default function AllNotificationsScreen() {
             </ThemedText>
           </View>
         ) : (
-          notifications.map((item: NotificationData) => (
+          notifications.map((item: Notification) => (
             <TouchableOpacity
               key={item.id.toString()}
               activeOpacity={0.7}
               onPress={() => handlePressNotification(item)}
               className={`flex-row items-start px-5 py-4 border-b border-slate-100 ${
-                !item.read ? "bg-blue-50/30" : "bg-white"
+                !item.isRead ? "bg-blue-50/30" : "bg-white"
               }`}
             >
-              {renderIcon(item.category)}
+              {renderIcon(item.type)}
 
               <View className="flex-1 ml-4 justify-center">
                 <View className="flex-row items-start justify-between gap-2">
                   <ThemedText 
                     className={`text-[15px] leading-5 flex-1 ${
-                      !item.read ? "font-bold text-[#152249]" : "font-medium text-slate-700"
+                      !item.isRead ? "font-bold text-[#152249]" : "font-medium text-slate-700"
                     }`}
                   >
                     {item.title}
                   </ThemedText>
                   
-                  {!item.read && (
+                  {!item.isRead && (
                     <View className="w-2.5 h-2.5 bg-blue-500 rounded-full mt-1.5 shadow-sm" />
                   )}
                 </View>

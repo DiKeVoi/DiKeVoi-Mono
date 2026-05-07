@@ -29,10 +29,10 @@ jest.mock('react-native-safe-area-context', () => {
 jest.mock('@/hooks/NotificationContext', () => ({
   useNotification: () => ({
     notifications: [
-      { id: 1, title: 'Nguyễn Văn A yêu cầu kết nối với bạn', time: new Date(), read: false, category: 'matching', targetId: 'req_123' },
-      { id: 2, title: 'Nguyễn Văn A đã đồng ý kết nối với bạn', time: new Date(), read: true, category: 'accepted', targetId: 'c1' },
-      { id: 3, title: 'Bạn đã hoàn thành chuyến đi với Nguyễn Văn A', time: new Date(), read: false, category: 'success', targetId: 'c2' },
-      { id: 4, title: 'Nguyễn Văn A đã hủy chuyến đi với bạn.', time: new Date(), read: false, category: 'failed', targetId: 'c3' },
+      { id: 'n-1', userId: 'u-1', type: 'ride_request', title: 'Nguyễn Văn A yêu cầu kết nối với bạn', body: null, relatedId: 'req_123', isRead: false, createdAt: '2026-05-07T10:00:00' },
+      { id: 'n-2', userId: 'u-1', type: 'negotiation_accepted', title: 'Nguyễn Văn A đã đồng ý kết nối với bạn', body: null, relatedId: 'c1', isRead: true, createdAt: '2026-05-07T10:00:00' },
+      { id: 'n-3', userId: 'u-1', type: 'ride_completed', title: 'Bạn đã hoàn thành chuyến đi với Nguyễn Văn A', body: null, relatedId: 'c2', isRead: false, createdAt: '2026-05-07T10:00:00' },
+      { id: 'n-4', userId: 'u-1', type: 'ride_cancelled', title: 'Nguyễn Văn A đã hủy chuyến đi với bạn.', body: null, relatedId: 'c3', isRead: false, createdAt: '2026-05-07T10:00:00' },
     ],
     unreadCount: 3,
     markAllAsRead: mockMarkAllAsRead,
@@ -94,14 +94,14 @@ describe('AllNotificationsScreen (all-notifications.tsx)', () => {
     it('pressing a "matching" notification calls markAsRead and navigates to connection-request', () => {
       const { getByText } = render(<AllNotificationsScreen />);
       fireEvent.press(getByText('Nguyễn Văn A yêu cầu kết nối với bạn'));
-      expect(mockMarkAsRead).toHaveBeenCalledWith(1);
+      expect(mockMarkAsRead).toHaveBeenCalledWith('n-1');
       expect(mockPush).toHaveBeenCalledWith('/(tabs)/matching/connection-request');
     });
 
     it('pressing an "accepted" notification calls markAsRead and navigates to chat', () => {
       const { getByText } = render(<AllNotificationsScreen />);
       fireEvent.press(getByText('Nguyễn Văn A đã đồng ý kết nối với bạn'));
-      expect(mockMarkAsRead).toHaveBeenCalledWith(2);
+      expect(mockMarkAsRead).toHaveBeenCalledWith('n-2');
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/(matching)/chat/[id]',
         params: { id: 'c1' },
@@ -111,14 +111,14 @@ describe('AllNotificationsScreen (all-notifications.tsx)', () => {
     it('pressing a "success" notification calls markAsRead but does NOT navigate', () => {
       const { getByText } = render(<AllNotificationsScreen />);
       fireEvent.press(getByText('Bạn đã hoàn thành chuyến đi với Nguyễn Văn A'));
-      expect(mockMarkAsRead).toHaveBeenCalledWith(3);
+      expect(mockMarkAsRead).toHaveBeenCalledWith('n-3');
       expect(mockPush).not.toHaveBeenCalled();
     });
 
     it('pressing a "failed" notification calls markAsRead but does NOT navigate', () => {
       const { getByText } = render(<AllNotificationsScreen />);
       fireEvent.press(getByText('Nguyễn Văn A đã hủy chuyến đi với bạn.'));
-      expect(mockMarkAsRead).toHaveBeenCalledWith(4);
+      expect(mockMarkAsRead).toHaveBeenCalledWith('n-4');
       expect(mockPush).not.toHaveBeenCalled();
     });
   });

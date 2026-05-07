@@ -22,6 +22,17 @@ jest.mock('expo-router', () => {
   };
 });
 
+jest.mock('@/hooks/AuthContext', () => ({
+  useAuth: jest.fn(() => ({
+    login: jest.fn().mockImplementation((_email: string, password: string) => {
+      if (password !== '1234') throw new Error('Invalid credentials');
+    }),
+    logout: jest.fn(),
+    user: null,
+    isLoading: false,
+  })),
+}));
+
 import OTPScreen from '../../app/(auth)/otp';
 
 // Access the mocked router functions after module resolution
@@ -216,26 +227,26 @@ describe('OTPScreen', () => {
   // handleVerify – correct OTP
   // -------------------------
 
-  it('navigates to /(tabs)/home on correct OTP "1234"', () => {
+  it('navigates to /(tabs)/home on correct OTP "1234"', async () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
-    const touchables = getTouchables(comp);
     fireEvent.changeText(inputs[0], '1');
     fireEvent.changeText(inputs[1], '2');
     fireEvent.changeText(inputs[2], '3');
     fireEvent.changeText(inputs[3], '4');
-    act(() => { touchables[1].props.onPress(); });
+    const touchables = getTouchables(comp);
+    await act(async () => { touchables[1].props.onPress(); });
     expect(getMockRouter().replace).toHaveBeenCalledWith('/(tabs)/home');
   });
 
-  it('navigates to home via fireEvent.press when button is enabled', () => {
+  it('navigates to home via fireEvent.press when button is enabled', async () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
     fireEvent.changeText(inputs[0], '1');
     fireEvent.changeText(inputs[1], '2');
     fireEvent.changeText(inputs[2], '3');
     fireEvent.changeText(inputs[3], '4');
-    fireEvent.press(comp.getByText('Xác nhận'));
+    await act(async () => { fireEvent.press(comp.getByText('Xác nhận')); });
     expect(getMockRouter().replace).toHaveBeenCalledWith('/(tabs)/home');
   });
 

@@ -1,12 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function OTPScreen() {
   // Lấy email từ tham số URL (nếu bạn có truyền từ trang Login sang)
-  const { email } = useLocalSearchParams(); 
-  
+  const { email } = useLocalSearchParams<{ email: string }>();
+  const { login } = useAuth();
+
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [errorMessage, setErrorMessage] = useState("");
   const [countdown, setCountdown] = useState(30);
@@ -43,25 +45,20 @@ export default function OTPScreen() {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const fullOtp = otp.join("");
-    
     if (fullOtp.length < 4) {
       setErrorMessage("Vui lòng nhập đủ 4 số OTP.");
       return;
     }
 
-    if (fullOtp !== "1234") {
+    try {
+      await login(email as string, fullOtp);
+      Keyboard.dismiss();
+      router.replace("/(tabs)/home");
+    } catch {
       setErrorMessage("Mã OTP không chính xác. Vui lòng thử lại.");
-      
-      return;
     }
-
-    Keyboard.dismiss();
-    setErrorMessage("");
-    
-    // Đăng nhập thành công -> Chuyển về màn hình Home và chặn quay lại
-    router.replace("/(tabs)/home");
   };
 
   const handleResendOtp = () => {

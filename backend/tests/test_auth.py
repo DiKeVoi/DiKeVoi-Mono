@@ -1,4 +1,3 @@
-import bcrypt
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
@@ -20,10 +19,7 @@ def test_signup_success(client: TestClient, mock_supabase: MagicMock) -> None:
 
     response = client.post(
         "/auth/signup",
-        json={
-            "email": "newuser@example.com",
-            "password": "securepass",
-        },
+        json={"email": "newuser@example.com"},
     )
 
     assert response.status_code == 201
@@ -37,93 +33,19 @@ def test_signup_duplicate_email(client: TestClient, mock_supabase: MagicMock) ->
 
     response = client.post(
         "/auth/signup",
-        json={
-            "email": "existing@example.com",
-            "password": "securepass",
-        },
+        json={"email": "existing@example.com"},
     )
 
     assert response.status_code == 409
     assert "already registered" in response.json()["detail"]
 
 
-def test_signup_short_password(client: TestClient, mock_supabase: MagicMock) -> None:
-    response = client.post(
-        "/auth/signup",
-        json={
-            "email": "user@example.com",
-            "password": "short",
-        },
-    )
-    assert response.status_code == 422
-
-
 def test_signup_invalid_email(client: TestClient, mock_supabase: MagicMock) -> None:
     response = client.post(
         "/auth/signup",
-        json={
-            "email": "not-an-email",
-            "password": "securepass",
-        },
+        json={"email": "not-an-email"},
     )
     assert response.status_code == 422
-
-
-def test_signin_success(client: TestClient, mock_supabase: MagicMock) -> None:
-    hashed = bcrypt.hashpw(b"securepass", bcrypt.gensalt()).decode()
-    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
-        "id": "user-123",
-        "email": "user@example.com",
-        "password": hashed,
-    }
-
-    response = client.post(
-        "/auth/signin",
-        json={
-            "email": "user@example.com",
-            "password": "securepass",
-        },
-    )
-
-    assert response.status_code == 200
-    body = response.json()
-    assert "access_token" in body
-    assert body["token_type"] == "bearer"
-
-
-def test_signin_wrong_password(client: TestClient, mock_supabase: MagicMock) -> None:
-    hashed = bcrypt.hashpw(b"correctpass", bcrypt.gensalt()).decode()
-    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
-        "id": "user-123",
-        "email": "user@example.com",
-        "password": hashed,
-    }
-
-    response = client.post(
-        "/auth/signin",
-        json={
-            "email": "user@example.com",
-            "password": "wrongpass1",
-        },
-    )
-
-    assert response.status_code == 401
-
-
-def test_signin_user_not_found(client: TestClient, mock_supabase: MagicMock) -> None:
-    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = (
-        None
-    )
-
-    response = client.post(
-        "/auth/signin",
-        json={
-            "email": "ghost@example.com",
-            "password": "securepass",
-        },
-    )
-
-    assert response.status_code == 401
 
 
 def test_signup_db_failure(client: TestClient, mock_supabase: MagicMock) -> None:
@@ -134,27 +56,10 @@ def test_signup_db_failure(client: TestClient, mock_supabase: MagicMock) -> None
 
     response = client.post(
         "/auth/signup",
-        json={"email": "newuser@example.com", "password": "securepass"},
+        json={"email": "newuser@example.com"},
     )
 
     assert response.status_code == 500
-
-
-def test_token_endpoint_success(client: TestClient, mock_supabase: MagicMock) -> None:
-    hashed = bcrypt.hashpw(b"securepass", bcrypt.gensalt()).decode()
-    mock_supabase.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
-        "id": "user-123",
-        "email": "user@example.com",
-        "password": hashed,
-    }
-
-    response = client.post(
-        "/auth/token",
-        data={"username": "user@example.com", "password": "securepass"},
-    )
-
-    assert response.status_code == 200
-    assert "access_token" in response.json()
 
 
 def test_signup_with_optional_fields(
@@ -171,7 +76,6 @@ def test_signup_with_optional_fields(
         "/auth/signup",
         json={
             "email": "newuser@example.com",
-            "password": "securepass",
             "display_name": "Test User",
             "gender": "male",
             "photo_url": "http://example.com/photo.jpg",
@@ -179,3 +83,45 @@ def test_signup_with_optional_fields(
     )
 
     assert response.status_code == 201
+
+
+def test_otp_verify_success(client: TestClient, mock_supabase: MagicMock) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+        {"id": "user-123", "email": "user@example.com"}
+    ]
+
+    response = client.post(
+        "/auth/otp-verify",
+        json={"email": "user@example.com", "otp": "1234"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "access_token" in body
+    assert body["token_type"] == "bearer"
+
+
+def test_otp_verify_invalid_otp(client: TestClient, mock_supabase: MagicMock) -> None:
+    response = client.post(
+        "/auth/otp-verify",
+        json={"email": "user@example.com", "otp": "0000"},
+    )
+    assert response.status_code == 401
+
+
+def test_otp_verify_creates_user_when_not_found(
+    client: TestClient, mock_supabase: MagicMock
+) -> None:
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = (
+        []
+    )
+    mock_supabase.table.return_value.insert.return_value.execute.return_value.data = [
+        {"id": "new-id", "email": "ghost@example.com"}
+    ]
+
+    response = client.post(
+        "/auth/otp-verify",
+        json={"email": "ghost@example.com", "otp": "1234"},
+    )
+    assert response.status_code == 200
+    assert "access_token" in response.json()

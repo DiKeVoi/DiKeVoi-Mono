@@ -1,4 +1,4 @@
-import { NotificationData } from "@/types/homeData";
+import type { Notification as ApiNotification } from "@/types/api";
 import { CircleCheck, CircleX, UserPlus, UserCheck } from "lucide-react-native";
 import { TouchableOpacity, View, ScrollView } from "react-native";
 import { ThemedText } from "./themed-text";
@@ -14,42 +14,45 @@ export function Notification() {
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification();
 
   // 2. Hàm xử lý khi bấm vào 1 thông báo cụ thể
-  const handlePressNotification = (item: NotificationData) => {
+  const handlePressNotification = (item: ApiNotification) => {
     // Gọi hàm từ Context để đánh dấu đã đọc
     markAsRead(item.id); 
     
     // Chuyển trang
-    if (item.category === "accepted") {
+    if (item.type === "ride_confirmed" || item.type === "negotiation_accepted") {
       router.push({
         pathname: "/(matching)/chat/[id]",
-        params: { id: item.targetId } 
+        params: { id: item.relatedId ?? "" }
       });
-    } else if (item.category === "matching") {
+    } else if (item.type === "ride_request") {
       router.push("/(tabs)/matching/connection-request");
     }
   };
 
-  const renderIcon = (category?: string) => {
-    switch (category) {
-      case "matching":
+  const renderIcon = (type?: string) => {
+    switch (type) {
+      case "ride_request":
         return (
           <View className="bg-blue-50 p-2 rounded-full">
             <UserPlus size={20} color="#2563EB" />
           </View>
         );
-      case "accepted":
+      case "ride_confirmed":
+      case "negotiation_accepted":
+      case "negotiation_offer":
         return (
           <View className="bg-yellow-50 p-2 rounded-full">
             <UserCheck size={20} color="#EAB308" />
           </View>
         );
-      case "failed":
+      case "ride_cancelled":
+      case "negotiation_rejected":
         return (
           <View className="bg-red-50 p-2 rounded-full">
             <CircleX size={20} color="#EF4444" />
           </View>
         );
-      case "success":
+      case "ride_completed":
         return (
           <View className="bg-green-50 p-2 rounded-full">
             <CircleCheck size={20} color="#10B981" />
@@ -93,7 +96,7 @@ export function Notification() {
           showsVerticalScrollIndicator={true}
           nestedScrollEnabled={true}
         >
-          {notifications.map((item: NotificationData, index: number) => (
+          {notifications.map((item: ApiNotification, index: number) => (
             <TouchableOpacity
               key={item.id.toString()}
               activeOpacity={0.5}
@@ -101,22 +104,22 @@ export function Notification() {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               className={`flex-row items-start px-6 py-5 ${
                 index !== notifications.length - 1 ? "border-b border-slate-50" : ""
-              } ${!item.read ? "bg-slate-50/50" : "bg-white"}`} // Highlight nhẹ nền nếu chưa đọc
+              } ${!item.isRead ? "bg-slate-50/50" : "bg-white"}`} // Highlight nhẹ nền nếu chưa đọc
             >
-              {renderIcon(item.category)}
+              {renderIcon(item.type)}
 
               <View className="flex-1 ml-4 justify-center">
                 <View className="flex-row items-start justify-between gap-2">
                   <ThemedText 
                     className={`text-[14px] leading-5 flex-1 ${
-                      !item.read ? "font-bold text-[#152249]" : "font-normal text-slate-600"
+                      !item.isRead ? "font-bold text-[#152249]" : "font-normal text-slate-600"
                     }`}
                   >
                     {item.title}
                   </ThemedText>
                   
                   {/* CHẤM ĐỎ: Chỉ hiện khi read === false */}
-                  {!item.read && (
+                  {!item.isRead && (
                     <View className="w-2.5 h-2.5 bg-red-500 rounded-full mt-1.5 shadow-sm shadow-red-200" />
                   )}
                 </View>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { 
-  ScrollView, 
-  View, 
-  TouchableOpacity, 
-  Platform, 
-  KeyboardAvoidingView // Thêm import này
+import {
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Platform,
+  KeyboardAvoidingView, // Thêm import này
+  Alert,
 } from "react-native";
+import { useCreateRidePost } from "@/hooks/useRidePosts";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -43,7 +45,9 @@ export default function RequestScreen() {
     return defaultDate;
   });
   const [showPicker, setShowPicker] = useState(false);
-  
+
+  const createRidePost = useCreateRidePost();
+
   const onTimeChange = (event: any, selectedDate?: Date) => {
     if (Platform.OS === "android") {
       setShowPicker(false);
@@ -59,20 +63,30 @@ export default function RequestScreen() {
     hour12: false,
   });
 
-  const handleSubmit = () => {
-    const hours = time.getHours().toString().padStart(2, '0');
-    const minutes = time.getMinutes().toString().padStart(2, '0');
-    const formattedTime = `${hours}:${minutes}`;
+  const handleSubmit = async () => {
+    if (!pickup || !destination) {
+      Alert.alert("Thiếu thông tin", "Vui lòng nhập điểm đi và điểm đến.");
+      return;
+    }
 
-    console.log({
-      vaiTro: role === "rider" ? "Đi ké" : "Cho đi ké",
-      diemDi: pickup,
-      diemDen: destination,
-      thoiGian: formattedTime,
-      lapLai: isRepeat
-    });
+    const departureISO = (() => {
+      const d = new Date();
+      d.setHours(time.getHours(), time.getMinutes(), 0, 0);
+      return d.toISOString();
+    })();
 
-    router.push("/matching/matching");
+    try {
+      await createRidePost.mutateAsync({
+        type: role === "driver" ? "offer" : "request",
+        origin_location: pickup,
+        destination_location: destination,
+        departure_time: departureISO,
+        is_recurring: isRepeat,
+      });
+      router.push("/matching/matching");
+    } catch {
+      Alert.alert("Lỗi", "Không thể tạo yêu cầu. Vui lòng thử lại.");
+    }
   };
 
   return (
@@ -180,10 +194,11 @@ export default function RequestScreen() {
             <ToggleRow value={isRepeat} onValueChange={setIsRepeat} />
 
             <View className="mt-4">
-              <PrimaryButton 
-                title="Tạo yêu cầu" 
-                iconName="send" 
-                onPress={handleSubmit} 
+              <PrimaryButton
+                title={createRidePost.isPending ? "Đang tạo..." : "Tạo yêu cầu"}
+                iconName="send"
+                onPress={handleSubmit}
+                disabled={createRidePost.isPending}
               />
             </View>
           </ScrollView>

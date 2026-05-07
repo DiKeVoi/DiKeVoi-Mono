@@ -5,26 +5,26 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { router } from "expo-router";
+import { useAuth } from "@/hooks/AuthContext";
 
-// --- MOCK DATA ---
-const MOCK_USER = {
-  name: "Nguyễn Văn A",
-  joinYear: "2023",
-  avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDhJPq6VE2JnXLGktiwcIabLV-BZk_So9ivUDNZWqdGOdTID4BB_J3JXJ-LQJ0qwfU8P6TVnrFCiVT4x10jThgVMdiUmF1jYdxWjlmsoszMcPsixDD3_K6odWabP_IzW9PUfiVvWXCQgb8n8hTSQKm23ynYDU8A8I0aPv3QuQSm2wgevXBFV1SudBcTiVKqzCh6WzORRyPXJBTar75ZfnZk8q-qNz-yNGMvcmno6YBfSl-dVufClCCcjMgYx4WTMqgKe3MRVimGvGU",
-  appVersion: "1.0.0",
-};
+export default function Profile() {
+  const { user, logout } = useAuth();
 
-const handleLogout = async () => {
+  const handleLogout = async () => {
     try {
-      console.log("Đã đăng xuất thành công!");
-
-      router.replace("/(auth)/login"); 
+      await logout();
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error);
     }
   };
 
-export default function Profile() {
+  const displayName = user?.displayName ?? "Người dùng";
+  const avatarUri = user?.photoUrl ?? undefined;
+  const joinYear = user?.createdAt
+    ? new Date(user.createdAt).getFullYear().toString()
+    : "—";
+  const appVersion = "1.0.0";
+
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <ScrollView 
@@ -45,7 +45,7 @@ export default function Profile() {
             {/* Avatar */}
             <View className="relative">
               <Image
-                source={{ uri: MOCK_USER.avatar }}
+                source={{ uri: avatarUri }}
                 className="h-28 w-28 rounded-full border-4 border-[#F9F871]"
                 contentFit="cover"
               />
@@ -60,12 +60,12 @@ export default function Profile() {
             {/* Info */}
             <View className="items-center mt-4">
               <ThemedText className="text-2xl font-bold text-slate-900 dark:text-white">
-                {MOCK_USER.name}
+                {displayName}
               </ThemedText>
               <View className="flex-row items-center mt-1">
                 <MaterialIcons name="stars" size={16} color="#F9F871" />
                 <ThemedText className="text-sm text-slate-500 dark:text-slate-400 ml-1 font-medium">
-                  Thành viên từ {MOCK_USER.joinYear}
+                  Thành viên từ {joinYear}
                 </ThemedText>
               </View>
             </View>
@@ -133,7 +133,7 @@ export default function Profile() {
           </TouchableOpacity>
           
           <ThemedText className="text-center text-slate-400 text-xs mt-6">
-            Phiên bản {MOCK_USER.appVersion} • Đi ké với! © 2026
+            Phiên bản {appVersion} • Đi ké với! © 2026
           </ThemedText>
         </View>
 
