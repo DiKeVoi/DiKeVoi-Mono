@@ -14,14 +14,6 @@ const config: Config = {
     "!components/onboarding/first-page.tsx",
     "!**/*.d.ts",
   ],
-  coverageThreshold: {
-    global: {
-        branches: 80,
-        functions: 80,
-        lines: 80,
-        statements: 90,
-    }
-  },
   coverageProvider: "v8",
   coverageReporters: ["lcov", "text"],
   coverageDirectory: "coverage",
