@@ -39,6 +39,7 @@ export function Notification() {
         );
       case "ride_confirmed":
       case "negotiation_accepted":
+      case "negotiation_offer":
         return (
           <View className="bg-yellow-50 p-2 rounded-full">
             <UserCheck size={20} color="#EAB308" />

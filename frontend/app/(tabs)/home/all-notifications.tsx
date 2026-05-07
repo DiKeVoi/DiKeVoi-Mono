@@ -20,7 +20,7 @@ export default function AllNotificationsScreen() {
     if (item.type === "ride_confirmed" || item.type === "negotiation_accepted") {
       router.push({
         pathname: "/(matching)/chat/[id]",
-        params: { id: item.relatedId ?? "c1" }
+        params: { id: item.relatedId ?? "" }
       });
     } else if (item.type === "ride_request") {
       router.push("/(tabs)/matching/connection-request");
@@ -37,6 +37,7 @@ export default function AllNotificationsScreen() {
         );
       case "ride_confirmed":
       case "negotiation_accepted":
+      case "negotiation_offer":
         return (
           <View className="bg-yellow-50 p-3 rounded-full">
             <UserCheck size={24} color="#EAB308" />

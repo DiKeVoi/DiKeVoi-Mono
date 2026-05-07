@@ -28,6 +28,10 @@ const createWrapper = () => {
 };
 
 describe("useNotificationList", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("returns notifications from API", async () => {
     const { result } = renderHook(() => useNotificationList(), {
       wrapper: createWrapper(),
