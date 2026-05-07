@@ -20,7 +20,7 @@ export function useMyRidePosts() {
       const all = await ridePostsService.list();
       return all.filter((p) => p.userId === user?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!user,
   });
 }
 

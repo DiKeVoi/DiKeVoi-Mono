@@ -110,15 +110,7 @@ export function MyRequests({ viewAll }: RequestProps) {
     );
   }
 
-  const requests: MyRequestData[] = (ridePosts ?? []).map((p) => ({
-    id: Number(p.id) || 0,
-    from: p.originLocation,
-    to: p.destinationLocation,
-    time: new Date(p.departureTime),
-    status: p.status === "matched" ? "matched" : "finding",
-  }));
-
-  const displayRequests = viewAll ? requests : requests.slice(0, 3);
+  const displayPosts = viewAll ? (ridePosts ?? []) : (ridePosts ?? []).slice(0, 3);
 
   return (
     <ThemedView className="px-4 gap-4">
@@ -137,16 +129,25 @@ export function MyRequests({ viewAll }: RequestProps) {
         )}
       </View>
       <View>
-        {displayRequests.map((request) => (
-          <View key={request.id}>
-            {request.status === "finding" ? (
-              <RequestItemFinding {...request} />
-            ) : (
-              <RequestItemMatched {...request} />
-            )}
-          </View>
-        ))}
-        {displayRequests.length === 0 && (
+        {displayPosts.map((p) => {
+          const request: MyRequestData = {
+            id: Number(p.id) || 0,
+            from: p.originLocation,
+            to: p.destinationLocation,
+            time: new Date(p.departureTime),
+            status: p.status === "matched" ? "matched" : "finding",
+          };
+          return (
+            <View key={p.id}>
+              {request.status === "finding" ? (
+                <RequestItemFinding {...request} />
+              ) : (
+                <RequestItemMatched {...request} />
+              )}
+            </View>
+          );
+        })}
+        {displayPosts.length === 0 && (
           <ThemedText className="text-slate-400 text-sm text-center py-4">
             Chưa có yêu cầu nào.
           </ThemedText>

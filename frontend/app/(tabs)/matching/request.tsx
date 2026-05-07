@@ -198,6 +198,7 @@ export default function RequestScreen() {
                 title={createRidePost.isPending ? "Đang tạo..." : "Tạo yêu cầu"}
                 iconName="send"
                 onPress={handleSubmit}
+                disabled={createRidePost.isPending}
               />
             </View>
           </ScrollView>

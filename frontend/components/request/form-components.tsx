@@ -95,12 +95,14 @@ interface PrimaryButtonProps {
   title: string;
   onPress: () => void;
   iconName?: keyof typeof MaterialIcons.glyphMap;
+  disabled?: boolean;
 }
-export function PrimaryButton({ title, onPress, iconName }: PrimaryButtonProps) {
+export function PrimaryButton({ title, onPress, iconName, disabled }: PrimaryButtonProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="w-full h-14 bg-[#F9F871] active:opacity-90 rounded-xl flex-row items-center justify-center gap-2 shadow-sm mb-10"
+      disabled={disabled}
+      className={`w-full h-14 bg-[#F9F871] rounded-xl flex-row items-center justify-center gap-2 shadow-sm mb-10 ${disabled ? "opacity-50" : "active:opacity-90"}`}
     >
       <ThemedText className="text-[#152249] font-bold text-base">{title}</ThemedText>
       {iconName && <MaterialIcons name={iconName} size={20} color="#152249" />}
