@@ -3,16 +3,10 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as Google from "expo-auth-session/providers/google";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: "YOUR_IOS_CLIENT_ID",
-    androidClientId: "YOUR_ANDROID_CLIENT_ID",
-    webClientId: "403153241092-j0rpo7hoa5mpbfpbssuup25kv2cisbig.apps.googleusercontent.com",
-  });
 
   const handleLogin = () => {
     const trimmedEmail = email.trim().toLowerCase();
