@@ -64,10 +64,10 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 jest.mock('@/hooks/NotificationContext', () => ({
   useNotification: () => ({
     notifications: [
-      { id: 1, title: 'Nguyễn Văn A yêu cầu kết nối với bạn', time: new Date(), read: false, category: 'matching', targetId: 'req_123' },
-      { id: 2, title: 'Nguyễn Văn A đã đồng ý kết nối với bạn', time: new Date(), read: true, category: 'accepted', targetId: 'c1' },
-      { id: 3, title: 'Bạn đã hoàn thành chuyến đi với Nguyễn Văn A', time: new Date(), read: false, category: 'success', targetId: 'c2' },
-      { id: 4, title: 'Nguyễn Văn A đã hủy chuyến đi với bạn.', time: new Date(), read: false, category: 'failed', targetId: 'c3' },
+      { id: 'n-1', userId: 'u-1', type: 'ride_request', title: 'Nguyễn Văn A yêu cầu kết nối với bạn', body: null, relatedId: 'req_123', isRead: false, createdAt: '2026-05-07T10:00:00' },
+      { id: 'n-2', userId: 'u-1', type: 'negotiation_accepted', title: 'Nguyễn Văn A đã đồng ý kết nối với bạn', body: null, relatedId: 'c1', isRead: true, createdAt: '2026-05-07T10:00:00' },
+      { id: 'n-3', userId: 'u-1', type: 'ride_completed', title: 'Bạn đã hoàn thành chuyến đi với Nguyễn Văn A', body: null, relatedId: 'c2', isRead: false, createdAt: '2026-05-07T10:00:00' },
+      { id: 'n-4', userId: 'u-1', type: 'ride_cancelled', title: 'Nguyễn Văn A đã hủy chuyến đi với bạn.', body: null, relatedId: 'c3', isRead: false, createdAt: '2026-05-07T10:00:00' },
     ],
     unreadCount: 3,
     markAllAsRead: jest.fn(),
@@ -89,3 +89,39 @@ jest.mock('react-native-maps', () => {
 });
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons');
+
+jest.mock('@/hooks/AuthContext', () => ({
+  AuthProvider: ({ children }: any) => children,
+  useAuth: () => ({
+    user: null,
+    logout: jest.fn(),
+    login: jest.fn().mockResolvedValue(undefined),
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@/hooks/useRidePosts', () => ({
+  useMyRidePosts: () => ({
+    data: [
+      { id: 'rp-1', userId: 'u-1', type: 'request', status: 'open', originLocation: 'KTX Khu B', destinationLocation: 'Nhà văn hóa sinh viên', departureTime: '2026-05-15T07:30:00', seatsAvailable: 1, isRecurring: false, preferredGender: null, description: null, createdAt: '2026-05-07T09:00:00', updatedAt: '2026-05-07T09:00:00' },
+      { id: 'rp-2', userId: 'u-1', type: 'request', status: 'open', originLocation: 'KTX Khu B', destinationLocation: 'Nhà văn hóa sinh viên', departureTime: '2026-05-16T07:30:00', seatsAvailable: 1, isRecurring: false, preferredGender: null, description: null, createdAt: '2026-05-07T09:00:00', updatedAt: '2026-05-07T09:00:00' },
+      { id: 'rp-3', userId: 'u-1', type: 'request', status: 'open', originLocation: 'KTX Khu B', destinationLocation: 'Nhà văn hóa sinh viên', departureTime: '2026-05-17T07:30:00', seatsAvailable: 1, isRecurring: false, preferredGender: null, description: null, createdAt: '2026-05-07T09:00:00', updatedAt: '2026-05-07T09:00:00' },
+      { id: 'rp-4', userId: 'u-1', type: 'offer', status: 'matched', originLocation: 'KTX Khu B', destinationLocation: 'Nhà văn hóa sinh viên', departureTime: '2026-05-18T07:30:00', seatsAvailable: 1, isRecurring: false, preferredGender: null, description: null, createdAt: '2026-05-07T09:00:00', updatedAt: '2026-05-07T09:00:00' },
+      { id: 'rp-5', userId: 'u-1', type: 'request', status: 'open', originLocation: 'KTX Khu B', destinationLocation: 'Nhà văn hóa sinh viên', departureTime: '2026-05-19T07:30:00', seatsAvailable: 1, isRecurring: false, preferredGender: null, description: null, createdAt: '2026-05-07T09:00:00', updatedAt: '2026-05-07T09:00:00' },
+    ],
+    isLoading: false,
+    isSuccess: true,
+  }),
+  useRidePosts: () => ({ data: [], isLoading: false }),
+  useCreateRidePost: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useDeleteRidePost: () => ({ mutate: jest.fn(), isPending: false }),
+  RIDE_POSTS_KEY: 'ridePosts',
+}));
+
+jest.mock('@/hooks/useNotifications', () => ({
+  useNotificationList: () => ({ data: [], isLoading: false }),
+  useUnreadCount: () => ({ data: 0, isLoading: false }),
+  useMarkRead: () => ({ mutate: jest.fn() }),
+  useMarkAllRead: () => ({ mutate: jest.fn() }),
+  NOTIFICATIONS_KEY: 'notifications',
+}));

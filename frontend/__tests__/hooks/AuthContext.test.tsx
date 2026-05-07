@@ -1,3 +1,5 @@
+jest.unmock("@/hooks/AuthContext");
+
 import React from "react";
 import { renderHook, act } from "@testing-library/react-native";
 import { AuthProvider, useAuth } from "@/hooks/AuthContext";
