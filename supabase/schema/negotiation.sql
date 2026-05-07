@@ -1,0 +1,23 @@
+create table public."Negotiation" (
+  id uuid not null default gen_random_uuid (),
+  "offererUid" uuid null,
+  "requesterUid" uuid null,
+  "rideId" uuid null,
+  status public.negotiation_status not null,
+  "createdAt" timestamp without time zone not null default now(),
+  "lastEditedAt" timestamp without time zone null,
+  "pickupLocation" character varying null,
+  "dropoffLocation" character varying null,
+  "departureTime" character varying null,
+  fare integer null,
+  note character varying null,
+  "confirmedByOfferer" boolean null,
+  "confirmedByRequester" boolean null,
+  "lastEditedBy" uuid null,
+  "updatedAt" timestamp without time zone null default now(),
+  constraint Negotiation_pkey primary key (id),
+  constraint Negotiation_lastEditedBy_fkey foreign KEY ("lastEditedBy") references "User" (id) deferrable,
+  constraint Negotiation_offererUid_fkey foreign KEY ("offererUid") references "User" (id),
+  constraint Negotiation_requesterUid_fkey foreign KEY ("requesterUid") references "User" (id),
+  constraint Negotiation_rideId_fkey foreign KEY ("rideId") references "Ride" (id) deferrable
+) TABLESPACE pg_default;
