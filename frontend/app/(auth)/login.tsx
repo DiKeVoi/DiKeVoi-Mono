@@ -3,36 +3,43 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Google from "expo-auth-session/providers/google";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: "YOUR_IOS_CLIENT_ID",
+    androidClientId: "YOUR_ANDROID_CLIENT_ID",
+    webClientId: "403153241092-j0rpo7hoa5mpbfpbssuup25kv2cisbig.apps.googleusercontent.com",
+  });
 
   const handleLogin = () => {
     const trimmedEmail = email.trim().toLowerCase();
-    
+
     if (!trimmedEmail) {
       setErrorMessage("Vui lòng nhập địa chỉ email.");
       return;
     }
 
     if (!trimmedEmail.endsWith(".edu.vn")) {
-      setErrorMessage("Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)");
+      setErrorMessage(
+        "Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)",
+      );
       return;
     }
 
     setErrorMessage("");
-    
+
     router.push({
       pathname: "/(auth)/otp",
-      params: { email: trimmedEmail }
+      params: { email: trimmedEmail },
     });
   };
 
   return (
     <View className="flex-1 bg-[#f8f6f6] dark:bg-[#221610] items-center justify-center p-4">
       <View className="w-full max-w-[480px] h-full min-h-[795px] flex-col bg-white dark:bg-slate-900 overflow-hidden rounded-xl shadow-xl">
-        
         {/* Top App Bar / Header */}
         <View className="flex-row items-center p-4 justify-between">
           <View className="flex-1" />
@@ -68,7 +75,9 @@ export default function LoginScreen() {
               </View>
               <TextInput
                 className={`w-full rounded-xl border ${
-                  errorMessage ? "border-red-500" : "border-slate-200 dark:border-slate-700"
+                  errorMessage
+                    ? "border-red-500"
+                    : "border-slate-200 dark:border-slate-700"
                 } bg-slate-50 dark:bg-slate-800 dark:text-white h-14 pl-12 pr-4 text-base`}
                 placeholder="yourname@student.edu.vn"
                 placeholderTextColor="#94a3b8"
@@ -81,7 +90,7 @@ export default function LoginScreen() {
                 }}
               />
             </View>
-            
+
             {errorMessage ? (
               <Text className="text-xs text-red-500 mt-2 font-medium">
                 {errorMessage}
@@ -94,11 +103,13 @@ export default function LoginScreen() {
           </View>
 
           {/* Main Action Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleLogin}
             className="w-full h-14 bg-[#152249] active:opacity-90 rounded-xl flex-row items-center justify-center gap-2 shadow-md"
           >
-            <Text className="text-white font-bold text-base">Tiếp tục với mã OTP</Text>
+            <Text className="text-white font-bold text-base">
+              Tiếp tục với mã OTP
+            </Text>
             <MaterialIcons name="arrow-forward" size={20} color="white" />
           </TouchableOpacity>
         </View>
@@ -114,12 +125,10 @@ export default function LoginScreen() {
 
         {/* Secondary Action */}
         <View className="px-6 mb-8">
-          <TouchableOpacity 
-            className="w-full h-14 border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 active:bg-slate-50 dark:active:bg-slate-800 flex-row items-center justify-center gap-3 rounded-xl"
-          >
+          <TouchableOpacity className="w-full h-14 border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 active:bg-slate-50 dark:active:bg-slate-800 flex-row items-center justify-center gap-3 rounded-xl">
             <Image
-                source={require("@/assets/images/google-logo.png")}
-                style={{ width: 24, height: 24 }}
+              source={require("@/assets/images/google-logo.png")}
+              style={{ width: 24, height: 24 }}
             />
             <Text className="text-slate-700 dark:text-slate-300 font-semibold text-base">
               Đăng nhập với Google
@@ -134,11 +143,15 @@ export default function LoginScreen() {
         <View className="p-6 mb-4 items-center">
           <Text className="text-xs text-slate-500 dark:text-slate-400 text-center leading-relaxed">
             Bằng cách đăng nhập, bạn đồng ý với {"\n"}
-            <Text className="text-[#152249] dark:text-[#F9F871] font-semibold">Điều khoản</Text> &{" "}
-            <Text className="text-[#152249] dark:text-[#F9F871] font-semibold">Chính sách bảo mật</Text>
+            <Text className="text-[#152249] dark:text-[#F9F871] font-semibold">
+              Điều khoản
+            </Text>{" "}
+            &{" "}
+            <Text className="text-[#152249] dark:text-[#F9F871] font-semibold">
+              Chính sách bảo mật
+            </Text>
           </Text>
         </View>
-
       </View>
     </View>
   );
