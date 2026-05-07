@@ -7,7 +7,6 @@ export function useRatingsReceived(userId?: string) {
   return useQuery({
     queryKey: [RATINGS_KEY, "received", userId],
     queryFn: () => ratingsService.list("received", userId),
-    enabled: userId !== undefined,
   });
 }
 
