@@ -1,4 +1,4 @@
-import type { Notification } from "@/types/api";
+import type { Notification as ApiNotification } from "@/types/api";
 import { CircleCheck, CircleX, UserPlus, UserCheck } from "lucide-react-native";
 import { TouchableOpacity, View, ScrollView } from "react-native";
 import { ThemedText } from "./themed-text";
@@ -14,7 +14,7 @@ export function Notification() {
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification();
 
   // 2. Hàm xử lý khi bấm vào 1 thông báo cụ thể
-  const handlePressNotification = (item: Notification) => {
+  const handlePressNotification = (item: ApiNotification) => {
     // Gọi hàm từ Context để đánh dấu đã đọc
     markAsRead(item.id); 
     
@@ -95,7 +95,7 @@ export function Notification() {
           showsVerticalScrollIndicator={true}
           nestedScrollEnabled={true}
         >
-          {notifications.map((item: Notification, index: number) => (
+          {notifications.map((item: ApiNotification, index: number) => (
             <TouchableOpacity
               key={item.id.toString()}
               activeOpacity={0.5}
