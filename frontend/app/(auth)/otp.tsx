@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";

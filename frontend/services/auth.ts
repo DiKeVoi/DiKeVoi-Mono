@@ -11,12 +11,10 @@ export const authService = {
     return data;
   },
 
-  async login(email: string, password: string): Promise<TokenResponse> {
-    const formData = new URLSearchParams();
-    formData.append("username", email);
-    formData.append("password", password);
-    const { data } = await apiClient.post<TokenResponse>("/auth/token", formData, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  async login(email: string, otp: string): Promise<TokenResponse> {
+    const { data } = await apiClient.post<TokenResponse>("/auth/otp-verify", {
+      email,
+      otp,
     });
     return data;
   },

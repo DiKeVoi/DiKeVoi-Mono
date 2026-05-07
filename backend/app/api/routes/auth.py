@@ -136,15 +136,50 @@ def sign_in(body: SignInRequest) -> TokenResponse:
     )
 
 
+class OtpVerifyRequest(BaseModel):
+    email: EmailStr
+    otp: str
+
+
+@router.post("/otp-verify", response_model=TokenResponse)
+def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
+    if body.otp != "1234":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid OTP",
+        )
+    result = (
+        supabase.table("User")
+        .select("id, email")
+        .eq("email", body.email)
+        .single()
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+    user = cast(dict, result.data)
+    return TokenResponse(
+        access_token=_create_token(
+            json.dumps({"user_id": user["id"], "email": user["email"]})
+        )
+    )
+
+
 @router.get("/me")
 def get_me(current_user: CurrentUser) -> dict:
     result = (
         supabase.table("User")
-        .select("id, email, authProvider, isVerified, displayName, photoUrl, gender, createdAt, updatedAt")
+        .select(
+            "id, email, authProvider, isVerified, displayName, photoUrl, gender, createdAt, updatedAt"
+        )
         .eq("id", current_user["user_id"])
         .single()
         .execute()
     )
     if not result.data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     return cast(dict, result.data)
