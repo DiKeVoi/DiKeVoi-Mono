@@ -93,21 +93,27 @@ def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid OTP",
         )
-    result = supabase.table("User").select("id, email").eq("email", body.email).execute()
+    result = (
+        supabase.table("User").select("id, email").eq("email", body.email).execute()
+    )
     print("Result:", result)
     if not result.data:
-        request = supabase.table("User").insert(
-            {
-                "id": str(uuid.uuid4()),
-                "email": body.email,
-                "authProvider": "email",
-                "isVerified": True,
-                "createdAt": datetime.now(timezone.utc).isoformat(),
-                "displayName": None,
-                "photoUrl": None,
-                "gender": None
-            }
-        ).execute()
+        request = (
+            supabase.table("User")
+            .insert(
+                {
+                    "id": str(uuid.uuid4()),
+                    "email": body.email,
+                    "authProvider": "email",
+                    "isVerified": True,
+                    "createdAt": datetime.now(timezone.utc).isoformat(),
+                    "displayName": None,
+                    "photoUrl": None,
+                    "gender": None,
+                }
+            )
+            .execute()
+        )
         created_users = request.data or []
         if not created_users:
             raise HTTPException(
@@ -117,7 +123,9 @@ def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
         created_user = cast(dict, created_users[0])
         return TokenResponse(
             access_token=_create_token(
-                json.dumps({"user_id": created_user["id"], "email": created_user["email"]})
+                json.dumps(
+                    {"user_id": created_user["id"], "email": created_user["email"]}
+                )
             )
         )
     user = cast(dict, result.data[0]) if result.data else None
