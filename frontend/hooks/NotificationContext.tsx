@@ -1,83 +1,43 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NotificationData } from "@/types/homeData"; // Nhớ import đúng đường dẫn của bạn
+import React, { createContext, useContext } from "react";
+import {
+  useNotificationList,
+  useMarkRead,
+  useMarkAllRead,
+  useUnreadCount,
+} from "@/hooks/useNotifications";
+import type { Notification } from "@/types/api";
 
-const NOTIFICATION_STORAGE_KEY = "@user_notifications";
+interface NotificationContextValue {
+  notifications: Notification[];
+  unreadCount: number;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+}
 
-const INITIAL_NOTIFICATIONS: NotificationData[] = [
-  { 
-    id: 1, 
-    title: "Nguyễn Văn A yêu cầu kết nối với bạn", 
-    time: new Date(), 
-    read: false, 
-    category: "matching",
-    targetId: "req_123"
-  },
-  { 
-    id: 2, 
-    title: "Nguyễn Văn A đã đồng ý kết nối với bạn", 
-    time: new Date(), 
-    read: false, 
-    category: "accepted",
-    targetId: "c1"
-  },
-  {
-    id: 3,
-    title: "Bạn đã hoàn thành chuyến đi với Nguyễn Văn A",
-    time: new Date(),
-    read: false,
-    category: "success",
-    targetId: "c2"
-  },
-  {
-    id: 4,
-    title: "Nguyễn Văn A đã hủy chuyến đi với bạn.",
-    time: new Date(),
-    read: false,
-    category: "failed",
-    targetId: "c3"
-  },
-];
-
-const NotificationContext = createContext<any>(null);
+const NotificationContext = createContext<NotificationContextValue | null>(null);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [notifications, setNotifications] = useState<NotificationData[]>(INITIAL_NOTIFICATIONS);
-
-  useEffect(() => {
-    const loadSavedNotifications = async () => {
-      const savedData = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
-      if (savedData) {
-        const parsedData = JSON.parse(savedData).map((item: any) => ({
-          ...item,
-          time: new Date(item.time),
-        }));
-        setNotifications(parsedData);
-      }
-    };
-    loadSavedNotifications();
-  }, []);
-
-  const saveAndSetNotifications = async (newNotifications: NotificationData[]) => {
-    setNotifications(newNotifications);
-    await AsyncStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(newNotifications));
-  };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAllAsRead = () => {
-    saveAndSetNotifications(notifications.map((n) => ({ ...n, read: true })));
-  };
-
-  const markAsRead = (id: number) => {
-    saveAndSetNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  };
+  const { data: notifications = [] } = useNotificationList();
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const markRead = useMarkRead();
+  const markAllRead = useMarkAllRead();
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAllAsRead, markAsRead }}>
+    <NotificationContext.Provider
+      value={{
+        notifications,
+        unreadCount,
+        markAsRead: (id: string) => markRead.mutate(id),
+        markAllAsRead: () => markAllRead.mutate(),
+      }}
+    >
       {children}
     </NotificationContext.Provider>
   );
 };
 
-export const useNotification = () => useContext(NotificationContext);
+export const useNotification = () => {
+  const ctx = useContext(NotificationContext);
+  if (!ctx) throw new Error("useNotification must be inside NotificationProvider");
+  return ctx;
+};
