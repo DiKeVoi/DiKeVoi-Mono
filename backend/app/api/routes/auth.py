@@ -1,7 +1,7 @@
 import uuid
 import json
 from datetime import datetime, timedelta, timezone
-from typing import cast
+from typing import Annotated, cast
 
 import bcrypt as _bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -9,10 +9,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from pydantic import BaseModel, EmailStr, field_validator
 
+from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.supabase import supabase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+CurrentUser = Annotated[dict, Depends(get_current_user)]
 
 
 def _hash_password(password: str) -> str:
@@ -131,3 +134,17 @@ def sign_in(body: SignInRequest) -> TokenResponse:
             json.dumps({"user_id": user["id"], "email": user["email"]})
         )
     )
+
+
+@router.get("/me")
+def get_me(current_user: CurrentUser) -> dict:
+    result = (
+        supabase.table("User")
+        .select("id, email, authProvider, isVerified, displayName, photoUrl, gender, createdAt, updatedAt")
+        .eq("id", current_user["user_id"])
+        .single()
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return cast(dict, result.data)

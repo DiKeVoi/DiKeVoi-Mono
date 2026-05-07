@@ -3,7 +3,7 @@ import type { User, TokenResponse } from "@/types/api";
 
 export const authService = {
   async register(email: string, password: string, displayName?: string): Promise<User> {
-    const { data } = await apiClient.post<User>("/auth/register", {
+    const { data } = await apiClient.post<User>("/auth/signup", {
       email,
       password,
       display_name: displayName ?? null,
