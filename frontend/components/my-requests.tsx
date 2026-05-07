@@ -8,61 +8,15 @@ import {
   Route,
   Search,
 } from "lucide-react-native";
-import { Image, TouchableOpacity, View, ViewProps } from "react-native";
+import { ActivityIndicator, Image, TouchableOpacity, View, ViewProps } from "react-native";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
+import { useMyRidePosts } from "@/hooks/useRidePosts";
+
 export type RequestProps = ViewProps & {
   viewAll: boolean;
 };
-const mockRequests: MyRequestData[] = [
-  {
-    id: 1,
-    from: "KTX Khu B",
-    to: "Nhà văn hóa sinh viên",
-    time: new Date(),
-    status: "finding",
-  },
-  {
-    id: 2,
-    from: "KTX Khu A",
-    to: "Trường Đại học Bách khoa",
-    time: new Date(),
-    status: "matched",
-    with: {
-      id: 1,
-      name: "Nguyễn Văn A",
-      avatarUrl:
-        "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?semt=ais_hybrid&w=740&q=80",
-    },
-  },
-  {
-    id: 3,
-    from: "KTX Khu B",
-    to: "Trường Đại học Khoa học Tự nhiên",
-    time: new Date(),
-    status: "matched",
-    with: {
-      id: 2,
-      name: "Trần Thị B",
-      avatarUrl:
-        "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?semt=ais_hybrid&w=740&q=80",
-    },
-  },
-  {
-    id: 4,
-    from: "KTX Khu A",
-    to: "Trường Đại học Công nghệ Thông tin",
-    time: new Date(),
-    status: "finding",
-  },
-  {
-    id: 5,
-    from: "KTX Khu B",
-    to: "Nhà văn hóa sinh viên",
-    time: new Date(),
-    status: "finding",
-  },
-];
+
 function RequestItemFinding({ from, to, time }: MyRequestData) {
   return (
     <View className="bg-white border border-slate-100 rounded-xl p-4 mb-3 shadow-sm">
@@ -102,7 +56,6 @@ function RequestItemMatched({
 }: MyRequestData) {
   return (
     <View className="bg-white border border-slate-100 rounded-xl p-4 mb-3 shadow-sm">
-      {/* Status + Time */}
       <View className="flex-row justify-between items-center mb-4">
         <View className="flex-row items-center bg-green-50 px-2 py-1 rounded gap-2">
           <CircleCheck size={16} color="#16A34A" />
@@ -114,8 +67,6 @@ function RequestItemMatched({
           {time.getHours()}:{time.getMinutes().toString().padStart(2, "0")}
         </ThemedText>
       </View>
-
-      {/* Partner Row */}
       <View className="flex-row items-center gap-3 mb-4">
         <Image
           source={{ uri: withPerson?.avatarUrl }}
@@ -129,25 +80,19 @@ function RequestItemMatched({
             {withPerson?.name}
           </ThemedText>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           className="w-10 h-10 bg-slate-100 rounded-full items-center justify-center"
           onPress={() => router.push("/(matching)/chat")}
         >
           <MessageSquare size={18} color="#152249" />
         </TouchableOpacity>
       </View>
-
-      {/* Route Info - Đồng nhất với Finding */}
       <View className="border-t border-slate-50 pt-2">
         <View className="flex-row items-center">
           <Route size={14} color="#94A3B8" />
-          <ThemedText className="text-slate-900 text-xs ml-2">
-            {from}
-          </ThemedText>
+          <ThemedText className="text-slate-900 text-xs ml-2">{from}</ThemedText>
           <MoveRight size={14} color="#CBD5E1" className="mx-2" />
-          <ThemedText className="text-slate-900 font-bold text-xs">
-            {to}
-          </ThemedText>
+          <ThemedText className="text-slate-900 font-bold text-xs">{to}</ThemedText>
         </View>
       </View>
     </View>
@@ -155,11 +100,28 @@ function RequestItemMatched({
 }
 
 export function MyRequests({ viewAll }: RequestProps) {
-  const displayRequests = viewAll ? mockRequests : mockRequests.slice(0, 3);
+  const { data: ridePosts, isLoading } = useMyRidePosts();
+
+  if (isLoading) {
+    return (
+      <ThemedView className="px-4 items-center py-8">
+        <ActivityIndicator color="#152249" />
+      </ThemedView>
+    );
+  }
+
+  const requests: MyRequestData[] = (ridePosts ?? []).map((p) => ({
+    id: Number(p.id) || 0,
+    from: p.originLocation,
+    to: p.destinationLocation,
+    time: new Date(p.departureTime),
+    status: p.status === "matched" ? "matched" : "finding",
+  }));
+
+  const displayRequests = viewAll ? requests : requests.slice(0, 3);
 
   return (
     <ThemedView className="px-4 gap-4">
-      {/* Section header */}
       <View className="flex-row items-center justify-between mb-2">
         <ThemedText className="text-lg font-bold text-slate-900">
           Yêu cầu của tôi
@@ -174,8 +136,6 @@ export function MyRequests({ viewAll }: RequestProps) {
           </Link>
         )}
       </View>
-
-      {/* List items */}
       <View>
         {displayRequests.map((request) => (
           <View key={request.id}>
@@ -186,6 +146,11 @@ export function MyRequests({ viewAll }: RequestProps) {
             )}
           </View>
         ))}
+        {displayRequests.length === 0 && (
+          <ThemedText className="text-slate-400 text-sm text-center py-4">
+            Chưa có yêu cầu nào.
+          </ThemedText>
+        )}
       </View>
     </ThemedView>
   );
