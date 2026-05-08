@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"bgGreen.bold,bgBlue.bold\" \"cd backend && uvicorn app.main:app --reload\" \"cd frontend && npm start -- -c\"",
+    "start": "concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"bgGreen.bold,bgBlue.bold\" \"cd backend && source venv/bin/activate && uvicorn app.main:app --reload\" \"cd frontend && npm start -- -c\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
   },
