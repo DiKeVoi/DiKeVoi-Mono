@@ -21,5 +21,10 @@ class Settings(BaseSettings):
         "SUPABASE_SERVICE_ROLE_KEY", ""
     )  # Use service role key — NOT the publishable key
 
+    brevo_api_key: str = os.getenv("BREVO_API_KEY", "")
+    brevo_sender_email: str = os.getenv("BREVO_SENDER_EMAIL", "")
+    brevo_sender_name: str = os.getenv("BREVO_SENDER_NAME", "DiKeVoi")
+    otp_expire_minutes: int = 10
+
 
 settings = Settings()
