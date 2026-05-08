@@ -47,8 +47,25 @@
       "expo-font",
       "@react-native-community/datetimepicker",
       "expo-image",
+<<<<<<< Updated upstream
       "expo-web-browser",
       "expo-secure-store"
+=======
+<<<<<<< Updated upstream
+      "expo-web-browser"
+=======
+      "expo-web-browser",
+      "expo-secure-store",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "dikevoi",
+          "organization": "hehe-21"
+        }
+      ]
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     ],
     "experiments": {
       "typedRoutes": true,

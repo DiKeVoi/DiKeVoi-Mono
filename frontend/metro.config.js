@@ -1,8 +1,10 @@
-const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
+const {
+  getSentryExpoConfig
+} = require("@sentry/react-native/metro");
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 // Required for web: enables .web.ts/.web.js platform-specific file resolution.
 // Without this, Metro ignores web overrides and Fabric components try to call

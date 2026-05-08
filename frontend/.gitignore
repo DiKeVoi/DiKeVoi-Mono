@@ -45,3 +45,5 @@ app-example
 
 # test coverage reports
 coverage/
+
+.env.local
