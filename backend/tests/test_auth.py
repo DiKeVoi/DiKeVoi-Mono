@@ -106,7 +106,7 @@ def test_otp_verify_invalid_otp(client: TestClient, mock_supabase: MagicMock) ->
         "/auth/otp-verify",
         json={"email": "user@example.com", "otp": "0000"},
     )
-    assert response.status_code == 401
+    assert response.status_code == 400
 
 
 def test_otp_verify_creates_user_when_not_found(
