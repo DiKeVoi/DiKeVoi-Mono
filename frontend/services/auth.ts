@@ -11,11 +11,18 @@ export const authService = {
     return data;
   },
 
+  async sendOtp(email: string): Promise<void> {
+    await apiClient.post("/auth/send-otp", { email });
+  },
+
   async login(email: string, otp: string): Promise<TokenResponse> {
     const { data } = await apiClient.post<TokenResponse>("/auth/otp-verify", {
       email,
       otp,
     });
+    if (!data.access_token) {
+      throw new Error("Failed to login");
+    }
     return data;
   },
 

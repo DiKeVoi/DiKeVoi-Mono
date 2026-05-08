@@ -3,13 +3,14 @@ import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "@/hooks/AuthContext";
+import { authService } from "@/services/auth";
 
 export default function OTPScreen() {
   // Lấy email từ tham số URL (nếu bạn có truyền từ trang Login sang)
   const { email } = useLocalSearchParams<{ email: string }>();
   const { login } = useAuth();
 
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [errorMessage, setErrorMessage] = useState("");
   const [countdown, setCountdown] = useState(30);
   
@@ -34,7 +35,7 @@ export default function OTPScreen() {
     setOtp(newOtp);
     setErrorMessage(""); // Xóa lỗi khi người dùng bắt đầu gõ lại
 
-    if (numericValue !== "" && index < 3) {
+    if (numericValue !== "" && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -47,8 +48,8 @@ export default function OTPScreen() {
 
   const handleVerify = async () => {
     const fullOtp = otp.join("");
-    if (fullOtp.length < 4) {
-      setErrorMessage("Vui lòng nhập đủ 4 số OTP.");
+    if (fullOtp.length < 6) {
+      setErrorMessage("Vui lòng nhập đủ 6 số OTP.");
       return;
     }
 
@@ -57,18 +58,22 @@ export default function OTPScreen() {
       Keyboard.dismiss();
       router.replace("/(tabs)/home");
     } catch {
+      console.error("OTP verification failed");
       setErrorMessage("Mã OTP không chính xác. Vui lòng thử lại.");
     }
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     if (countdown === 0) {
-      // Giả lập gửi lại mã
-      setOtp(["", "", "", ""]);
-      setErrorMessage("");
-      setCountdown(30);
-      inputRefs.current[0]?.focus();
-      // TODO: Thêm logic gọi API gửi lại mã ở đây
+      try {
+        await authService.sendOtp(email as string);
+        setOtp(["", "", "", "", "", ""]);
+        setErrorMessage("");
+        setCountdown(30);
+        inputRefs.current[0]?.focus();
+      } catch {
+        setErrorMessage("Không thể gửi lại mã. Vui lòng thử lại.");
+      }
     }
   };
 
@@ -101,7 +106,7 @@ return (
               Xác thực OTP
             </Text>
             <Text className="text-slate-600 dark:text-slate-400 text-base font-normal leading-relaxed">
-              Vui lòng nhập mã gồm 4 chữ số đã được gửi đến email:
+              Vui lòng nhập mã gồm 6 chữ số đã được gửi đến email:
             </Text>
             <Text className="text-[#152249] dark:text-[#F9F871] text-base font-bold mt-1">
               {email || "sinhvien@student.edu.vn"}
@@ -110,12 +115,12 @@ return (
 
           {/* OTP Input Section */}
           <View className="px-6 space-y-6">
-            <View className="flex-row justify-between w-full max-w-[320px] self-center mb-2">
+            <View className="flex-row justify-between w-full max-w-[360px] self-center mb-2">
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
                   ref={(el) => { inputRefs.current[index] = el; }}
-                  className={`w-16 h-16 rounded-2xl border-2 text-center text-2xl font-bold ${
+                  className={`w-12 h-14 rounded-2xl border-2 text-center text-xl font-bold ${
                     errorMessage 
                       ? "border-red-500 text-red-500 bg-red-50 dark:bg-red-900/20" 
                       : digit 
@@ -142,11 +147,11 @@ return (
             <TouchableOpacity 
               onPress={handleVerify}
               className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 shadow-md mt-4 ${
-                otp.join("").length === 4 ? "bg-[#152249] active:opacity-90" : "bg-slate-300 dark:bg-slate-700"
+                otp.join("").length === 6 ? "bg-[#152249] active:opacity-90" : "bg-slate-300 dark:bg-slate-700"
               }`}
-              disabled={otp.join("").length < 4}
+              disabled={otp.join("").length < 6}
             >
-              <Text className={`font-bold text-base ${otp.join("").length === 4 ? "text-white" : "text-slate-500 dark:text-slate-400"}`}>
+              <Text className={`font-bold text-base ${otp.join("").length === 6 ? "text-white" : "text-slate-500 dark:text-slate-400"}`}>
                 Xác nhận
               </Text>
             </TouchableOpacity>

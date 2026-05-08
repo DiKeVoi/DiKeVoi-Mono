@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { authService } from "@/services/auth";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedEmail) {
@@ -24,11 +26,19 @@ export default function LoginScreen() {
     }
 
     setErrorMessage("");
+    setLoading(true);
 
-    router.push({
-      pathname: "/(auth)/otp",
-      params: { email: trimmedEmail },
-    });
+    try {
+      await authService.sendOtp(trimmedEmail);
+      router.push({
+        pathname: "/(auth)/otp",
+        params: { email: trimmedEmail },
+      });
+    } catch {
+      setErrorMessage("Không thể gửi mã OTP. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,12 +109,19 @@ export default function LoginScreen() {
           {/* Main Action Button */}
           <TouchableOpacity
             onPress={handleLogin}
+            disabled={loading}
             className="w-full h-14 bg-[#152249] active:opacity-90 rounded-xl flex-row items-center justify-center gap-2 shadow-md"
           >
-            <Text className="text-white font-bold text-base">
-              Tiếp tục với mã OTP
-            </Text>
-            <MaterialIcons name="arrow-forward" size={20} color="white" />
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Text className="text-white font-bold text-base">
+                  Tiếp tục với mã OTP
+                </Text>
+                <MaterialIcons name="arrow-forward" size={20} color="white" />
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
