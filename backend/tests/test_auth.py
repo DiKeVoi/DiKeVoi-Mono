@@ -102,10 +102,23 @@ def test_otp_verify_success(client: TestClient, mock_supabase: MagicMock) -> Non
 
 
 def test_otp_verify_invalid_otp(client: TestClient, mock_supabase: MagicMock) -> None:
+    otp_chain = (
+        mock_supabase.table.return_value
+        .select.return_value
+        .eq.return_value
+        .eq.return_value
+        .eq.return_value
+        .gt.return_value
+        .limit.return_value
+        .execute.return_value
+    )
+    otp_chain.data = []
+
     response = client.post(
         "/auth/otp-verify",
-        json={"email": "user@example.com", "otp": "0000"},
+        json={"email": "user@example.com", "otp": "000010"},
     )
+
     assert response.status_code == 400
 
 
