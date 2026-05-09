@@ -10,6 +10,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   fetchMe: () => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -53,9 +54,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Failed to fetch user:", error);
     }
   };
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, fetchMe, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, fetchMe, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

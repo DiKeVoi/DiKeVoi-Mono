@@ -10,7 +10,7 @@ export interface UpdateUserPayload {
 }
 
 export function useUser() {
-  const { user: authUser } = useAuth();
+  const { user: authUser, updateUser: updateAuthUser } = useAuth();
   const queryClient = useQueryClient();
 
   const userQuery = useQuery<User>({
@@ -30,6 +30,7 @@ export function useUser() {
       }),
     onSuccess: async (updatedUser) => {
       queryClient.setQueryData(["user"], updatedUser);
+      updateAuthUser(updatedUser);
     },
   });
 

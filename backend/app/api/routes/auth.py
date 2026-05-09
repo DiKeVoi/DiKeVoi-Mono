@@ -263,6 +263,37 @@ def sign_in_with_google(body: GoogleSignInRequest) -> TokenResponse:
         )
     )
 
+class UpdateProfileRequest(BaseModel):
+    display_name: str | None = None
+    gender: str | None = None
+    photo_url: str | None = None
+
+
+@router.patch("/me")
+def update_me(body: UpdateProfileRequest, current_user: CurrentUser) -> dict:
+    updates: dict = {}
+    if body.display_name is not None:
+        updates["displayName"] = body.display_name
+    if body.gender is not None:
+        updates["gender"] = body.gender
+    if body.photo_url is not None:
+        updates["photoUrl"] = body.photo_url
+
+    if updates:
+        supabase.table("User").update(updates).eq("id", current_user["user_id"]).execute()
+
+    result = (
+        supabase.table("User")
+        .select("id, email, authProvider, isVerified, displayName, photoUrl, gender, createdAt")
+        .eq("id", current_user["user_id"])
+        .single()
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return cast(dict, result.data)
+
+
 @router.get("/me")
 def get_me(current_user: CurrentUser) -> dict:
     result = (

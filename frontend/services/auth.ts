@@ -50,4 +50,13 @@ export const authService = {
     const { data } = await apiClient.get<User>("/auth/me");
     return data;
   },
+
+  async updateProfile(payload: {
+    display_name?: string | null;
+    gender?: string | null;
+    photo_url?: string | null;
+  }): Promise<User> {
+    const { data } = await apiClient.patch<User>("/auth/me", payload);
+    return data;
+  },
 };
