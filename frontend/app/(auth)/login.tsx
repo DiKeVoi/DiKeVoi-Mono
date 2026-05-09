@@ -1,14 +1,26 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
+import { authService } from "@/services/auth";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { authService } from "@/services/auth";
-
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const {
+    isLoading: isGoogleLoading,
+    errorMessage: googleErrorMessage,
+    signInWithGoogle,
+    clearError,
+  } = useGoogleSignIn();
 
   const handleLogin = async () => {
     const trimmedEmail = email.trim().toLowerCase();
@@ -39,6 +51,11 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    clearError();
+    await signInWithGoogle();
   };
 
   return (
@@ -135,14 +152,33 @@ export default function LoginScreen() {
         </View>
 
         {/* Secondary Action */}
+        {googleErrorMessage ? (
+          <View className="px-6 mb-4">
+            <Text className="text-xs text-red-500 font-medium">
+              {googleErrorMessage}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Secondary Action — Google Sign-In */}
         <View className="px-6 mb-8">
-          <TouchableOpacity className="w-full h-14 border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 active:bg-slate-50 dark:active:bg-slate-800 flex-row items-center justify-center gap-3 rounded-xl">
-            <Image
-              source={require("@/assets/images/google-logo.png")}
-              style={{ width: 24, height: 24 }}
-            />
+          <TouchableOpacity
+            onPress={handleGoogleSignIn}
+            disabled={isGoogleLoading}
+            className={`w-full h-14 border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 active:bg-slate-50 dark:active:bg-slate-800 flex-row items-center justify-center gap-3 rounded-xl ${
+              isGoogleLoading ? "opacity-60" : ""
+            }`}
+          >
+            {isGoogleLoading ? (
+              <ActivityIndicator size="small" color="#152249" />
+            ) : (
+              <Image
+                source={require("@/assets/images/google-logo.png")}
+                style={{ width: 24, height: 24 }}
+              />
+            )}
             <Text className="text-slate-700 dark:text-slate-300 font-semibold text-base">
-              Đăng nhập với Google
+              {isGoogleLoading ? "Đang đăng nhập..." : "Đăng nhập với Google"}
             </Text>
           </TouchableOpacity>
         </View>

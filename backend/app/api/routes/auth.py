@@ -2,7 +2,7 @@ import uuid
 import json
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from jose import jwt
@@ -42,6 +42,11 @@ class OtpVerifyRequest(BaseModel):
     email: EmailStr
     otp: str
 
+class GoogleSignInRequest(BaseModel):
+    email: EmailStr
+    display_name: str
+    photo_url: str | None = None
+
 
 # --- Helpers ---
 
@@ -58,6 +63,80 @@ def _create_token(subject: str) -> str:
 def _generate_otp() -> str:
     return f"{secrets.randbelow(1000000):06d}"
 
+def _get_user_by_email(email: str) -> dict | None:
+    result = (
+        supabase.table("User")
+        .select("id, email, authProvider, isVerified, displayName, photoUrl, gender")
+        .eq("email", email)
+        .single()
+        .execute()
+    )
+    return result.data
+
+def _create_user(
+    email: str,
+    auth_provider: str,
+    display_name: str | None = None,
+    photo_url: str | None = None,
+    gender: str | None = None,
+    is_verified: bool = False,  # <-- Thêm tham số này
+) -> dict:
+    result = (
+        supabase.table("User")
+        .insert(
+            {
+                "id": str(uuid.uuid4()),
+                "email": email,
+                "authProvider": auth_provider,
+                "isVerified": is_verified,  # <-- Cập nhật ở đây
+                "createdAt": datetime.now(timezone.utc).isoformat(),
+                "displayName": display_name,
+                "photoUrl": photo_url,
+                "gender": gender,
+            }
+        )
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create user",
+        )
+    return result.data[0]
+
+def _ensure_user(
+    email: str,
+    auth_provider: str,
+    display_name: str | None = None,
+    photo_url: str | None = None,
+    gender: str | None = None,
+    is_verified: bool = False, 
+) -> dict:
+    existing = _get_user_by_email(email)
+    if existing:
+        updates: dict[str, Any] = {}
+        if display_name is not None:
+            updates["displayName"] = display_name
+        if photo_url is not None:
+            updates["photoUrl"] = photo_url
+        if gender is not None:
+            updates["gender"] = gender
+        if auth_provider == "google" and existing.get("authProvider") != "google":
+            updates["authProvider"] = "google"
+            
+        if is_verified and not existing.get("isVerified"):
+            updates["isVerified"] = True
+            
+        if updates:
+            _update_user_by_email(email, updates)
+        return existing
+        
+    return _create_user(email, auth_provider, display_name, photo_url, gender, is_verified)
+
+def _update_user_by_email(email: str, update_data: dict) -> None:
+    if not update_data:
+        return
+    supabase.table("User").update(update_data).eq("email", email).execute()
 
 # --- Routes ---
 
@@ -198,6 +277,20 @@ def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
         )
     )
 
+@router.post("/google", response_model=TokenResponse)
+def sign_in_with_google(body: GoogleSignInRequest) -> TokenResponse:
+    user = _ensure_user(
+        email=body.email,
+        auth_provider="google",
+        display_name=body.display_name,
+        photo_url=body.photo_url,
+    )
+    
+    return TokenResponse(
+        access_token=_create_token(
+            json.dumps({"user_id": user["id"], "email": user["email"]})
+        )
+    )
 
 @router.get("/me")
 def get_me(current_user: CurrentUser) -> dict:
