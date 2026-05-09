@@ -216,7 +216,6 @@ def send_otp(body: SendOtpRequest) -> dict:
 def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
     now = datetime.now(timezone.utc).isoformat()
 
-    # filter by now, so duplicate OTPs won't cause issues (e.g. if user requests multiple OTPs, only the latest one is valid)
     otp_result = (
         supabase.table("OtpCode")
         .select("id")
@@ -237,46 +236,18 @@ def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
     otp_id = otp_result.data[0]["id"]
     supabase.table("OtpCode").update({"used": True}).eq("id", otp_id).execute()
 
-    user_result = (
-        supabase.table("User").select("id, email").eq("email", body.email).execute()
+    user = _ensure_user(
+        email=body.email,
+        auth_provider="email",
+        is_verified=True 
     )
-
-    if not user_result.data:
-        insert_result = (
-            supabase.table("User")
-            .insert(
-                {
-                    "id": str(uuid.uuid4()),
-                    "email": body.email,
-                    "authProvider": "email",
-                    "isVerified": True,
-                    "createdAt": datetime.now(timezone.utc).isoformat(),
-                    "displayName": None,
-                    "photoUrl": None,
-                    "gender": None,
-                }
-            )
-            .execute()
-        )
-        created_users = insert_result.data or []
-        if not created_users:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create user",
-            )
-        user = cast(dict, created_users[0])
-    else:
-        user = cast(dict, user_result.data[0])
-        supabase.table("User").update({"isVerified": True}).eq(
-            "id", user["id"]
-        ).execute()
 
     return TokenResponse(
         access_token=_create_token(
             json.dumps({"user_id": user["id"], "email": user["email"]})
         )
     )
-
+    
 @router.post("/google", response_model=TokenResponse)
 def sign_in_with_google(body: GoogleSignInRequest) -> TokenResponse:
     user = _ensure_user(
