@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 export default function MatchingScreen() {
+  const { myPostId, myPostType } = useLocalSearchParams<{ myPostId?: string; myPostType?: string }>();
   const pulseAnim1 = useRef(new Animated.Value(0)).current;
   const pulseAnim2 = useRef(new Animated.Value(0)).current;
   
@@ -62,7 +63,7 @@ export default function MatchingScreen() {
   });
 
   const handleCancelSearch = () => {
-    router.push("/(matching)/results");
+    router.push({ pathname: "/(matching)/results", params: { myPostId, myPostType } });
   };
 
   return (

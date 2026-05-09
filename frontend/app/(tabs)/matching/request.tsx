@@ -93,14 +93,17 @@ export default function RequestScreen() {
     })();
 
     try {
-      await createRidePost.mutateAsync({
+      const post = await createRidePost.mutateAsync({
         type: role === "driver" ? "offer" : "request",
         origin_location: pickupLocation.name,
         destination_location: destinationLocation.name,
         departure_time: departureISO,
         is_recurring: isRepeat,
       });
-      router.push("/matching/matching");
+      router.push({
+        pathname: "/matching/matching",
+        params: { myPostId: post.id, myPostType: post.type },
+      });
     } catch {
       Alert.alert("Lỗi", "Không thể tạo yêu cầu. Vui lòng thử lại.");
     }

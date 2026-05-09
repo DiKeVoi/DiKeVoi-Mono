@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import (
     auth,
     health,
+    negotiation,
     notification,
     report,
     ride_posts,
@@ -30,6 +31,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(ride_posts.router)
+app.include_router(negotiation.router)
 app.include_router(rides.router)
 app.include_router(notification.router)
 app.include_router(report.router)

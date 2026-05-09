@@ -42,6 +42,7 @@ class OtpVerifyRequest(BaseModel):
     email: EmailStr
     otp: str
 
+
 class GoogleSignInRequest(BaseModel):
     email: EmailStr
     display_name: str
@@ -63,6 +64,7 @@ def _create_token(subject: str) -> str:
 def _generate_otp() -> str:
     return f"{secrets.randbelow(1000000):06d}"
 
+
 def _get_user_by_email(email: str) -> dict | None:
     result = (
         supabase.table("User")
@@ -72,6 +74,7 @@ def _get_user_by_email(email: str) -> dict | None:
         .execute()
     )
     return result.data
+
 
 def _create_user(
     email: str,
@@ -104,13 +107,14 @@ def _create_user(
         )
     return result.data[0]
 
+
 def _ensure_user(
     email: str,
     auth_provider: str,
     display_name: str | None = None,
     photo_url: str | None = None,
     gender: str | None = None,
-    is_verified: bool = False, 
+    is_verified: bool = False,
 ) -> dict:
     existing = _get_user_by_email(email)
     if existing:
@@ -123,20 +127,24 @@ def _ensure_user(
             updates["gender"] = gender
         if auth_provider == "google" and existing.get("authProvider") != "google":
             updates["authProvider"] = "google"
-            
+
         if is_verified and not existing.get("isVerified"):
             updates["isVerified"] = True
-            
+
         if updates:
             _update_user_by_email(email, updates)
         return existing
-        
-    return _create_user(email, auth_provider, display_name, photo_url, gender, is_verified)
+
+    return _create_user(
+        email, auth_provider, display_name, photo_url, gender, is_verified
+    )
+
 
 def _update_user_by_email(email: str, update_data: dict) -> None:
     if not update_data:
         return
     supabase.table("User").update(update_data).eq("email", email).execute()
+
 
 # --- Routes ---
 
@@ -236,18 +244,15 @@ def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
     otp_id = otp_result.data[0]["id"]
     supabase.table("OtpCode").update({"used": True}).eq("id", otp_id).execute()
 
-    user = _ensure_user(
-        email=body.email,
-        auth_provider="email",
-        is_verified=True 
-    )
+    user = _ensure_user(email=body.email, auth_provider="email", is_verified=True)
 
     return TokenResponse(
         access_token=_create_token(
             json.dumps({"user_id": user["id"], "email": user["email"]})
         )
     )
-    
+
+
 @router.post("/google", response_model=TokenResponse)
 def sign_in_with_google(body: GoogleSignInRequest) -> TokenResponse:
     user = _ensure_user(
@@ -256,12 +261,13 @@ def sign_in_with_google(body: GoogleSignInRequest) -> TokenResponse:
         display_name=body.display_name,
         photo_url=body.photo_url,
     )
-    
+
     return TokenResponse(
         access_token=_create_token(
             json.dumps({"user_id": user["id"], "email": user["email"]})
         )
     )
+
 
 class UpdateProfileRequest(BaseModel):
     display_name: str | None = None
@@ -280,17 +286,23 @@ def update_me(body: UpdateProfileRequest, current_user: CurrentUser) -> dict:
         updates["photoUrl"] = body.photo_url
 
     if updates:
-        supabase.table("User").update(updates).eq("id", current_user["user_id"]).execute()
+        supabase.table("User").update(updates).eq(
+            "id", current_user["user_id"]
+        ).execute()
 
     result = (
         supabase.table("User")
-        .select("id, email, authProvider, isVerified, displayName, photoUrl, gender, createdAt")
+        .select(
+            "id, email, authProvider, isVerified, displayName, photoUrl, gender, createdAt"
+        )
         .eq("id", current_user["user_id"])
         .single()
         .execute()
     )
     if not result.data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     return cast(dict, result.data)
 
 
