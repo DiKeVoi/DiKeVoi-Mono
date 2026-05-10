@@ -17,7 +17,7 @@ export function useMyRidePosts() {
   return useQuery({
     queryKey: [RIDE_POSTS_KEY, "mine", user?.id],
     queryFn: async () => {
-      const all = await ridePostsService.list();
+      const all = await ridePostsService.listMine();
       return all.filter((p) => p.userId === user?.id);
     },
     enabled: !!user,

@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/axios";
-import type { RidePost, PostType } from "@/types/api";
+import type { RidePost, PostType, MyRidePost } from "@/types/api";
 
 export interface CreateRidePostPayload {
   type: PostType;
@@ -13,12 +13,20 @@ export interface CreateRidePostPayload {
 }
 
 export const ridePostsService = {
+  async listMine(type?: PostType): Promise<MyRidePost[]> {
+    const { data } = await apiClient.get<MyRidePost[]>("/ride-posts/mine", {
+      params: type ? { type } : {},
+    });
+    return data;
+  },
+
   async list(type?: PostType): Promise<RidePost[]> {
     const { data } = await apiClient.get<RidePost[]>("/ride-posts", {
       params: type ? { type } : {},
     });
     return data;
   },
+
 
   async get(id: string): Promise<RidePost> {
     const { data } = await apiClient.get<RidePost>(`/ride-posts/${id}`);

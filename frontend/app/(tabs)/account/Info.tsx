@@ -7,23 +7,34 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useUser } from "@/hooks/useUser";
 import type { Gender } from "@/types/api";
+import { useAvatarUpload } from "@/hooks/useImage";
+
 
 export default function PersonalInfoScreen() {
   const { user, isLoading, isUpdating, updateUser } = useUser();
-
+  const { pickAndUploadImage, isUploading: isUploadingAvatar } = useAvatarUpload();
   const [fullName, setFullName] = useState("");
   const [gender, setGender] = useState<Gender>("other");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
       setFullName(user.displayName ?? "");
       setGender((user.gender as Gender) ?? "other");
+      setAvatarUrl(user.photoUrl ?? null);
     }
   }, [user]);
 
+  const handleChangeAvatar = async () => {
+    const newAvatarUrl = await pickAndUploadImage();
+    if (newAvatarUrl) {
+      setAvatarUrl(newAvatarUrl);
+    }
+  };
+
   const handleSave = async () => {
     try {
-      await updateUser({ displayName: fullName, gender });
+      await updateUser({ displayName: fullName, gender, photoUrl: avatarUrl });
       Alert.alert("Thành công", "Đã lưu thông tin cá nhân.");
     } catch {
       Alert.alert("Lỗi", "Không thể lưu thông tin. Vui lòng thử lại.");
@@ -71,7 +82,7 @@ export default function PersonalInfoScreen() {
               <View className="relative">
                 {user?.photoUrl ? (
                   <Image
-                    source={{ uri: user.photoUrl }}
+                    source={{ uri: avatarUrl ?? user.photoUrl }}
                     className="h-28 w-28 rounded-full border-4 border-[#F9F871]"
                     contentFit="cover"
                   />
@@ -82,8 +93,11 @@ export default function PersonalInfoScreen() {
                 )}
                 <TouchableOpacity
                   activeOpacity={0.8}
+                  onPress={handleChangeAvatar}
+                  disabled={isUploadingAvatar}
                   className="absolute bottom-1 right-1 bg-[#F9F871] rounded-full p-1.5 border-2 border-white dark:border-slate-800 shadow-sm"
                 >
+                  
                   <MaterialIcons name="edit" size={16} color="#152249" />
                 </TouchableOpacity>
               </View>

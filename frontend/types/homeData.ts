@@ -1,5 +1,5 @@
 export type MyRequestData = {
-  id: number;
+  id: string;
   from: string;
   to: string;
   time: Date;
@@ -8,13 +8,12 @@ export type MyRequestData = {
 };
 
 export type UserData = {
-  id: number;
   name: string;
   avatarUrl: string;
 };
 
 export type NotificationData = {
-  id: number;
+  id: string;
   title: string;
   time: Date;
   read: boolean;

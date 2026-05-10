@@ -50,7 +50,7 @@ export default function Home() {
                   justifyContent: "space-between",
                   backgroundColor: "#F1F5F9",
                   borderRadius: 16,
-                  paddingHorizontal: 16,
+                  paddingHorizontal: 10,
                   paddingVertical: 16,
                   borderWidth: 1,
                   borderColor: "#E2E8F0",
@@ -59,21 +59,21 @@ export default function Home() {
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View
                     style={{
-                      width: 38,
-                      height: 38,
+                      width: 32,
+                      height: 32,
                       borderRadius: 11,
                       backgroundColor: "#152249",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <MaterialIcons name="search" size={20} color="#F9F871" />
+                    <MaterialIcons name="search" size={16} color="#F9F871" />
                   </View>
                   <View>
-                    <ThemedText style={{ fontSize: 14, fontWeight: "700", color: "#152249" }}>
+                    <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#152249" }}>
                       Duyệt bài đăng
                     </ThemedText>
-                    <ThemedText style={{ fontSize: 11, color: "#64748B", marginTop: 1 }}>
+                    <ThemedText style={{ fontSize: 10, color: "#64748B", marginTop: 1 }}>
                       Tìm bạn đồng hành
                     </ThemedText>
                   </View>
@@ -94,15 +94,15 @@ export default function Home() {
                   justifyContent: "space-between",
                   backgroundColor: "#152249",
                   borderRadius: 16,
-                  paddingHorizontal: 16,
+                  paddingHorizontal: 10,
                   paddingVertical: 16,
                 }}
               >
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View
                     style={{
-                      width: 38,
-                      height: 38,
+                      width: 32,
+                      height: 32,
                       borderRadius: 11,
                       backgroundColor: "#F9F871",
                       alignItems: "center",
@@ -112,10 +112,10 @@ export default function Home() {
                     <MaterialIcons name="directions-car" size={20} color="#152249" />
                   </View>
                   <View>
-                    <ThemedText style={{ fontSize: 14, fontWeight: "700", color: "#F9F871" }}>
+                    <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#F9F871" }}>
                       Chuyến của tôi
                     </ThemedText>
-                    <ThemedText style={{ fontSize: 11, color: "#94A3B8", marginTop: 1 }}>
+                    <ThemedText style={{ fontSize: 10, color: "#94A3B8", marginTop: 1 }}>
                       Chuyến đã ghép
                     </ThemedText>
                   </View>

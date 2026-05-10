@@ -142,7 +142,7 @@ export function Notification() {
           style={{ opacity: unreadCount === 0 ? 0.5 : 1 }}
         >
           <ThemedText className="text-[13px] font-bold text-slate-500">
-            Đánh dấu đã đọc tất cả
+            Đánh dấu đã đọc
           </ThemedText>
         </TouchableOpacity>
 

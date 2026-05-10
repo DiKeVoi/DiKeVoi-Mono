@@ -81,6 +81,64 @@ def list_ride_posts(type: PostType | None = Query(default=None)) -> list:
         query = query.eq("type", type.value)
     return cast(list, query.order("createdAt", desc=True).execute().data)
 
+@router.get("/mine")
+def list_my_ride_posts(type: PostType | None = Query(default=None)) -> list:
+    select_query = """
+        *,
+        offer_negotiations:Negotiation!Negotiation_offerPostId_fkey(
+            id, 
+            status,
+            requester:User!Negotiation_requesterUid_fkey(displayName, photoUrl)
+        ),
+        request_negotiations:Negotiation!Negotiation_requestPostId_fkey(
+            id, 
+            status,
+            offerer:User!Negotiation_offererUid_fkey(displayName, photoUrl)
+        )
+    """
+    
+    query = supabase.table("RidePost").select(select_query)
+    
+    if type is not None:
+        query = query.eq("type", type.value)
+        
+    raw_data = cast(list, query.order("createdAt", desc=True).execute().data)
+    
+    formatted_data = []
+    
+    for post in raw_data:
+        offer_negs = post.pop("offer_negotiations", [])
+        request_negs = post.pop("request_negotiations", [])
+        
+        negotiation = None
+        partner = None
+        
+        if offer_negs:
+            for neg in offer_negs:
+                if neg.get("status") == "accepted": 
+                    negotiation = neg
+                    partner = neg.get("requester")
+                    break
+                    
+        if not negotiation and request_negs:
+            for neg in request_negs:
+                if neg.get("status") == "accepted":
+                    negotiation = neg
+                    partner = neg.get("offerer")
+                    break
+        
+        # Nếu tìm thấy một negotiation thành công, đính kèm vào response
+        if negotiation:
+            post["negotiationId"] = negotiation.get("id")
+            if partner:
+                post["with"] = {
+                    "name": partner.get("displayName"),
+                    "avatarUrl": partner.get("photoUrl")
+                }
+                
+        formatted_data.append(post)
+        
+    return formatted_data
 
 @router.get("/{ride_id}")
 def get_ride_post(ride_id: str) -> dict:

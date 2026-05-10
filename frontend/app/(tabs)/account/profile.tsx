@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/AuthContext";
 
 export default function Profile() {
   const { user, logout } = useAuth();
-  console.log("User in Profile:", user);
   const handleLogout = async () => {
     try {
       await logout();

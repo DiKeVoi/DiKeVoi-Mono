@@ -37,6 +37,29 @@ export interface RidePost {
   updatedAt: string;
 }
 
+export interface MyRidePost {
+  id: string;
+  userId: string;
+  type: PostType; // 'offer' | 'request'
+  status: RidePostStatus; // 'open' | 'matched' | 'cancelled' etc.
+  originLocation: string;
+  destinationLocation: string;
+  departureTime: string;
+  seatsAvailable: number;
+  isRecurring: boolean;
+  preferredGender: Gender | null;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Các field bổ sung từ backend join
+  negotiationId?: string;
+  with?: {
+    name: string;
+    avatarUrl: string;
+  };
+}
+
 export interface Ride {
   id: string;
   offerUserId: string | null;
