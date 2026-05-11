@@ -1,5 +1,5 @@
 export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
-export type RideStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type RideStatus = "pending" | "confirmed" | "in_progress" | "awaiting_payment" | "completed" | "cancelled";
 export type PostType = "offer" | "request";
 export type RidePostStatus = "open" |"connecting" | "matched" | "closed" | "cancelled";
 export type NegotiationStatus = "pending" | "accepted" | "rejected" | "cancelled" | "confirmed";
@@ -74,6 +74,13 @@ export interface Ride {
   isRecurring: boolean | null;
   createdAt: string;
   updatedAt: string;
+  startedAt: string | null;
+  finishedByOfferer: boolean;
+  finishedByRequester: boolean;
+  finishedAt: string | null;
+  paidByOfferer: boolean;
+  paidByRequester: boolean;
+  paidAt: string | null;
 }
 
 export interface Notification {

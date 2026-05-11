@@ -6,14 +6,19 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useRides } from "@/hooks/useRides";
+import { MaterialIcons } from "@expo/vector-icons"; import { router } from "expo-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ridesService } from "@/services/rides";
+import { useStartRide } from "@/hooks/useRides";
 import { useAuth } from "@/hooks/AuthContext";
 import type { Ride } from "@/types/api";
 import { useReports } from "@/hooks/useReports";
+import { confirmAction } from "@/lib/confirm";
+
+const ACTIVE_STATUSES = ["confirmed", "in_progress", "awaiting_payment"] as const;
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -25,38 +30,73 @@ function formatDateTime(iso: string): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")} ${timeStr}`;
 }
 
-function RideCard(
-  { ride, isOfferUser, isReported }
-  : 
-  { ride: Ride; isOfferUser: boolean; isReported?: boolean }) {
+function StatusBadge({ status }: { status: Ride["status"] }) {
+  const config: Record<string, { label: string; bg: string; dot: string; text: string }> = {
+    confirmed: { label: "Đã xác nhận", bg: "bg-emerald-50", dot: "bg-emerald-500", text: "text-emerald-700" },
+    in_progress: { label: "Đang di chuyển", bg: "bg-blue-50", dot: "bg-blue-500", text: "text-blue-700" },
+    awaiting_payment: { label: "Chờ thanh toán", bg: "bg-amber-50", dot: "bg-amber-500", text: "text-amber-700" },
+  };
+  const c = config[status] ?? config.confirmed;
+  return (
+    <View className={`${c.bg} px-2.5 py-1 rounded-full flex-row items-center gap-1`}>
+      <View className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+      <Text className={`text-[10px] font-bold ${c.text}`}>{c.label}</Text>
+    </View>
+  );
+}
+
+function RideCard({
+  ride,
+  isOfferUser,
+  isReported,
+}: {
+  ride: Ride;
+  isOfferUser: boolean;
+  isReported?: boolean;
+}) {
   const reportedUserId = isOfferUser ? ride.requestUserId : ride.offerUserId;
+  const { mutate: startRide, isPending: isStarting } = useStartRide();
+  const qc = useQueryClient();
+
+  function handleStart() {
+    confirmAction("Bắt đầu chuyến đi", "Xác nhận khởi hành?", () =>
+      startRide(ride.id, {
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ["rides"] });
+          router.push({ pathname: "/(matching)/in-progress", params: { rideId: ride.id } });
+        },
+        onError: () => Alert.alert("Lỗi", "Không thể bắt đầu. Thử lại."),
+      }), "Bắt đầu"
+    );
+  }
+
+  function navigateToStatus() {
+    if (ride.status === "in_progress") {
+      router.push({ pathname: "/(matching)/in-progress", params: { rideId: ride.id } });
+    } else if (ride.status === "awaiting_payment") {
+      router.push({ pathname: "/(matching)/payment", params: { rideId: ride.id } });
+    }
+  }
+
   return (
     <View
       className="bg-white rounded-2xl p-4 mb-3 border border-slate-100"
       style={{ shadowColor: "#152249", shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 }}
     >
-      {/* Role badge + time */}
+      {/* Role badge + report */}
       <View className="flex-row items-center justify-between mb-3">
-        <View
-          className={`px-2.5 py-1 rounded-lg ${isOfferUser ? "bg-[#152249]" : "bg-[#F9F871]"}`}
-        >
-          <Text
-            className={`text-[10px] font-bold uppercase tracking-wide ${
-              isOfferUser ? "text-[#F9F871]" : "text-[#152249]"
-            }`}
-          >
+        <View className={`px-2.5 py-1 rounded-lg ${isOfferUser ? "bg-[#152249]" : "bg-[#F9F871]"}`}>
+          <Text className={`text-[10px] font-bold uppercase tracking-wide ${isOfferUser ? "text-[#F9F871]" : "text-[#152249]"}`}>
             {isOfferUser ? "Bạn cho đi ké" : "Bạn đi ké"}
           </Text>
-          
         </View>
-        {isReported ? 
-        (
-        <View className="flex-row items-center gap-1 px-2 py-1 bg-slate-100 rounded-lg">
-          <MaterialIcons name="check" size={14} color="#64748B" />
-          <Text className="text-[10px] font-bold text-slate-500 uppercase">Đã báo cáo</Text>
-        </View>)
-            :
-        (<TouchableOpacity 
+        {isReported ? (
+          <View className="flex-row items-center gap-1 px-2 py-1 bg-slate-100 rounded-lg">
+            <MaterialIcons name="check" size={14} color="#64748B" />
+            <Text className="text-[10px] font-bold text-slate-500 uppercase">Đã báo cáo</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
             onPress={() => router.push({ pathname: "/report", params: { rideId: ride.id, reportedUserId: reportedUserId } })}
             className="p-1.5 bg-red-50 items-center rounded-lg active:bg-red-100"
           >
@@ -64,17 +104,12 @@ function RideCard(
           </TouchableOpacity>
         )}
       </View>
-      <View className="flex items-end justify-between">
-      
-          </View>
-            
+
       {/* Route */}
       <View className="mb-3 ml-0.5">
         <View className="flex-row items-center gap-3 mb-4">
           <MaterialIcons name="schedule" size={13} color="#94A3B8" />
-          <Text className="text-xs font-bold text-slate-400">
-            {formatDateTime(ride.departureTime)}
-          </Text>
+          <Text className="text-xs font-bold text-slate-400">{formatDateTime(ride.departureTime)}</Text>
         </View>
         <View className="flex-row items-center gap-3 mb-1">
           <View className="w-2 h-2 rounded-full bg-[#152249]" />
@@ -91,7 +126,7 @@ function RideCard(
         </View>
       </View>
 
-      {/* Fare + status row */}
+      {/* Fare + status */}
       <View className="flex-row items-center justify-between pt-3 border-t border-slate-50">
         {ride.negotiatedCost != null ? (
           <View className="flex-row items-center gap-1.5">
@@ -103,26 +138,66 @@ function RideCard(
         ) : (
           <View />
         )}
-        <View className="bg-emerald-50 px-2.5 py-1 rounded-full flex-row items-center gap-1">
-          <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <Text className="text-[10px] font-bold text-emerald-700">Đã xác nhận</Text>
-        </View>
+        <StatusBadge status={ride.status} />
       </View>
+
+      {/* CTA per status */}
+      {ride.status === "confirmed" && isOfferUser && (
+        <TouchableOpacity
+          onPress={handleStart}
+          disabled={isStarting}
+          activeOpacity={0.85}
+          className="mt-3 w-full h-11 bg-[#152249] rounded-full items-center justify-center"
+        >
+          {isStarting ? (
+            <ActivityIndicator size="small" color="#F9F871" />
+          ) : (
+            <Text className="text-[#F9F871] font-bold">Bắt đầu chuyến đi</Text>
+          )}
+        </TouchableOpacity>
+      )}
+      {ride.status === "confirmed" && !isOfferUser && (
+        <View className="mt-3 w-full h-11 bg-slate-50 rounded-full items-center justify-center border border-slate-200">
+          <Text className="text-slate-400 font-medium text-sm">Chờ tài xế xác nhận khởi hành</Text>
+        </View>
+      )}
+      {(ride.status === "in_progress" || ride.status === "awaiting_payment") && (
+        <TouchableOpacity
+          onPress={navigateToStatus}
+          activeOpacity={0.85}
+          className="mt-3 w-full h-11 bg-[#152249] rounded-full items-center justify-center"
+        >
+          <Text className="text-[#F9F871] font-bold">
+            {ride.status === "in_progress" ? "Xem chuyến đi" : "Xác nhận thanh toán"}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
 
 export default function ActiveRidesScreen() {
   const { user } = useAuth();
+
   const {
     data: rides,
     isLoading,
     error,
     refetch,
     isRefetching,
-  } = useRides("confirmed");
+  } = useQuery({
+    queryKey: ["rides", "active"],
+    queryFn: async () => {
+      const results = await Promise.all(
+        ACTIVE_STATUSES.map((s) => ridesService.list(s))
+      );
+      return results.flat().sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    },
+  });
 
-  const { data: reports, isLoading: reportsLoading } = useReports();
+  const { data: reports } = useReports();
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
@@ -132,8 +207,8 @@ export default function ActiveRidesScreen() {
           <MaterialIcons name="arrow-back" size={24} color="#152249" />
         </TouchableOpacity>
         <View className="flex-1">
-          <Text className="font-bold text-lg text-[#152249]">Chuyến đi sắp tới</Text>
-          <Text className="text-xs text-slate-400 font-medium">Các chuyến đã ghép thành công</Text>
+          <Text className="font-bold text-lg text-[#152249]">Chuyến đi của bạn</Text>
+          <Text className="text-xs text-slate-400 font-medium">Đang diễn ra & sắp tới</Text>
         </View>
       </View>
 
@@ -154,9 +229,7 @@ export default function ActiveRidesScreen() {
           <View className="w-20 h-20 rounded-full bg-slate-100 items-center justify-center">
             <MaterialIcons name="directions-car" size={36} color="#CBD5E1" />
           </View>
-          <Text className="text-lg font-bold text-slate-300 text-center">
-            Chưa có chuyến đi nào
-          </Text>
+          <Text className="text-lg font-bold text-slate-300 text-center">Chưa có chuyến đi nào</Text>
           <Text className="text-sm text-slate-400 text-center">
             Ghép chuyến thành công sẽ xuất hiện ở đây
           </Text>
@@ -181,18 +254,16 @@ export default function ActiveRidesScreen() {
             {rides.length} chuyến đi
           </Text>
           {rides.map((ride) => {
-      // 2. Kiểm tra xem ride này đã có trong danh sách báo cáo chưa
-      const isReported = reports?.some((r) => r.rideId === ride.id);
-
-      return (
-        <RideCard
-          key={ride.id}
-          ride={ride}
-          isOfferUser={ride.offerUserId === user?.id}
-          isReported={isReported} // Truyền prop mới vào RideCard
-        />
-      );
-    })}
+            const isReported = reports?.some((r) => r.rideId === ride.id);
+            return (
+              <RideCard
+                key={ride.id}
+                ride={ride}
+                isOfferUser={ride.offerUserId === user?.id}
+                isReported={isReported}
+              />
+            );
+          })}
         </ScrollView>
       )}
     </SafeAreaView>

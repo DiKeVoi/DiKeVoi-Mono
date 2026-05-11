@@ -70,13 +70,13 @@ def _get_user_by_email(email: str) -> dict | None:
         supabase.table("User")
         .select("id, email, authProvider, isVerified, displayName, photoUrl, gender")
         .eq("email", email)
-        .limit(1) 
+        .limit(1)
         .execute()
     )
-    
+
     if result.data and len(result.data) > 0:
         return result.data[0]
-        
+
     return None
 
 

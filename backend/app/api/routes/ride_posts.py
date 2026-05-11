@@ -77,49 +77,55 @@ def list_ride_posts(type: PostType | None = Query(default=None)) -> list:
 
 
 @router.get("/mine")
-def list_my_ride_posts(current_user: CurrentUser, type: PostType | None = Query(default=None)) -> list:
+def list_my_ride_posts(
+    current_user: CurrentUser, type: PostType | None = Query(default=None)
+) -> list:
     select_query = """
         *,
         offer_negotiations:Negotiation!Negotiation_offerPostId_fkey(
-            id, 
+            id,
             status,
             requester:User!Negotiation_requesterUid_fkey(displayName, photoUrl)
         ),
         request_negotiations:Negotiation!Negotiation_requestPostId_fkey(
-            id, 
+            id,
             status,
             offerer:User!Negotiation_offererUid_fkey(displayName, photoUrl)
         )
     """
-    
-    query = supabase.table("RidePost").select(select_query).eq("userId", current_user["user_id"])
-    
+
+    query = (
+        supabase.table("RidePost")
+        .select(select_query)
+        .eq("userId", current_user["user_id"])
+    )
+
     if type is not None:
         query = query.eq("type", type.value)
-        
+
     raw_data = cast(list, query.order("createdAt", desc=True).execute().data)
-    
+
     formatted_data = []
-    
+
     for post in raw_data:
         offer_negs = post.pop("offer_negotiations", [])
         request_negs = post.pop("request_negotiations", [])
-        
+
         offer_negs = offer_negs if offer_negs else []
         request_negs = request_negs if request_negs else []
-        
+
         active_neg = None
         partner_info = None
         has_pending = False
-        
+
         for neg in offer_negs:
-            if neg.get("status") in ["accepted", "confirmed"]: 
+            if neg.get("status") in ["accepted", "confirmed"]:
                 active_neg = neg
                 partner_info = neg.get("requester")
                 break
             elif neg.get("status") == "pending":
                 has_pending = True
-                
+
         if not active_neg:
             for neg in request_negs:
                 if neg.get("status") in ["accepted", "confirmed"]:
@@ -128,19 +134,19 @@ def list_my_ride_posts(current_user: CurrentUser, type: PostType | None = Query(
                     break
                 elif neg.get("status") == "pending":
                     has_pending = True
-        
+
         if active_neg:
             post["negotiationId"] = active_neg.get("id")
-            
+
             if isinstance(partner_info, list) and len(partner_info) > 0:
                 partner_info = partner_info[0]
-                
+
             if isinstance(partner_info, dict):
                 post["with"] = {
                     "name": partner_info.get("displayName"),
-                    "avatarUrl": partner_info.get("photoUrl")
+                    "avatarUrl": partner_info.get("photoUrl"),
                 }
-            
+
             # Đã accept -> đổi thành "matched"
             post["computedStatus"] = "matched"
         elif has_pending:
@@ -148,9 +154,9 @@ def list_my_ride_posts(current_user: CurrentUser, type: PostType | None = Query(
             post["computedStatus"] = "connecting"
         else:
             post["computedStatus"] = "open"
-                
+
         formatted_data.append(post)
-        
+
     return formatted_data
 
 
