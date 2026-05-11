@@ -11,12 +11,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router"; // <-- Import thêm useLocalSearchParams
 import { useNegotiations } from "@/hooks/useNegotiations";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { useAuth } from "@/hooks/AuthContext";
 import { NegotiationCard } from "@/components/negotiation-card";
 
 
 
 export default function NegotiationsScreen() {
+  const safeBack = useSafeBack("/(matching)/browse");
   const { user } = useAuth();
   const { postId } = useLocalSearchParams<{ postId?: string }>(); 
   
@@ -48,7 +50,7 @@ export default function NegotiationsScreen() {
       <View className="px-4 py-3 flex-row justify-between items-center bg-white border-b border-slate-100">
         <View className="flex-row items-center gap-3">
           {postId && (
-             <TouchableOpacity onPress={() => router.back()} className="p-1">
+             <TouchableOpacity onPress={safeBack} className="p-1">
                <MaterialIcons name="arrow-back-ios" size={20} color="#152249" />
              </TouchableOpacity>
           )}

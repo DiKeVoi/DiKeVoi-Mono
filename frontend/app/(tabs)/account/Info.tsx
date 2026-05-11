@@ -6,11 +6,13 @@ import { router } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useUser } from "@/hooks/useUser";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import type { Gender } from "@/types/api";
 import { useAvatarUpload } from "@/hooks/useImage";
 
 
 export default function PersonalInfoScreen() {
+  const safeBack = useSafeBack("/(tabs)/account" as any);
   const { user, isLoading, isUpdating, updateUser } = useUser();
   const { pickAndUploadImage, isUploading: isUploadingAvatar } = useAvatarUpload();
   const [fullName, setFullName] = useState("");
@@ -63,7 +65,7 @@ export default function PersonalInfoScreen() {
           {/* Header */}
           <View className="bg-[#152249] pt-14 pb-16 px-4 rounded-b-[24px] flex-row items-center shadow-lg relative z-10">
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={safeBack}
               className="p-2 absolute left-4 top-12 z-20"
               activeOpacity={0.7}
             >

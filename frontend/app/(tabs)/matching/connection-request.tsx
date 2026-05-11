@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } fr
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { useNegotiation, useUpdateNegotiation } from "@/hooks/useNegotiations";
 import { useAuth } from "@/hooks/AuthContext";
 
@@ -11,6 +12,7 @@ function formatDateTime(iso: string): string {
 }
 
 export default function ConnectionRequest() {
+  const safeBack = useSafeBack("/(matching)/negotiations");
   const { negotiationId } = useLocalSearchParams<{ negotiationId: string }>();
   const { user } = useAuth();
   const { data: neg, isLoading, error } = useNegotiation(negotiationId ?? "");
@@ -49,7 +51,7 @@ export default function ConnectionRequest() {
       <SafeAreaView className="flex-1 bg-white items-center justify-center gap-4">
         <MaterialIcons name="error-outline" size={48} color="#CBD5E1" />
         <Text className="text-slate-500 font-medium">Không tìm thấy yêu cầu kết nối.</Text>
-        <TouchableOpacity onPress={() => router.back()} className="px-6 py-2 bg-[#152249] rounded-full">
+        <TouchableOpacity onPress={safeBack} className="px-6 py-2 bg-[#152249] rounded-full">
           <Text className="text-white font-bold">Quay lại</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -62,7 +64,7 @@ export default function ConnectionRequest() {
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <View className="flex-row items-center px-6 py-4 bg-white border-b border-[#F1F5F9]/50">
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={safeBack}
           className="w-8 h-8 items-center justify-center rounded-full active:bg-slate-50"
         >
           <MaterialIcons name="arrow-back" size={20} color="#152249" />

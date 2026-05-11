@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useReport } from "@/hooks/useReports";
+import { useSafeBack } from "@/hooks/useSafeBack";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string; icon: string }> = {
   pending: { label: "Đang chờ xử lý", color: "text-orange-700", bg: "bg-orange-50 border-orange-100", icon: "pending-actions" },
@@ -18,6 +19,7 @@ function formatDate(iso: string): string {
 }
 
 export default function ReportDetailScreen() {
+  const safeBack = useSafeBack("/(tabs)/account" as any);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: report, isLoading, error } = useReport(id ?? "");
 
@@ -34,7 +36,7 @@ export default function ReportDetailScreen() {
       <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center">
         <MaterialIcons name="error-outline" size={48} color="#CBD5E1" />
         <Text className="text-slate-500 mt-4 font-medium">Không tìm thấy chi tiết báo cáo.</Text>
-        <TouchableOpacity onPress={() => router.back()} className="mt-6 px-6 py-2 bg-[#152249] rounded-full">
+        <TouchableOpacity onPress={safeBack} className="mt-6 px-6 py-2 bg-[#152249] rounded-full">
           <Text className="text-white font-bold">Quay lại</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -46,7 +48,7 @@ export default function ReportDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-slate-100 z-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1 rounded-full bg-slate-50">
+        <TouchableOpacity onPress={safeBack} className="mr-3 p-1 rounded-full bg-slate-50">
           <MaterialIcons name="arrow-back" size={24} color="#152249" />
         </TouchableOpacity>
         <Text className="font-bold text-lg text-[#152249]">Chi tiết báo cáo</Text>

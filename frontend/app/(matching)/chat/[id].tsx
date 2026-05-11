@@ -14,11 +14,13 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
 
-import { MessageBubble } from "@/components/MessageBubble"; 
+import { MessageBubble } from "@/components/MessageBubble";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { useNegotiation, useNegotiationUsers } from "@/hooks/useNegotiations";
 import { useAuth } from "@/hooks/AuthContext";
 import {Message} from "@/types/api";
 export default function ChatDetailScreen() {
+  const safeBack = useSafeBack();
   const { id: negotiationId } = useLocalSearchParams<{ id: string }>();
   const { user: currentUser } = useAuth();
 
@@ -89,7 +91,7 @@ export default function ChatDetailScreen() {
         {/* --- HEADER --- */}
         <View className="flex-row items-center justify-between px-4 py-2 border-b border-slate-100 bg-white">
           <View className="flex-row items-center flex-1">
-            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <TouchableOpacity onPress={safeBack} className="p-2 -ml-2">
               <MaterialIcons name="arrow-back-ios" size={20} color="#152249" />
             </TouchableOpacity>
             

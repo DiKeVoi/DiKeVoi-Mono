@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useRidePosts, useMyRidePosts } from "@/hooks/useRidePosts";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { useCreateNegotiation } from "@/hooks/useNegotiations";
 import { useAuth } from "@/hooks/AuthContext";
 import { Toast, useToast } from "@/components/ui/toast";
@@ -203,6 +204,7 @@ function PostCard({
 }
 
 export default function BrowseScreen() {
+  const safeBack = useSafeBack("/(tabs)/matching" as any);
   const [filter, setFilter] = useState<Filter>("all");
   const { user } = useAuth();
   const { toast, toastY, show: showToast } = useToast();
@@ -231,7 +233,7 @@ export default function BrowseScreen() {
       {/* Header */}
       <View className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
         <View className="flex-row items-center px-4 py-3">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1">
+          <TouchableOpacity onPress={safeBack} className="mr-3 p-1">
             <MaterialIcons name="arrow-back" size={24} color="#152249" />
           </TouchableOpacity>
           <Text className="font-bold text-lg text-[#152249] dark:text-white flex-1">

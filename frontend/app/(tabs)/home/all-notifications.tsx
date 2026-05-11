@@ -4,11 +4,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CircleCheck, CircleX, UserPlus, UserCheck, ArrowLeft, CheckCircle2 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useNotification } from "@/hooks/NotificationContext";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import type { Notification } from "@/types/api";
 import { ThemedText } from "@/components/themed-text"; // Chỉnh lại đường dẫn nếu cần
 
 export default function AllNotificationsScreen() {
   const router = useRouter();
+  const safeBack = useSafeBack("/(tabs)/home" as any);
   
   // Lấy dữ liệu từ Context y hệt như bản popup
   const { notifications, markAllAsRead, markAsRead } = useNotification();
@@ -67,7 +69,7 @@ export default function AllNotificationsScreen() {
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-slate-100 bg-white shadow-sm z-10">
         <View className="flex-row items-center">
           <TouchableOpacity 
-            onPress={() => router.back()} 
+            onPress={safeBack}
             className="mr-3 p-2 -ml-2 rounded-full active:bg-slate-50"
           >
             <ArrowLeft size={24} color="#152249" />

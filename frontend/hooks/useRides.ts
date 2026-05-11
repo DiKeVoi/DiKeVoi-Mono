@@ -28,7 +28,11 @@ export function useRide(id: string) {
           qc.invalidateQueries({ queryKey: [RIDES_KEY] });
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (__DEV__) {
+          console.log(`[Realtime] ride:${id} →`, status, err ?? "");
+        }
+      });
 
     return () => { supabase.removeChannel(channel); };
   }, [id, qc]);

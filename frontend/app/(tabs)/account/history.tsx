@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useRides } from "@/hooks/useRides";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import type { Ride } from "@/types/api";
 
 function formatDepartureTime(iso: string): string {
@@ -106,6 +107,7 @@ function RideCard({ ride }: { ride: Ride }) {
 }
 
 export default function TripHistoryScreen() {
+  const safeBack = useSafeBack("/(tabs)/account" as any);
   const [activeTab, setActiveTab] = useState<"completed" | "cancelled">("completed");
   const { data: rides, isLoading, error } = useRides();
 
@@ -116,7 +118,7 @@ export default function TripHistoryScreen() {
       <View className="bg-white border-b border-slate-100 z-10">
         <View className="flex-row items-center justify-between px-4 py-3">
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={safeBack}
             className="w-10 h-10 items-center justify-center rounded-full bg-[#152249]/5"
             activeOpacity={0.7}
           >

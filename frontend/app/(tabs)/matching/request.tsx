@@ -25,10 +25,12 @@ import { LocationPicker } from "@/components/request/location-picker";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useCreateRidePost } from "@/hooks/useRidePosts";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { useRouting } from "@/hooks/useRouting";
 import { PresetLocation } from "@/hooks/useSearchPlaces";
 
 export default function RequestScreen() {
+  const safeBack = useSafeBack("/(tabs)/matching" as any);
   const { role: navRole } = useLocalSearchParams<{ role: string }>();
 
   const [role, setRole] = useState<"rider" | "driver">(
@@ -135,7 +137,7 @@ export default function RequestScreen() {
         {/* Header (Giữ cố định) */}
         <View className="flex-row items-center justify-between px-4 py-3 bg-white dark:bg-[#152249] border-b border-slate-200 dark:border-[#152249]/20 z-10">
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={safeBack}
             className="p-2 -ml-2 rounded-full active:bg-slate-100 dark:active:bg-slate-800"
           >
             <MaterialIcons name="arrow-back" size={24} color="#152249" />

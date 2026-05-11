@@ -13,6 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useRide, useFinishRide } from "@/hooks/useRides";
 import { useAuth } from "@/hooks/AuthContext";
 import { confirmAction } from "@/lib/confirm";
+import { useSafeBack } from "@/hooks/useSafeBack";
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
@@ -20,6 +21,7 @@ function formatTime(iso: string): string {
 }
 
 export default function InProgressScreen() {
+  const safeBack = useSafeBack();
   const { rideId } = useLocalSearchParams<{ rideId?: string }>();
   const { user } = useAuth();
   const { data: ride, isLoading, refetch } = useRide(rideId ?? "");
@@ -70,7 +72,7 @@ export default function InProgressScreen() {
       {/* App bar */}
       <View className="bg-white border-b border-slate-100 px-4 py-3 flex-row items-center justify-between">
         <View className="flex-row items-center gap-3">
-          <TouchableOpacity onPress={() => router.back()} className="p-1">
+          <TouchableOpacity onPress={safeBack} className="p-1">
             <MaterialIcons name="arrow-back" size={24} color="#152249" />
           </TouchableOpacity>
           <Text className="font-bold text-lg text-[#152249]">Đang di chuyển</Text>

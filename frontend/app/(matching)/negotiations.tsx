@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useNegotiations } from "@/hooks/useNegotiations";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { useAuth } from "@/hooks/AuthContext";
 import type { Negotiation } from "@/types/api";
 
@@ -94,6 +95,7 @@ function NegotiationCard({ neg, userId }: { neg: Negotiation; userId: string }) 
 }
 
 export default function NegotiationsScreen() {
+  const safeBack = useSafeBack("/(matching)/browse");
   const { user } = useAuth();
   const { data: negotiations, isLoading, error, refetch } = useNegotiations();
 
@@ -103,7 +105,7 @@ export default function NegotiationsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900" edges={["top"]}>
       <View className="flex-row items-center px-4 py-3 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1">
+        <TouchableOpacity onPress={safeBack} className="mr-3 p-1">
           <MaterialIcons name="arrow-back" size={24} color="#152249" />
         </TouchableOpacity>
         <Text className="font-bold text-lg text-[#152249] dark:text-white flex-1">Yêu cầu kết nối</Text>

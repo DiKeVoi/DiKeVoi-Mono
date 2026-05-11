@@ -3,10 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "@/hooks/AuthContext";
+import { useSafeBack } from "@/hooks/useSafeBack";
 import { authService } from "@/services/auth";
 
 export default function OTPScreen() {
-  // Lấy email từ tham số URL (nếu bạn có truyền từ trang Login sang)
+  const safeBack = useSafeBack("/(auth)/login" as any);
   const { email } = useLocalSearchParams<{ email: string }>();
   const { login } = useAuth();
 
@@ -93,7 +94,7 @@ return (
           {/* Top App Bar / Header */}
           <View className="flex-row items-center p-4 justify-between border-b border-transparent">
             <TouchableOpacity 
-              onPress={() => router.back()} 
+              onPress={safeBack}
               className="w-10 h-10 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800 active:opacity-70"
             >
               <MaterialIcons name="arrow-back" size={24} color="#152249" />

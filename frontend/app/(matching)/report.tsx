@@ -15,9 +15,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRide } from "@/hooks/useRides";
 import { useCreateReport } from "@/hooks/useReports";
+import { useSafeBack } from "@/hooks/useSafeBack";
 
 export default function ReportScreen() {
-  const { rideId, reportedUserId } = useLocalSearchParams<{ 
+  const safeBack = useSafeBack();
+  const { rideId, reportedUserId } = useLocalSearchParams<{
     rideId?: string, 
     reportedUserId?: string 
   }>();
@@ -51,7 +53,7 @@ export default function ReportScreen() {
       <View className="bg-[#152249] h-16 px-6 flex-row items-center justify-between shadow-none">
         <View className="flex-row items-center gap-4">
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={safeBack}
             className="active:opacity-80 active:scale-95"
           >
             <MaterialIcons name="arrow-back" size={24} color="#F9F871" />
