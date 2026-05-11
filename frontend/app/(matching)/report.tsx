@@ -18,7 +18,7 @@ import { useCreateReport } from "@/hooks/useReports";
 import { useSafeBack } from "@/hooks/useSafeBack";
 
 export default function ReportScreen() {
-  const safeBack = useSafeBack();
+  const safeBack = useSafeBack("/active-rides");
   const { rideId, reportedUserId } = useLocalSearchParams<{
     rideId?: string, 
     reportedUserId?: string 

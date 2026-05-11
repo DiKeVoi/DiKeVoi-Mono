@@ -6,5 +6,7 @@
 BEGIN;
 
 ALTER PUBLICATION supabase_realtime ADD TABLE public."Ride";
+ALTER PUBLICATION supabase_realtime ADD TABLE public."RidePost";
+ALTER PUBLICATION supabase_realtime ADD TABLE public."Negotiation";
 
 COMMIT;

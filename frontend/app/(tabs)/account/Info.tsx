@@ -12,7 +12,7 @@ import { useAvatarUpload } from "@/hooks/useImage";
 
 
 export default function PersonalInfoScreen() {
-  const safeBack = useSafeBack("/(tabs)/account" as any);
+  const safeBack = useSafeBack("/account" as any);
   const { user, isLoading, isUpdating, updateUser } = useUser();
   const { pickAndUploadImage, isUploading: isUploadingAvatar } = useAvatarUpload();
   const [fullName, setFullName] = useState("");

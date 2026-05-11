@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ridesService } from "@/services/rides";
 import type { RideStatus } from "@/types/api";
@@ -7,9 +7,55 @@ import { supabase } from "@/lib/supabase";
 export const RIDES_KEY = "rides";
 
 export function useRides(status?: RideStatus) {
+  const qc = useQueryClient();
+  const channelId = useRef(`rides-list-${Math.random().toString(36).slice(2)}`).current;
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(channelId)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "Ride" },
+        () => qc.invalidateQueries({ queryKey: [RIDES_KEY] })
+      )
+      .subscribe((status, err) => {
+        if (__DEV__) console.log("[Realtime] rides-list →", status, err ?? "");
+      });
+    return () => { supabase.removeChannel(channel); };
+  }, [qc]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return useQuery({
     queryKey: [RIDES_KEY, status],
     queryFn: () => ridesService.list(status),
+  });
+}
+
+const ACTIVE_STATUSES = ["confirmed", "in_progress", "awaiting_payment"] as const;
+
+export function useActiveRides() {
+  const qc = useQueryClient();
+  const channelId = useRef(`active-rides-${Math.random().toString(36).slice(2)}`).current;
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(channelId)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "Ride" },
+        () => qc.invalidateQueries({ queryKey: [RIDES_KEY, "active"] })
+      )
+      .subscribe((status, err) => {
+        if (__DEV__) console.log("[Realtime] active-rides →", status, err ?? "");
+      });
+    return () => { supabase.removeChannel(channel); };
+  }, [qc]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return useQuery({
+    queryKey: [RIDES_KEY, "active"],
+    queryFn: async () => {
+      const results = await Promise.all(ACTIVE_STATUSES.map((s) => ridesService.list(s)));
+      return results.flat().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
   });
 }
 

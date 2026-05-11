@@ -10,16 +10,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons"; import { router } from "expo-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ridesService } from "@/services/rides";
-import { useStartRide } from "@/hooks/useRides";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStartRide, useActiveRides } from "@/hooks/useRides";
 import { useAuth } from "@/hooks/AuthContext";
 import type { Ride } from "@/types/api";
 import { useReports } from "@/hooks/useReports";
 import { confirmAction } from "@/lib/confirm";
 import { useSafeBack } from "@/hooks/useSafeBack";
 
-const ACTIVE_STATUSES = ["confirmed", "in_progress", "awaiting_payment"] as const;
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -181,23 +179,7 @@ export default function ActiveRidesScreen() {
   const safeBack = useSafeBack("/matching" as any);
   const { user } = useAuth();
 
-  const {
-    data: rides,
-    isLoading,
-    error,
-    refetch,
-    isRefetching,
-  } = useQuery({
-    queryKey: ["rides", "active"],
-    queryFn: async () => {
-      const results = await Promise.all(
-        ACTIVE_STATUSES.map((s) => ridesService.list(s))
-      );
-      return results.flat().sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    },
-  });
+  const { data: rides, isLoading, error, refetch, isRefetching } = useActiveRides();
 
   const { data: reports } = useReports();
 
