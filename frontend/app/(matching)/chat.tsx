@@ -9,14 +9,12 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
-  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useNegotiation, useUpdateNegotiation, useConfirmNegotiation } from "@/hooks/useNegotiations";
 import { useAuth } from "@/hooks/AuthContext";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 
 function formatDateTime(iso: string): string {
@@ -109,15 +107,7 @@ export default function ChatScreen() {
       },
     ]);
   };
-
-  const onDateChange = (event, selectedDate: Date | undefined) => {
-    setShow(false); 
-
-    if (selectedDate) {
-      const dateString = selectedDate.toISOString(); 
-      setDepartureTime(dateString);
-    }
-};
+  
   if (isLoading || !neg) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
@@ -330,26 +320,11 @@ export default function ChatScreen() {
                     <Text className="text-xs font-bold text-[#152249]/70">Thời gian xuất phát</Text>
                     <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-[48px]">
                       <MaterialIcons name="schedule" size={16} color="#15224980" />
-                      <Pressable 
-                        onPress={() => setShow(true)}
-                        className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-[48px]"
-                      >
-                        <MaterialIcons name="schedule" size={16} color="#15224980" />
-                        
-                        {/* Thay TextInput bằng Text để hiển thị ngày đã chọn */}
-                        <Text className="flex-1 ml-3 text-base text-[#152249]">
-                          {formatDateTime(departureTime)}
-                        </Text>
-                      </Pressable>
-
-                      {show && (
-                        <DateTimePicker
-                          value={departureTime ? new Date(departureTime) : new Date()}
-                          mode="date" // Bạn có thể đổi thành "time" hoặc "datetime" (iOS)
-                          display="default"
-                          onChange={onDateChange}
-                        />
-                      )}
+                      <Text className="flex-1 ml-3 text-base text-slate-500">
+                        {departureTime ? formatDateTime(departureTime) : "Chưa chọn thời gian"}
+                      </Text>
+                      
+                      <MaterialIcons name="lock-outline" size={16} color="#64748B" />
                     </View>
                   </View>
 
