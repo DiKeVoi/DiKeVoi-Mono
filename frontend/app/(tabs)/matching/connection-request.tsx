@@ -12,7 +12,7 @@ function formatDateTime(iso: string): string {
 }
 
 export default function ConnectionRequest() {
-  const safeBack = useSafeBack("/(matching)/negotiations");
+  const safeBack = useSafeBack("/negotiations");
   const { negotiationId } = useLocalSearchParams<{ negotiationId: string }>();
   const { user } = useAuth();
   const { data: neg, isLoading, error } = useNegotiation(negotiationId ?? "");

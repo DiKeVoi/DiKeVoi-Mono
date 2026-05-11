@@ -204,7 +204,7 @@ function PostCard({
 }
 
 export default function BrowseScreen() {
-  const safeBack = useSafeBack("/(tabs)/matching" as any);
+  const safeBack = useSafeBack("/matching" as any);
   const [filter, setFilter] = useState<Filter>("all");
   const { user } = useAuth();
   const { toast, toastY, show: showToast } = useToast();

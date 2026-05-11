@@ -19,7 +19,7 @@ function formatDate(iso: string): string {
 }
 
 export default function ReportDetailScreen() {
-  const safeBack = useSafeBack("/(tabs)/account" as any);
+  const safeBack = useSafeBack("/account" as any);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: report, isLoading, error } = useReport(id ?? "");
 

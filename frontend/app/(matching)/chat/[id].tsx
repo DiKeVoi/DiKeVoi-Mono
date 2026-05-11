@@ -20,7 +20,7 @@ import { useNegotiation, useNegotiationUsers } from "@/hooks/useNegotiations";
 import { useAuth } from "@/hooks/AuthContext";
 import {Message} from "@/types/api";
 export default function ChatDetailScreen() {
-  const safeBack = useSafeBack();
+  const safeBack = useSafeBack("/browse");
   const { id: negotiationId } = useLocalSearchParams<{ id: string }>();
   const { user: currentUser } = useAuth();
 

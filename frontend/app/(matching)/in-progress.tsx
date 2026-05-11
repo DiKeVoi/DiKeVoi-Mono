@@ -21,7 +21,7 @@ function formatTime(iso: string): string {
 }
 
 export default function InProgressScreen() {
-  const safeBack = useSafeBack();
+  const safeBack = useSafeBack("/active-rides");
   const { rideId } = useLocalSearchParams<{ rideId?: string }>();
   const { user } = useAuth();
   const { data: ride, isLoading, refetch } = useRide(rideId ?? "");

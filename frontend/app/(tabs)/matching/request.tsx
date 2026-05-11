@@ -30,7 +30,7 @@ import { useRouting } from "@/hooks/useRouting";
 import { PresetLocation } from "@/hooks/useSearchPlaces";
 
 export default function RequestScreen() {
-  const safeBack = useSafeBack("/(tabs)/matching" as any);
+  const safeBack = useSafeBack("/matching" as any);
   const { role: navRole } = useLocalSearchParams<{ role: string }>();
 
   const [role, setRole] = useState<"rider" | "driver">(

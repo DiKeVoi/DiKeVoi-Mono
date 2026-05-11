@@ -95,7 +95,7 @@ function NegotiationCard({ neg, userId }: { neg: Negotiation; userId: string }) 
 }
 
 export default function NegotiationsScreen() {
-  const safeBack = useSafeBack("/(matching)/browse");
+  const safeBack = useSafeBack("/browse");
   const { user } = useAuth();
   const { data: negotiations, isLoading, error, refetch } = useNegotiations();
 

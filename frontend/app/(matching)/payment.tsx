@@ -16,7 +16,7 @@ import { confirmAction } from "@/lib/confirm";
 import { useSafeBack } from "@/hooks/useSafeBack";
 
 export default function PaymentScreen() {
-  const safeBack = useSafeBack();
+  const safeBack = useSafeBack("/active-rides");
   const { rideId } = useLocalSearchParams<{ rideId?: string }>();
   const { user } = useAuth();
   const { data: ride, isLoading, refetch } = useRide(rideId ?? "");

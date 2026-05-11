@@ -10,7 +10,7 @@ import { ThemedText } from "@/components/themed-text"; // Chỉnh lại đườn
 
 export default function AllNotificationsScreen() {
   const router = useRouter();
-  const safeBack = useSafeBack("/(tabs)/home" as any);
+  const safeBack = useSafeBack("/home" as any);
   
   // Lấy dữ liệu từ Context y hệt như bản popup
   const { notifications, markAllAsRead, markAsRead } = useNotification();

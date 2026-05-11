@@ -107,7 +107,7 @@ function RideCard({ ride }: { ride: Ride }) {
 }
 
 export default function TripHistoryScreen() {
-  const safeBack = useSafeBack("/(tabs)/account" as any);
+  const safeBack = useSafeBack("/account" as any);
   const [activeTab, setActiveTab] = useState<"completed" | "cancelled">("completed");
   const { data: rides, isLoading, error } = useRides();
 

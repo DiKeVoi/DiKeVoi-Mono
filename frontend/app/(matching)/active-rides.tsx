@@ -178,7 +178,7 @@ function RideCard({
 }
 
 export default function ActiveRidesScreen() {
-  const safeBack = useSafeBack("/(tabs)/matching" as any);
+  const safeBack = useSafeBack("/matching" as any);
   const { user } = useAuth();
 
   const {

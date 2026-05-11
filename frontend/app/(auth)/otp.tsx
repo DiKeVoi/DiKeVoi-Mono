@@ -7,7 +7,7 @@ import { useSafeBack } from "@/hooks/useSafeBack";
 import { authService } from "@/services/auth";
 
 export default function OTPScreen() {
-  const safeBack = useSafeBack("/(auth)/login" as any);
+  const safeBack = useSafeBack("/login" as any);
   const { email } = useLocalSearchParams<{ email: string }>();
   const { login } = useAuth();
 

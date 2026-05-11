@@ -18,7 +18,7 @@ import { NegotiationCard } from "@/components/negotiation-card";
 
 
 export default function NegotiationsScreen() {
-  const safeBack = useSafeBack("/(matching)/browse");
+  const safeBack = useSafeBack("/browse");
   const { user } = useAuth();
   const { postId } = useLocalSearchParams<{ postId?: string }>(); 
   

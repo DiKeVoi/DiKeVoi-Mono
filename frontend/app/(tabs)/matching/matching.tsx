@@ -6,7 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSafeBack } from "@/hooks/useSafeBack";
 
 export default function MatchingScreen() {
-  const safeBack = useSafeBack("/(tabs)/matching" as any);
+  const safeBack = useSafeBack("/matching" as any);
   const { myPostId, myPostType } = useLocalSearchParams<{ myPostId?: string; myPostType?: string }>();
   const pulseAnim1 = useRef(new Animated.Value(0)).current;
   const pulseAnim2 = useRef(new Animated.Value(0)).current;
