@@ -58,6 +58,25 @@ export default function RequestScreen() {
     if (navRole === "passenger") setRole("rider");
   }, [navRole]);
 
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+    if (event.type === "set" && selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+
+  const dateDisplay = date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  // ------------------------------
+
   const [time, setTime] = useState(() => {
     const defaultDate = new Date();
     defaultDate.setHours(8, 30, 0, 0);
@@ -87,7 +106,8 @@ export default function RequestScreen() {
     }
 
     const departureISO = (() => {
-      const d = new Date();
+      // Kết hợp ngày từ state 'date' và giờ từ state 'time'
+      const d = new Date(date);
       d.setHours(time.getHours(), time.getMinutes(), 0, 0);
       return d.toISOString();
     })();
@@ -101,7 +121,7 @@ export default function RequestScreen() {
         is_recurring: isRepeat,
       });
       router.push({
-        pathname: "/matching/matching",
+        pathname: "/results",
         params: { myPostId: post.id, myPostType: post.type },
       });
     } catch {
@@ -207,6 +227,43 @@ export default function RequestScreen() {
                 ) : null}
               </View>
             )}
+
+            {/* --- CHÈN CHỌN NGÀY TẠI ĐÂY --- */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <View pointerEvents="none">
+                <IconInput
+                  label="Ngày đi"
+                  iconName="event"
+                  placeholder="Chọn ngày"
+                  value={dateDisplay}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <View className="mb-6 bg-slate-50 dark:bg-[#152249]/20 rounded-xl overflow-hidden border border-slate-200 dark:border-[#152249]/30">
+                {Platform.OS === "ios" && (
+                  <View className="flex-row justify-end p-3 border-b border-slate-200 dark:border-[#152249]/30">
+                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                      <ThemedText className="text-blue-600 dark:text-blue-400 font-bold text-base">
+                        Xong
+                      </ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "inline" : "default"}
+                  onChange={onDateChange}
+                  minimumDate={new Date()}
+                />
+              </View>
+            )}
+            {/* ---------------------------- */}
 
             <TouchableOpacity
               activeOpacity={0.8}

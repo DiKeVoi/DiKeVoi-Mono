@@ -100,8 +100,8 @@ def create_negotiation(body: NegotiationCreate, current_user: CurrentUser) -> di
 
     if body.auto_accept:
         # Mark both posts matched immediately
-        supabase.table("RidePost").update({"status": "matched"}).eq("id", body.offer_post_id).execute()
-        supabase.table("RidePost").update({"status": "matched"}).eq("id", body.request_post_id).execute()
+        supabase.table("RidePost").update({"status": "connecting"}).eq("id", body.offer_post_id).execute()
+        supabase.table("RidePost").update({"status": "connecting"}).eq("id", body.request_post_id).execute()
         # Notify the other party that a match was made and negotiation is open
         other_uid = requester_uid if caller == offerer_uid else offerer_uid
         _notify(other_uid, "Đã ghép chuyến!", "Bạn có một yêu cầu kết nối mới. Vào thương lượng ngay!")
@@ -133,6 +133,47 @@ def get_negotiation(negotiation_id: str, current_user: CurrentUser) -> dict:
     neg = _get_or_404(negotiation_id)
     _require_participant(neg, current_user["user_id"])
     return neg
+
+
+@router.get("/{id}/users")
+def get_users_of_negotiation(id: str):
+    try:
+        select_query = """
+            offererUid,
+            requesterUid,
+            offerer:User!Negotiation_offererUid_fkey (
+                id,
+                displayName,
+                photoUrl
+            ),
+            requester:User!Negotiation_requesterUid_fkey (
+                id,
+                displayName,
+                photoUrl
+            )
+        """
+        
+        response = (
+            supabase.table("Negotiation")
+            .select(select_query)
+            .eq("id", id)
+            .maybe_single()
+            .execute()
+        )
+
+        if not response.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Không tìm thấy cuộc thương lượng"
+            )
+
+        return response.data
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 
 @router.patch("/{negotiation_id}")
@@ -194,8 +235,8 @@ def confirm_negotiation(negotiation_id: str, current_user: CurrentUser) -> dict:
     caller = current_user["user_id"]
     _require_participant(neg, caller)
 
-    if neg["status"] != "accepted":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Negotiation must be accepted before confirming")
+    # if neg["status"] != "accepted":
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Negotiation must be accepted before confirming")
 
     is_offerer = neg["offererUid"] == caller
     confirm_field = "confirmedByOfferer" if is_offerer else "confirmedByRequester"
@@ -237,6 +278,8 @@ def confirm_negotiation(negotiation_id: str, current_user: CurrentUser) -> dict:
         ride_id = cast(list, ride_result.data)[0]["id"]
         db_updates["rideId"] = ride_id
         db_updates["status"] = NegotiationStatus.confirmed.value
+        supabase.table("RidePost").update({"status": "closed"}).eq("id", neg["offerPostId"]).execute()
+        supabase.table("RidePost").update({"status": "closed"}).eq("id", neg["requestPostId"]).execute()
 
         _notify(neg["offererUid"], "Chuyến đi đã được xác nhận! 🎉", "Cả hai đã đồng ý. Chúc chuyến đi vui vẻ!")
         _notify(neg["requesterUid"], "Chuyến đi đã được xác nhận! 🎉", "Cả hai đã đồng ý. Chúc chuyến đi vui vẻ!")

@@ -34,7 +34,8 @@ function MatchCard({
     try {
       const offerPostId = myPostType === "offer" ? myPostId : item.id;
       const requestPostId = myPostType === "request" ? myPostId : item.id;
-      await createNegotiation({ offer_post_id: offerPostId, request_post_id: requestPostId });
+      const neg = await createNegotiation({ offer_post_id: offerPostId, request_post_id: requestPostId });
+      router.push({ pathname: "/(matching)/chat", params: { negotiationId: neg.id } });
       setSent(true);
     } catch (err: any) {
       const msg = err?.response?.data?.detail ?? "Không thể gửi yêu cầu. Vui lòng thử lại.";
@@ -138,7 +139,7 @@ export default function ResultsScreen() {
     <SafeAreaView className="flex-1 bg-[#f8f6f6] dark:bg-[#221610]" edges={["top"]}>
       <View className="flex flex-row items-center justify-between p-4 pb-2">
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.replace("/home")}
           className="flex w-10 h-10 shrink-0 items-center justify-center -ml-2"
         >
           <MaterialIcons name="arrow-back" size={24} color="#152249" />

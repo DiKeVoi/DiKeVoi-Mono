@@ -66,7 +66,6 @@ function PostCard({
       const neg = await createNegotiation({
         offer_post_id: offerPostId,
         request_post_id: requestPostId,
-        auto_accept: true,
       });
       router.push({ pathname: "/(matching)/chat", params: { negotiationId: neg.id } });
     } catch {

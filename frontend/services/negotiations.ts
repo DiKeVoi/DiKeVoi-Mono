@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/axios";
-import type { Negotiation, NegotiationStatus } from "@/types/api";
+import type { Negotiation, NegotiationStatus, NegotiationUsers } from "@/types/api";
 
 export interface CreateNegotiationPayload {
   offer_post_id: string;
@@ -26,6 +26,11 @@ export const negotiationsService = {
 
   async get(id: string): Promise<Negotiation> {
     const { data } = await apiClient.get<Negotiation>(`/negotiations/${id}`);
+    return data;
+  },
+
+  async getUsers(id: string): Promise<NegotiationUsers> {
+    const { data } = await apiClient.get<NegotiationUsers>(`/negotiations/${id}/users`);
     return data;
   },
 

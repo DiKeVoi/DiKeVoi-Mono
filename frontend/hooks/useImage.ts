@@ -2,7 +2,7 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 
-const IMGBB_API_KEY = process.env.EXPO_PUBLIC_IMGBB_API_KEY || "YOUR_IMGBB_API_KEY"; 
+const IMGBB_API_KEY = process.env.EXPO_PUBLIC_IMGBB_API_KEY || ""; 
 
 export function useAvatarUpload() {
   const [isUploading, setIsUploading] = useState(false);

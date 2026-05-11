@@ -19,9 +19,6 @@ class PostType(str, Enum):
     offer = "offer"
 
 
-# --- Schemas ---
-
-
 class RidePostCreate(BaseModel):
     type: PostType
     origin_location: str
@@ -39,9 +36,6 @@ class RidePostUpdate(BaseModel):
     is_recurring: bool | None = None
     preferred_gender: str | None = None
     description: str | None = None
-
-
-# --- Routes ---
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -81,8 +75,9 @@ def list_ride_posts(type: PostType | None = Query(default=None)) -> list:
         query = query.eq("type", type.value)
     return cast(list, query.order("createdAt", desc=True).execute().data)
 
+
 @router.get("/mine")
-def list_my_ride_posts(type: PostType | None = Query(default=None)) -> list:
+def list_my_ride_posts(current_user: CurrentUser, type: PostType | None = Query(default=None)) -> list:
     select_query = """
         *,
         offer_negotiations:Negotiation!Negotiation_offerPostId_fkey(
@@ -97,7 +92,7 @@ def list_my_ride_posts(type: PostType | None = Query(default=None)) -> list:
         )
     """
     
-    query = supabase.table("RidePost").select(select_query)
+    query = supabase.table("RidePost").select(select_query).eq("userId", current_user["user_id"])
     
     if type is not None:
         query = query.eq("type", type.value)
@@ -110,35 +105,54 @@ def list_my_ride_posts(type: PostType | None = Query(default=None)) -> list:
         offer_negs = post.pop("offer_negotiations", [])
         request_negs = post.pop("request_negotiations", [])
         
-        negotiation = None
-        partner = None
+        offer_negs = offer_negs if offer_negs else []
+        request_negs = request_negs if request_negs else []
         
-        if offer_negs:
-            for neg in offer_negs:
-                if neg.get("status") == "accepted": 
-                    negotiation = neg
-                    partner = neg.get("requester")
-                    break
-                    
-        if not negotiation and request_negs:
+        active_neg = None
+        partner_info = None
+        has_pending = False
+        
+        for neg in offer_negs:
+            if neg.get("status") in ["accepted", "confirmed"]: 
+                active_neg = neg
+                partner_info = neg.get("requester")
+                break
+            elif neg.get("status") == "pending":
+                has_pending = True
+                
+        if not active_neg:
             for neg in request_negs:
-                if neg.get("status") == "accepted":
-                    negotiation = neg
-                    partner = neg.get("offerer")
+                if neg.get("status") in ["accepted", "confirmed"]:
+                    active_neg = neg
+                    partner_info = neg.get("offerer")
                     break
+                elif neg.get("status") == "pending":
+                    has_pending = True
         
-        # Nếu tìm thấy một negotiation thành công, đính kèm vào response
-        if negotiation:
-            post["negotiationId"] = negotiation.get("id")
-            if partner:
+        if active_neg:
+            post["negotiationId"] = active_neg.get("id")
+            
+            if isinstance(partner_info, list) and len(partner_info) > 0:
+                partner_info = partner_info[0]
+                
+            if isinstance(partner_info, dict):
                 post["with"] = {
-                    "name": partner.get("displayName"),
-                    "avatarUrl": partner.get("photoUrl")
+                    "name": partner_info.get("displayName"),
+                    "avatarUrl": partner_info.get("photoUrl")
                 }
+            
+            # Đã accept -> đổi thành "matched"
+            post["computedStatus"] = "matched"
+        elif has_pending:
+            # Có người đang trả giá -> đổi thành "connecting"
+            post["computedStatus"] = "connecting"
+        else:
+            post["computedStatus"] = "open"
                 
         formatted_data.append(post)
         
     return formatted_data
+
 
 @router.get("/{ride_id}")
 def get_ride_post(ride_id: str) -> dict:
@@ -163,7 +177,6 @@ def update_ride_post(
             detail="No fields to update",
         )
 
-    # Map snake_case fields to DB column names
     field_map = {
         "origin_location": "originLocation",
         "destination_location": "destinationLocation",
@@ -184,9 +197,6 @@ def update_ride_post(
 def delete_ride_post(ride_id: str, current_user: CurrentUser) -> None:
     _require_owner(ride_id, current_user["user_id"])
     supabase.table("RidePost").delete().eq("id", ride_id).execute()
-
-
-# --- Helpers ---
 
 
 def _require_owner(ride_id: str, user_id: str) -> None:

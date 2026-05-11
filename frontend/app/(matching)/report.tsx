@@ -17,7 +17,10 @@ import { useRide } from "@/hooks/useRides";
 import { useCreateReport } from "@/hooks/useReports";
 
 export default function ReportScreen() {
-  const { rideId } = useLocalSearchParams<{ rideId?: string }>();
+  const { rideId, reportedUserId } = useLocalSearchParams<{ 
+    rideId?: string, 
+    reportedUserId?: string 
+  }>();
   const [description, setDescription] = useState("");
 
   const { data: ride, isLoading: rideLoading } = useRide(rideId ?? "");
@@ -33,6 +36,7 @@ export default function ReportScreen() {
     try {
       await createReport({
         ride_id: rideId,
+        reported_user_id: reportedUserId,
         reason: trimmed,
       });
       router.push("/(matching)/report-success");

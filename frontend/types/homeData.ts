@@ -1,9 +1,10 @@
+import { RidePostStatus } from "./api";
 export type MyRequestData = {
   id: string;
   from: string;
   to: string;
   time: Date;
-  status: "finding" | "matched" | "completed";
+  status: RidePostStatus;
   with?: UserData; // Only for matched or completed requests
 };
 

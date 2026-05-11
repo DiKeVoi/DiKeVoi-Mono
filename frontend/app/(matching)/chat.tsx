@@ -9,12 +9,15 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useNegotiation, useUpdateNegotiation, useConfirmNegotiation } from "@/hooks/useNegotiations";
 import { useAuth } from "@/hooks/AuthContext";
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -53,7 +56,7 @@ export default function ChatScreen() {
   const theirConfirmed = isOfferer ? neg?.confirmedByRequester : neg?.confirmedByOfferer;
   const iProposed = neg?.lastEditedBy === myId;
   const theyProposed = neg?.lastEditedBy != null && neg?.lastEditedBy !== myId;
-
+  const [show, setShow] = useState(false);
   const handlePropose = async () => {
     if (!neg) return;
     const parsedFare = fare ? parseInt(fare, 10) : undefined;
@@ -107,6 +110,14 @@ export default function ChatScreen() {
     ]);
   };
 
+  const onDateChange = (event, selectedDate: Date | undefined) => {
+    setShow(false); 
+
+    if (selectedDate) {
+      const dateString = selectedDate.toISOString(); 
+      setDepartureTime(dateString);
+    }
+};
   if (isLoading || !neg) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
@@ -126,7 +137,7 @@ export default function ChatScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center px-4 py-3 bg-white border-b border-slate-100 z-50">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <TouchableOpacity onPress={() => router.replace("/home")} className="mr-3">
             <MaterialIcons name="arrow-back" size={26} color="#152249" />
           </TouchableOpacity>
           <View className="flex-1">
@@ -319,14 +330,26 @@ export default function ChatScreen() {
                     <Text className="text-xs font-bold text-[#152249]/70">Thời gian xuất phát</Text>
                     <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-[48px]">
                       <MaterialIcons name="schedule" size={16} color="#15224980" />
-                      <TextInput
-                        className="flex-1 ml-3 text-base text-[#152249]"
-                        value={departureTime}
-                        onChangeText={setDepartureTime}
-                        placeholder="ISO hoặc mô tả thời gian"
-                        placeholderTextColor="#94A3B8"
-                        style={Platform.OS === "web" ? { outlineStyle: "none" } as any : {}}
-                      />
+                      <Pressable 
+                        onPress={() => setShow(true)}
+                        className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-[48px]"
+                      >
+                        <MaterialIcons name="schedule" size={16} color="#15224980" />
+                        
+                        {/* Thay TextInput bằng Text để hiển thị ngày đã chọn */}
+                        <Text className="flex-1 ml-3 text-base text-[#152249]">
+                          {formatDateTime(departureTime)}
+                        </Text>
+                      </Pressable>
+
+                      {show && (
+                        <DateTimePicker
+                          value={departureTime ? new Date(departureTime) : new Date()}
+                          mode="date" // Bạn có thể đổi thành "time" hoặc "datetime" (iOS)
+                          display="default"
+                          onChange={onDateChange}
+                        />
+                      )}
                     </View>
                   </View>
 

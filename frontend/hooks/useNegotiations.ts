@@ -25,6 +25,14 @@ export function useNegotiation(id: string) {
   });
 }
 
+export function useNegotiationUsers(id: string) {
+  return useQuery({
+    queryKey: [NEGOTIATIONS_KEY, id, "users"],
+    queryFn: () => negotiationsService.getUsers(id),
+    enabled: !!id, // Chỉ chạy khi có id
+  });
+}
+
 export function useCreateNegotiation() {
   const qc = useQueryClient();
   return useMutation({

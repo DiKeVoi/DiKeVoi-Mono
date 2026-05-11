@@ -70,10 +70,14 @@ def _get_user_by_email(email: str) -> dict | None:
         supabase.table("User")
         .select("id, email, authProvider, isVerified, displayName, photoUrl, gender")
         .eq("email", email)
-        .single()
+        .limit(1) 
         .execute()
     )
-    return result.data
+    
+    if result.data and len(result.data) > 0:
+        return result.data[0]
+        
+    return None
 
 
 def _create_user(
@@ -223,7 +227,6 @@ def send_otp(body: SendOtpRequest) -> dict:
 @router.post("/otp-verify", response_model=TokenResponse)
 def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
     now = datetime.now(timezone.utc).isoformat()
-
     otp_result = (
         supabase.table("OtpCode")
         .select("id")

@@ -1,12 +1,21 @@
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText, ThemedView } from "@/components";
 import { HomeHeader } from "@/components/home-header";
 import { MyRequests } from "@/components/my-requests";
 import { QuickActions } from "@/components/quickactions";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useCallback } from "react";
+import { useMyRidePosts } from "@/hooks/useRidePosts";
 
 export default function Home() {
+  const { refetch, isRefetching } = useMyRidePosts();
+
+  const onRefresh = useCallback(async () => {
+    // Gọi refetch để tải lại danh sách bài đăng của tôi
+    await refetch();
+  }, [refetch]);
+
   return (
     <ThemedView style={{ flex: 1, paddingTop: 16 }}>
       <ThemedView
@@ -18,9 +27,16 @@ export default function Home() {
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: 96, 
-          }}
+          contentContainerStyle={{ paddingBottom: 96 }}
+          // 3. Tích hợp RefreshControl
+          refreshControl={
+            <RefreshControl 
+              refreshing={isRefetching} 
+              onRefresh={onRefresh} 
+              tintColor="#152249" // Màu cho iOS
+              colors={["#152249"]} // Màu cho Android
+            />
+          }
         >
           <HomeHeader />
 
@@ -35,96 +51,139 @@ export default function Home() {
 
           <QuickActions />
 
-          {/* Quick nav row */}
-          <View style={{ flexDirection: "row", gap: 10, marginHorizontal: 16, marginTop: 12 }}>
-            {/* Browse posts */}
+          <View
+            style={{
+              paddingHorizontal: 16,
+              marginTop: 16,
+              flexDirection: "row",
+              flexWrap: "wrap", 
+              justifyContent: "space-between",
+              gap: 16,
+            }}
+          >
+            {/* Nút 1: Duyệt bài đăng */}
             <TouchableOpacity
               onPress={() => router.push("/(matching)/browse")}
-              activeOpacity={0.85}
-              style={{ flex: 1 }}
+              style={{
+                flex: 1,
+                minWidth: 150, 
+                maxWidth: 400, 
+              }}
             >
               <View
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "space-between",
                   backgroundColor: "#F1F5F9",
                   borderRadius: 16,
-                  paddingHorizontal: 10,
+                  paddingHorizontal: 12,
                   paddingVertical: 16,
-                  borderWidth: 1,
-                  borderColor: "#E2E8F0",
+                  minHeight: 76, 
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <View
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 11,
-                      backgroundColor: "#152249",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 12,
+                    backgroundColor: "#152249",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10, 
+                  }}
+                >
+                  <MaterialIcons name="search" size={20} color="#F9F871" />
+                </View>
+
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <ThemedText
+                    style={{ fontSize: 13, fontWeight: "700", color: "#152249" }}
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
                   >
-                    <MaterialIcons name="search" size={16} color="#F9F871" />
-                  </View>
-                  <View>
-                    <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#152249" }}>
-                      Duyệt bài đăng
-                    </ThemedText>
-                    <ThemedText style={{ fontSize: 10, color: "#64748B", marginTop: 1 }}>
-                      Tìm bạn đồng hành
-                    </ThemedText>
-                  </View>
+                    Duyệt bài đăng
+                  </ThemedText>
+                  <ThemedText
+                    style={{ fontSize: 11, color: "#152249", marginTop: 2, opacity: 0.7 }}
+                    numberOfLines={2}
+                  >
+                    Tìm chuyến phù hợp
+                  </ThemedText>
                 </View>
               </View>
             </TouchableOpacity>
 
-            {/* Active rides */}
             <TouchableOpacity
-              onPress={() => router.push("/(matching)/active-rides" as any)}
-              activeOpacity={0.85}
-              style={{ flex: 1 }}
+              onPress={() => router.push("/(matching)/active-rides")}
+              style={{
+                flex: 1,
+                minWidth: 150,
+                maxWidth: 400,
+              }}
             >
               <View
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "space-between",
                   backgroundColor: "#152249",
                   borderRadius: 16,
-                  paddingHorizontal: 10,
+                  paddingHorizontal: 12,
                   paddingVertical: 16,
+                  minHeight: 76,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <View
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 11,
-                      backgroundColor: "#F9F871",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 12,
+                    backgroundColor: "#F9F871",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <MaterialIcons name="directions-car" size={20} color="#152249" />
+                </View>
+
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <ThemedText
+                    style={{ fontSize: 13, fontWeight: "700", color: "#F9F871" }}
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
                   >
-                    <MaterialIcons name="directions-car" size={20} color="#152249" />
-                  </View>
-                  <View>
-                    <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#F9F871" }}>
-                      Chuyến của tôi
-                    </ThemedText>
-                    <ThemedText style={{ fontSize: 10, color: "#94A3B8", marginTop: 1 }}>
-                      Chuyến đã ghép
-                    </ThemedText>
-                  </View>
+                    Chuyến của tôi
+                  </ThemedText>
+                  <ThemedText
+                    style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}
+                    numberOfLines={2}
+                  >
+                    Chuyến đã ghép
+                  </ThemedText>
                 </View>
               </View>
             </TouchableOpacity>
           </View>
-
-          <ThemedView style={{ marginTop: 24, marginBottom: 48 }}>
+          <Pressable
+            onPress={() => router.push("/home/all-requests")}
+            style={{
+              alignSelf: 'flex-end', 
+              marginRight: 16,
+              marginTop: 16,      
+            }}
+          >
+            <ThemedText
+              style={
+                { fontSize: 10, 
+                  fontWeight: "700", 
+                  color: "#152249",
+                  textDecorationLine: 'underline',
+                }}
+            >
+              Xem tất cả
+            </ThemedText>
+          </Pressable>
+          <ThemedView style={{ marginTop: 10, marginBottom: 48 }}>
             <MyRequests viewAll={false} />
           </ThemedView>
         </ScrollView>

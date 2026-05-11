@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import { useRides } from "@/hooks/useRides";
 import { useAuth } from "@/hooks/AuthContext";
 import type { Ride } from "@/types/api";
+import { useReports } from "@/hooks/useReports";
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -24,7 +25,11 @@ function formatDateTime(iso: string): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")} ${timeStr}`;
 }
 
-function RideCard({ ride, isOfferUser }: { ride: Ride; isOfferUser: boolean }) {
+function RideCard(
+  { ride, isOfferUser, isReported }
+  : 
+  { ride: Ride; isOfferUser: boolean; isReported?: boolean }) {
+  const reportedUserId = isOfferUser ? ride.requestUserId : ride.offerUserId;
   return (
     <View
       className="bg-white rounded-2xl p-4 mb-3 border border-slate-100"
@@ -42,17 +47,35 @@ function RideCard({ ride, isOfferUser }: { ride: Ride; isOfferUser: boolean }) {
           >
             {isOfferUser ? "Bạn cho đi ké" : "Bạn đi ké"}
           </Text>
+          
         </View>
-        <View className="flex-row items-center gap-1">
+        {isReported ? 
+        (
+        <View className="flex-row items-center gap-1 px-2 py-1 bg-slate-100 rounded-lg">
+          <MaterialIcons name="check" size={14} color="#64748B" />
+          <Text className="text-[10px] font-bold text-slate-500 uppercase">Đã báo cáo</Text>
+        </View>)
+            :
+        (<TouchableOpacity 
+            onPress={() => router.push({ pathname: "/report", params: { rideId: ride.id, reportedUserId: reportedUserId } })}
+            className="p-1.5 bg-red-50 items-center rounded-lg active:bg-red-100"
+          >
+            <MaterialIcons name="outlined-flag" size={16} color="#EF4444" />
+          </TouchableOpacity>
+        )}
+      </View>
+      <View className="flex items-end justify-between">
+      
+          </View>
+            
+      {/* Route */}
+      <View className="mb-3 ml-0.5">
+        <View className="flex-row items-center gap-3 mb-4">
           <MaterialIcons name="schedule" size={13} color="#94A3B8" />
           <Text className="text-xs font-bold text-slate-400">
             {formatDateTime(ride.departureTime)}
           </Text>
         </View>
-      </View>
-
-      {/* Route */}
-      <View className="mb-3 ml-0.5">
         <View className="flex-row items-center gap-3 mb-1">
           <View className="w-2 h-2 rounded-full bg-[#152249]" />
           <Text className="text-sm font-semibold text-slate-700 flex-1" numberOfLines={1}>
@@ -98,6 +121,8 @@ export default function ActiveRidesScreen() {
     refetch,
     isRefetching,
   } = useRides("confirmed");
+
+  const { data: reports, isLoading: reportsLoading } = useReports();
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
@@ -155,13 +180,19 @@ export default function ActiveRidesScreen() {
           <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
             {rides.length} chuyến đi
           </Text>
-          {rides.map((ride) => (
-            <RideCard
-              key={ride.id}
-              ride={ride}
-              isOfferUser={ride.offerUserId === user?.id}
-            />
-          ))}
+          {rides.map((ride) => {
+      // 2. Kiểm tra xem ride này đã có trong danh sách báo cáo chưa
+      const isReported = reports?.some((r) => r.rideId === ride.id);
+
+      return (
+        <RideCard
+          key={ride.id}
+          ride={ride}
+          isOfferUser={ride.offerUserId === user?.id}
+          isReported={isReported} // Truyền prop mới vào RideCard
+        />
+      );
+    })}
         </ScrollView>
       )}
     </SafeAreaView>

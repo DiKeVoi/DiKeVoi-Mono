@@ -1,7 +1,7 @@
 export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
 export type RideStatus = "pending" | "confirmed" | "completed" | "cancelled";
 export type PostType = "offer" | "request";
-export type RidePostStatus = "open" | "matched" | "closed" | "cancelled";
+export type RidePostStatus = "open" |"connecting" | "matched" | "closed" | "cancelled";
 export type NegotiationStatus = "pending" | "accepted" | "rejected" | "cancelled" | "confirmed";
 export type NotificationType =
   | "ride_request" | "ride_confirmed" | "ride_cancelled" | "ride_completed"
@@ -141,6 +141,22 @@ export interface Negotiation {
   createdAt: string;
   updatedAt: string | null;
 }
+
+export interface NegotiationUsers {
+  offererUid: string;
+  requesterUid: string;
+  offerer: {
+    id: string;
+    displayName: string | null;
+    photoUrl: string | null;
+  } | null;
+  requester: {
+    id: string;
+    displayName: string | null;
+    photoUrl: string | null;
+  } | null;
+}
+
 
 export interface TokenResponse {
   access_token: string;
