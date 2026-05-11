@@ -30,12 +30,12 @@ export default function LoginScreen() {
       return;
     }
 
-    // if (!trimmedEmail.endsWith(".edu.vn")) {
-    //   setErrorMessage(
-    //     "Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)",
-    //   );
-    //   return;
-    // }
+    if (!trimmedEmail.endsWith(".edu.vn")) {
+      setErrorMessage(
+        "Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)",
+      );
+      return;
+    }
 
     setErrorMessage("");
     setLoading(true);
