@@ -6,26 +6,34 @@ import { useRouter } from "expo-router";
 import { useNotification } from "@/hooks/NotificationContext";
 import { useSafeBack } from "@/hooks/useSafeBack";
 import type { Notification } from "@/types/api";
-import { ThemedText } from "@/components/themed-text"; // Chỉnh lại đường dẫn nếu cần
+import { ThemedText } from "@/components/themed-text";
+import { notificationsService } from "@/services/notifications"; 
 
 export default function AllNotificationsScreen() {
   const router = useRouter();
   const safeBack = useSafeBack("/home" as any);
   
-  // Lấy dữ liệu từ Context y hệt như bản popup
   const { notifications, markAllAsRead, markAsRead } = useNotification();
 
-  // Logic chuyển trang giữ nguyên 100%
-  const handlePressNotification = (item: Notification) => {
+  const handlePressNotification = async (item: Notification) => {
     markAsRead(item.id);
 
-    if (item.type === "ride_confirmed" || item.type === "negotiation_accepted") {
-      router.push({
-        pathname: "/(matching)/chat/[id]",
-        params: { id: item.relatedId ?? "" }
-      });
-    } else if (item.type === "ride_request") {
-      router.push("/(tabs)/matching/connection-request");
+    try {
+      await notificationsService.markRead(item.id.toString());
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái đã đọc:", error);
+    }
+
+    router.push("/active-rides");
+  };
+
+  const handleMarkAllAsRead = async () => {
+    markAllAsRead();
+
+    try {
+      await notificationsService.markAllRead();
+    } catch (error) {
+      console.error("Lỗi khi đánh dấu đọc tất cả:", error);
     }
   };
 
@@ -79,8 +87,9 @@ export default function AllNotificationsScreen() {
           </ThemedText>
         </View>
 
+        {/* GẮN HÀM MỚI VÀO NÚT NÀY */}
         <TouchableOpacity 
-          onPress={markAllAsRead}
+          onPress={handleMarkAllAsRead}
           className="p-2 -mr-2 flex-row items-center gap-1 active:opacity-70"
         >
           <CheckCircle2 size={18} color="#2563EB" />
