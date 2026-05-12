@@ -105,7 +105,7 @@ export default function Onboarding() {
               Math.min(prev + 1, onboardingData.length - 1),
             );
             if (currentIndex === onboardingData.length - 1) {
-              navigate("/login");
+              handleFinishOnboarding();
             }
           }}
           className="mb-8 rounded-xl w-4/5 h-16 bg-primary py-3 items-center justify-center"
