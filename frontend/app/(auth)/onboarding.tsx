@@ -1,5 +1,6 @@
 import { OnboardingData } from "@/types/onboardingData";
 import { ThemedText, ThemedView } from "@components/index";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
 import { navigate } from "expo-router/build/global-state/routing";
 import { useState } from "react";
@@ -30,6 +31,16 @@ const onboardingData: OnboardingData[] = [
 ];
 export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleFinishOnboarding = async () => {
+    try {
+      await AsyncStorage.setItem('hasViewedOnboarding', 'true');
+      
+      navigate("/login"); 
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <ThemedView className="flex-1 pt-12 items-center gap-5">
       {/* Top bar */}
@@ -40,9 +51,7 @@ export default function Onboarding() {
           contentFit="contain"
         />
           <Pressable
-            onPress={() => {
-              navigate("/login");
-            }}
+            onPress={handleFinishOnboarding}
           >
             <ThemedText className="font-bold text-slate-600 text-base">
               Bỏ qua
