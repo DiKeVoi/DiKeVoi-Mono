@@ -1,7 +1,6 @@
 import { OnboardingData } from "@/types/onboardingData";
 import { ThemedText, ThemedView } from "@components/index";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import { useState } from "react";
 import { Pressable, TouchableHighlight } from "react-native";
@@ -40,7 +39,6 @@ export default function Onboarding() {
           className="mb-4 h-12 w-12"
           contentFit="contain"
         />
-        <Link href="/(tabs)/home" asChild>
           <Pressable
             onPress={() => {
               navigate("/login");
@@ -50,7 +48,6 @@ export default function Onboarding() {
               Bỏ qua
             </ThemedText>
           </Pressable>
-        </Link>
       </ThemedView>
       <ThemedView className="flex-1 w-full items-center justify-center">
         <Animated.View

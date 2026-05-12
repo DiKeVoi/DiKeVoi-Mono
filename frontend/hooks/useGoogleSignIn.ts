@@ -77,7 +77,7 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   return {
     isLoading,
