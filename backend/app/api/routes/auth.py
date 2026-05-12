@@ -233,7 +233,7 @@ def otp_verify(body: OtpVerifyRequest) -> TokenResponse:
         .eq("email", body.email)
         .eq("code", body.otp)
         .eq("used", False)
-        .gt("expiresAt", now)
+        .gte("expiresAt", now)
         .limit(1)
         .execute()
     )

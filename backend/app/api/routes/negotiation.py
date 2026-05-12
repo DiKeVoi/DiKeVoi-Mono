@@ -277,6 +277,26 @@ def update_negotiation(
         )
         _notify(other_uid, "Chuyến đi đã bị hủy", "Người kia đã hủy thương lượng.")
 
+    # Notify other party when negotiable fields are proposed/changed
+    if not new_status:
+        other_uid = (
+            neg["requesterUid"] if caller == neg["offererUid"] else neg["offererUid"]
+        )
+        changed_fields = set(updates.keys())
+        if "fare" in changed_fields:
+            fare_val = updates["fare"]
+            _notify(
+                other_uid,
+                "Đề xuất giá mới",
+                f"Người kia đề xuất mức giá {fare_val:,} ₫. Vào thương lượng để phản hồi!",
+            )
+        elif changed_fields & {"pickup_location", "dropoff_location", "departure_time"}:
+            _notify(
+                other_uid,
+                "Thông tin chuyến đi đã thay đổi",
+                "Người kia vừa cập nhật điểm đón/điểm đến hoặc giờ khởi hành.",
+            )
+
     field_map = {
         "pickup_location": "pickupLocation",
         "dropoff_location": "dropoffLocation",
