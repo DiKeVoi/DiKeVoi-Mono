@@ -1,7 +1,7 @@
 import { OnboardingData } from "@/types/onboardingData";
 import { ThemedText, ThemedView } from "@components/index";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import { useState } from "react";
 import { Pressable, TouchableHighlight } from "react-native";
@@ -31,6 +31,16 @@ const onboardingData: OnboardingData[] = [
 ];
 export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleFinishOnboarding = async () => {
+    try {
+      await AsyncStorage.setItem('hasViewedOnboarding', 'true');
+      
+      navigate("/login"); 
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <ThemedView className="flex-1 pt-12 items-center gap-5">
       {/* Top bar */}
@@ -40,17 +50,13 @@ export default function Onboarding() {
           className="mb-4 h-12 w-12"
           contentFit="contain"
         />
-        <Link href="/(tabs)/home" asChild>
           <Pressable
-            onPress={() => {
-              navigate("/login");
-            }}
+            onPress={handleFinishOnboarding}
           >
             <ThemedText className="font-bold text-slate-600 text-base">
               Bỏ qua
             </ThemedText>
           </Pressable>
-        </Link>
       </ThemedView>
       <ThemedView className="flex-1 w-full items-center justify-center">
         <Animated.View
@@ -99,7 +105,7 @@ export default function Onboarding() {
               Math.min(prev + 1, onboardingData.length - 1),
             );
             if (currentIndex === onboardingData.length - 1) {
-              navigate("/login");
+              handleFinishOnboarding();
             }
           }}
           className="mb-8 rounded-xl w-4/5 h-16 bg-primary py-3 items-center justify-center"
