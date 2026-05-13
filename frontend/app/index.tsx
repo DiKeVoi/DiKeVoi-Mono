@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
+import { getToken } from "@/lib/tokenStorage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
@@ -13,7 +14,8 @@ export default function Index() {
         const hasViewedOnboarding = await AsyncStorage.getItem("hasViewedOnboarding");
         
         // 2. Giả lập check đăng nhập (Sau này bạn check Token thực tế ở đây)
-        const isLoggedIn = false; 
+        const token = await getToken();
+        const isLoggedIn = !!token; 
 
         // 3. Quyết định luồng đi
         if (hasViewedOnboarding === null) {

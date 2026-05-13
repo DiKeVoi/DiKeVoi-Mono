@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "DiKeVoi",
-    "slug": "dikevoi-app",
+    "slug": "dikevoi",
+    "owner": "dikevoi",
     "version": "1.0.0",
     "runtimeVersion": "1.0.0",
     "assetBundlePatterns": [
@@ -17,10 +18,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/dikevoi-logo.png",
+        "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -66,7 +65,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "44a77cc2-0c9c-4032-8336-9636d7ccd62d"
+        "projectId": "7d58b9ba-8329-409d-a9b2-ce129c082d2e"
       }
     },
     "updates": {
