@@ -123,14 +123,10 @@ def _ensure_user(
     existing = _get_user_by_email(email)
     if existing:
         updates: dict[str, Any] = {}
-        if display_name is not None:
-            updates["displayName"] = display_name
-        if photo_url is not None:
-            updates["photoUrl"] = photo_url
-        if gender is not None:
-            updates["gender"] = gender
         if auth_provider == "google" and existing.get("authProvider") != "google":
             updates["authProvider"] = "google"
+        elif auth_provider == "email" and existing.get("authProvider") != "email":
+             updates["authProvider"] = "email"
 
         if is_verified and not existing.get("isVerified"):
             updates["isVerified"] = True
