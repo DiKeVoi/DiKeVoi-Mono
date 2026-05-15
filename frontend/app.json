@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/dikevoi-logo.png",
+        "foregroundImage": "./assets/images/app-logo.png",
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
