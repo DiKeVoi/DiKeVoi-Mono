@@ -1,14 +1,15 @@
 {
   "expo": {
-    "name": "DiKeVoi",
-    "slug": "dikevoi",
+    "name": "dikevoi-app",
+    "slug": "dikevoi-app",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "assetBundlePatterns": [
       "assets/**/*"
     ],
     "orientation": "portrait",
     "icon": "./assets/images/dikevoi-logo.png",
-    "scheme": "dikevoi",
+    "scheme": "dikevoi-app",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
@@ -23,7 +24,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.nvdson2005.dikevoi"
+      "package": "com.dikevoi.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -32,6 +34,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-dev-client",
       [
         "expo-splash-screen",
         {
@@ -48,15 +51,13 @@
       "@react-native-community/datetimepicker",
       "expo-image",
       "expo-web-browser",
-      "expo-secure-store",
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "dikevoi",
-          "organization": "hehe-21"
-        }
-      ]
+      // "@react-native-google-signin/google-signin",
+      // [
+      //   "@react-native-google-signin/google-signin",
+      //   {
+      //     "iosUrlScheme": "com.googleusercontent.apps.YOUR_CLIENT_ID"
+      //   }
+      // ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -65,11 +66,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "02e13e68-fd07-4876-b4dd-1d184d5f8cd9"
+        "projectId": "063b006d-29a2-49d7-8ba3-444d72ee8699"
       }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/59e70a39-c66f-4db6-9561-b06199adde53"

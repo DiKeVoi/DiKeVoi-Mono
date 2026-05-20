@@ -1,0 +1,78 @@
+[    2055ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:377773
+[    2085ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:21723
+[    2278ms] [WARNING] [Layout children]: No route named "(auth)" exists in nested children: [+not-found, index, modal, (auth)/login, (auth)/onboarding, (auth)/otp, (health)/health-check, (matching)/active-rides, (matching)/browse, (matching)/chat, (matching)/connection, (matching)/finish, (matching)/in-progress, (matching)/negotiations, (matching)/payment, (matching)/report-success, (matching)/report, (matching)/results, (matching)/ride-confirmed, (matching)/chat/[id], (matching)/report/[id], (tabs)] @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[    2279ms] [WARNING] [Layout children]: No route named "(screens)" exists in nested children: [+not-found, index, modal, (auth)/login, (auth)/onboarding, (auth)/otp, (health)/health-check, (matching)/active-rides, (matching)/browse, (matching)/chat, (matching)/connection, (matching)/finish, (matching)/in-progress, (matching)/negotiations, (matching)/payment, (matching)/report-success, (matching)/report, (matching)/results, (matching)/ride-confirmed, (matching)/chat/[id], (matching)/report/[id], (tabs)] @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[    2280ms] [WARNING] [Layout children]: No route named "not-found" exists in nested children: [+not-found, index, modal, (auth)/login, (auth)/onboarding, (auth)/otp, (health)/health-check, (matching)/active-rides, (matching)/browse, (matching)/chat, (matching)/connection, (matching)/finish, (matching)/in-progress, (matching)/negotiations, (matching)/payment, (matching)/report-success, (matching)/report, (matching)/results, (matching)/ride-confirmed, (matching)/chat/[id], (matching)/report/[id], (tabs)] @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[    2813ms] [ERROR] React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ InProgressScreen(./(matching)/in-progress.tsx) 1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useContext                 useContext
+5. useEffect                  useEffect
+6. useState                   useState
+7. useCallback                useCallback
+8. useSyncExternalStore       useSyncExternalStore
+9. useEffect                  useEffect
+10. useContext                useContext
+11. useContext                useContext
+12. useState                  useState
+13. useEffect                 useEffect
+14. useCallback               useCallback
+15. useSyncExternalStore      useSyncExternalStore
+16. useCallback               useCallback
+17. undefined                 useEffect
+ @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:28937
+[    2827ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:367000:17)
+    at updateEffectImpl (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:367536:18)
+    at Object.useEffect (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:376488:9)
+    at exports.useEffect (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:360948:34)
+    at InProgressScreen (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:235781:19)
+    at Object.react_stack_bottom_frame (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:376013:20)
+    at renderWithHooks (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:366886:22)
+    at updateFunctionComponent (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:368275:19)
+    at beginWork (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:368844:18)
+    at runWithFiberInDEV (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:363363:70)
+    at performUnitOfWork (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371271:95)
+    at workLoopSync (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371166:40)
+    at renderRootSync (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371151:9)
+    at performWorkOnRoot (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:370824:35)
+    at performSyncWorkOnRoot (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371934:7)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371849:308)
+    at processRootScheduleInMicrotask (http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371870:104)
+    at http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:371945:154
+[    2827ms] [WARNING] %s
+
+%s
+ An error occurred in the <InProgressScreen(./(matching)/in-progress.tsx)> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[   33587ms] [WARNING] [Layout children]: No route named "(auth)" exists in nested children: [+not-found, index, modal, (auth)/login, (auth)/onboarding, (auth)/otp, (health)/health-check, (matching)/active-rides, (matching)/browse, (matching)/chat, (matching)/connection, (matching)/finish, (matching)/in-progress, (matching)/negotiations, (matching)/payment, (matching)/report-success, (matching)/report, (matching)/results, (matching)/ride-confirmed, (matching)/chat/[id], (matching)/report/[id], (tabs)] @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[   33588ms] [WARNING] [Layout children]: No route named "(screens)" exists in nested children: [+not-found, index, modal, (auth)/login, (auth)/onboarding, (auth)/otp, (health)/health-check, (matching)/active-rides, (matching)/browse, (matching)/chat, (matching)/connection, (matching)/finish, (matching)/in-progress, (matching)/negotiations, (matching)/payment, (matching)/report-success, (matching)/report, (matching)/results, (matching)/ride-confirmed, (matching)/chat/[id], (matching)/report/[id], (tabs)] @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[   33589ms] [WARNING] [Layout children]: No route named "not-found" exists in nested children: [+not-found, index, modal, (auth)/login, (auth)/onboarding, (auth)/otp, (health)/health-check, (matching)/active-rides, (matching)/browse, (matching)/chat, (matching)/connection, (matching)/finish, (matching)/in-progress, (matching)/negotiations, (matching)/payment, (matching)/report-success, (matching)/report, (matching)/results, (matching)/ride-confirmed, (matching)/chat/[id], (matching)/report/[id], (tabs)] @ http://localhost:8081/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app&transform.reactCompiler=true:166282
+[   68214ms] Unable to resolve module expo-clipboard from /Users/codeleap/Uni/Mobile/DiKeVoi-Mono/frontend/app/(matching)/payment.tsx: expo-clipboard could not be found within the project or in these directories:
+  node_modules
+  ../node_modules
+   8 |   Alert,
+   9 | } from "react-native";
+> 10 | import * as Clipboard from "expo-clipboard";
+     |                             ^
+  11 | import { SafeAreaView } from "react-native-safe-area-context";
+  12 | import { MaterialIcons } from "@expo/vector-icons";
+  13 | import { router, useLocalSearchParams } from "expo-router";
+[   72718ms] Unable to resolve module expo-clipboard from /Users/codeleap/Uni/Mobile/DiKeVoi-Mono/frontend/app/(matching)/payment.tsx: expo-clipboard could not be found within the project or in these directories:
+  node_modules
+  ../node_modules
+   8 |   Alert,
+   9 | } from "react-native";
+> 10 | import * as Clipboard from "expo-clipboard";
+     |                             ^
+  11 | import { SafeAreaView } from "react-native-safe-area-context";
+  12 | import { MaterialIcons } from "@expo/vector-icons";
+  13 | import { router, useLocalSearchParams } from "expo-router";

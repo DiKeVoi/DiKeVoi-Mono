@@ -17,6 +17,7 @@ import { NotificationProvider } from "@/hooks/NotificationContext";
 import * as Sentry from '@sentry/react-native';
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/AuthContext";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
 Sentry.init({
   dsn: 'https://c7fa84c2b600f6fee938f559c1066615@o4511351405543424.ingest.us.sentry.io/4511351422844928',
 
@@ -46,7 +47,13 @@ export default Sentry.wrap(function RootLayout() {
     Roboto_500Medium,
     Roboto_700Bold,
   });
-
+  
+  // useEffect(() => {
+  //   GoogleSignin.configure({
+  //     webClientId: process.env.EXPO_PUBLIC_GOOGLE_ID_CLIENT_WEB,
+  //   });
+  // }, []);
+  
   useEffect(() => {
     if (fontsLoaded || error) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);

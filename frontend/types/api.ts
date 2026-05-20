@@ -1,8 +1,8 @@
 export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
-export type RideStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type RideStatus = "pending" | "confirmed" | "in_progress" | "awaiting_payment" | "completed" | "cancelled";
 export type PostType = "offer" | "request";
-export type RidePostStatus = "open" | "matched" | "closed" | "cancelled";
-export type NegotiationStatus = "pending" | "accepted" | "rejected" | "cancelled";
+export type RidePostStatus = "open" |"connecting" | "matched" | "closed" | "cancelled";
+export type NegotiationStatus = "pending" | "accepted" | "rejected" | "cancelled" | "confirmed";
 export type NotificationType =
   | "ride_request" | "ride_confirmed" | "ride_cancelled" | "ride_completed"
   | "negotiation_offer" | "negotiation_accepted" | "negotiation_rejected"
@@ -37,6 +37,29 @@ export interface RidePost {
   updatedAt: string;
 }
 
+export interface MyRidePost {
+  id: string;
+  userId: string;
+  type: PostType; // 'offer' | 'request'
+  status: RidePostStatus; // 'open' | 'matched' | 'cancelled' etc.
+  originLocation: string;
+  destinationLocation: string;
+  departureTime: string;
+  seatsAvailable: number;
+  isRecurring: boolean;
+  preferredGender: Gender | null;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Các field bổ sung từ backend join
+  negotiationId?: string;
+  with?: {
+    name: string;
+    avatarUrl: string;
+  };
+}
+
 export interface Ride {
   id: string;
   offerUserId: string | null;
@@ -51,6 +74,13 @@ export interface Ride {
   isRecurring: boolean | null;
   createdAt: string;
   updatedAt: string;
+  startedAt: string | null;
+  finishedByOfferer: boolean;
+  finishedByRequester: boolean;
+  finishedAt: string | null;
+  paidByOfferer: boolean;
+  paidByRequester: boolean;
+  paidAt: string | null;
 }
 
 export interface Notification {
@@ -98,6 +128,42 @@ export interface Report {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Negotiation {
+  id: string;
+  offererUid: string;
+  requesterUid: string;
+  offerPostId: string | null;
+  requestPostId: string | null;
+  rideId: string | null;
+  status: NegotiationStatus;
+  pickupLocation: string | null;
+  dropoffLocation: string | null;
+  departureTime: string | null;
+  fare: number | null;
+  note: string | null;
+  confirmedByOfferer: boolean | null;
+  confirmedByRequester: boolean | null;
+  lastEditedBy: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface NegotiationUsers {
+  offererUid: string;
+  requesterUid: string;
+  offerer: {
+    id: string;
+    displayName: string | null;
+    photoUrl: string | null;
+  } | null;
+  requester: {
+    id: string;
+    displayName: string | null;
+    photoUrl: string | null;
+  } | null;
+}
+
 
 export interface TokenResponse {
   access_token: string;

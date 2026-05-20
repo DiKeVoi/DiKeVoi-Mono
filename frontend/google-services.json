@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "478294046753",
+    "project_id": "silken-champion-494703-p9",
+    "storage_bucket": "silken-champion-494703-p9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478294046753:android:628a72ba75fbd53fa00b60",
+        "android_client_info": {
+          "package_name": "com.dikevoi.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "478294046753-tf2vd2ud8couieu4rp1g9s1a73gu43t8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZZyrQ8i9yUjcm5S1Ek-9s7qmEElj2FB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "478294046753-tf2vd2ud8couieu4rp1g9s1a73gu43t8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

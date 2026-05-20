@@ -1,0 +1,63 @@
+- generic [ref=e9]:
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e17] [cursor=pointer]: 
+      - generic [ref=e18]: Tạo yêu cầu
+      - img [ref=e20]
+    - generic [ref=e23]:
+      - generic [ref=e24]: Bạn là ai?
+      - generic [ref=e25]:
+        - generic [ref=e27] [cursor=pointer]: Đi ké
+        - generic [ref=e29] [cursor=pointer]: Cho đi ké
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: Điểm đi
+          - generic [active] [ref=e33] [cursor=pointer]:
+            - generic [ref=e35]: 
+            - generic [ref=e37]: KTX Khu B - KTX ĐHQG-HCM
+        - generic [ref=e38]:
+          - generic [ref=e39]: Điểm đến
+          - generic [ref=e40] [cursor=pointer]:
+            - generic [ref=e42]: 
+            - generic [ref=e44]: Trường Đại học Bách Khoa
+      - generic [ref=e254]:
+        - generic [ref=e255]:
+          - generic [ref=e256]: 
+          - generic [ref=e257]: 3.1 km
+        - generic [ref=e259]:
+          - generic [ref=e260]: 
+          - generic [ref=e261]: 6 phút
+      - generic [ref=e45] [cursor=pointer]:
+        - generic:
+          - generic:
+            - generic: Ngày đi
+            - generic:
+              - generic:
+                - generic: 
+              - textbox "Chọn ngày": 11/05/2026
+      - generic [ref=e46] [cursor=pointer]:
+        - generic:
+          - generic:
+            - generic: Thời gian đi
+            - generic:
+              - generic:
+                - generic: 
+              - textbox "08:30"
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: 
+          - generic [ref=e51]: Lặp lại?
+        - generic [ref=e52]:
+          - generic [ref=e53]: Hàng ngày
+          - switch [ref=e57] [cursor=pointer]
+      - generic [ref=e59] [cursor=pointer]:
+        - generic [ref=e60]: Tạo yêu cầu
+        - generic [ref=e61]: 
+  - generic [ref=e62]:
+    - generic [ref=e63] [cursor=pointer]:
+      - img [ref=e64]
+      - generic [ref=e67]: Trang chủ
+    - img [ref=e70] [cursor=pointer]
+    - generic [ref=e71] [cursor=pointer]:
+      - img [ref=e72]
+      - generic [ref=e76]: Tài khoản

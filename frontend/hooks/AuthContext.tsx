@@ -1,14 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { router } from "expo-router";
+import { clearToken, getToken, setToken } from "@/lib/tokenStorage";
 import { authService } from "@/services/auth";
-import { setToken, getToken, clearToken } from "@/lib/tokenStorage";
 import type { User } from "@/types/api";
+import { router } from "expo-router";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  fetchMe: () => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -44,9 +46,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     router.replace("/(auth)/login");
   };
+  const fetchMe = async () => {
+    try {
+      const me = await authService.getMe();
+      setUser(me);
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+  };
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, fetchMe, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

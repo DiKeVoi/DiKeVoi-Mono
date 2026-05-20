@@ -2,9 +2,12 @@ import React, { useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useSafeBack } from "@/hooks/useSafeBack";
 
 export default function MatchingScreen() {
+  const safeBack = useSafeBack("/matching" as any);
+  const { myPostId, myPostType } = useLocalSearchParams<{ myPostId?: string; myPostType?: string }>();
   const pulseAnim1 = useRef(new Animated.Value(0)).current;
   const pulseAnim2 = useRef(new Animated.Value(0)).current;
   
@@ -62,14 +65,14 @@ export default function MatchingScreen() {
   });
 
   const handleCancelSearch = () => {
-    router.push("/(matching)/results");
+    router.push({ pathname: "/(matching)/results", params: { myPostId, myPostType } });
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-[#221610]">
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 pt-4 pb-2">
-        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 active:opacity-50">
+        <TouchableOpacity onPress={safeBack} className="p-2 -ml-2 active:opacity-50">
           <MaterialIcons name="arrow-back-ios" size={24} color="#152249" />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-[#152249] dark:text-white">

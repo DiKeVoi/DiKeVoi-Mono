@@ -32,4 +32,19 @@ export const ridesService = {
     const { data } = await apiClient.patch<Ride>(`/rides/${id}`, payload);
     return data;
   },
+
+  async start(id: string): Promise<Ride> {
+    const { data } = await apiClient.post<Ride>(`/rides/${id}/start`);
+    return data;
+  },
+
+  async finish(id: string): Promise<Ride> {
+    const { data } = await apiClient.post<Ride>(`/rides/${id}/finish`);
+    return data;
+  },
+
+  async pay(id: string): Promise<Ride> {
+    const { data } = await apiClient.post<Ride>(`/rides/${id}/pay`);
+    return data;
+  },
 };

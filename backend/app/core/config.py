@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 60 * 12  # 12 hours
+    jwt_expire_minutes: int = 60 * 24  # 1 day
 
     supabase_url: str = os.getenv("NEXT_PUBLIC_SUPABASE_URL", "")
     supabase_service_role_key: str = os.getenv(

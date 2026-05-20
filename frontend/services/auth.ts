@@ -1,8 +1,12 @@
 import { apiClient } from "@/lib/axios";
-import type { User, TokenResponse } from "@/types/api";
+import type { TokenResponse, User } from "@/types/api";
 
 export const authService = {
-  async register(email: string, password: string, displayName?: string): Promise<User> {
+  async register(
+    email: string,
+    password: string,
+    displayName?: string,
+  ): Promise<User> {
     const { data } = await apiClient.post<User>("/auth/signup", {
       email,
       password,
@@ -26,8 +30,33 @@ export const authService = {
     return data;
   },
 
+  async loginWithGoogle(
+    email: string,
+    displayName: string,
+    photoUrl: string | null,
+  ): Promise<TokenResponse> {
+    const { data } = await apiClient.post<TokenResponse>("/auth/google", {
+      email,
+      display_name: displayName,
+      photo_url: photoUrl,
+    });
+    if (!data.access_token) {
+      throw new Error("Failed to login with Google");
+    }
+    return data;
+  },
+
   async getMe(): Promise<User> {
     const { data } = await apiClient.get<User>("/auth/me");
+    return data;
+  },
+
+  async updateProfile(payload: {
+    display_name?: string | null;
+    gender?: string | null;
+    photo_url?: string | null;
+  }): Promise<User> {
+    const { data } = await apiClient.patch<User>("/auth/me", payload);
     return data;
   },
 };

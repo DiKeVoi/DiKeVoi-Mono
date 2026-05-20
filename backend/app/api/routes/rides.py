@@ -17,6 +17,8 @@ CurrentUser = Annotated[dict, Depends(get_current_user)]
 class RideStatus(str, Enum):
     pending = "pending"
     confirmed = "confirmed"
+    in_progress = "in_progress"
+    awaiting_payment = "awaiting_payment"
     completed = "completed"
     cancelled = "cancelled"
 
@@ -139,6 +141,153 @@ def delete_ride(ride_id: str, current_user: CurrentUser) -> None:
     supabase.table("Ride").delete().eq("id", ride_id).execute()
 
 
+@router.post("/{ride_id}/start")
+def start_ride(ride_id: str, current_user: CurrentUser) -> dict:
+    ride = _get_or_404(ride_id)
+    user_id = current_user["user_id"]
+
+    if ride.get("offerUserId") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the offerer can start the ride",
+        )
+
+    if ride.get("status") != RideStatus.confirmed.value:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ride must be confirmed before starting",
+        )
+
+    now = datetime.now(timezone.utc).isoformat()
+    result = (
+        supabase.table("Ride")
+        .update(
+            {
+                "status": RideStatus.in_progress.value,
+                "startedAt": now,
+                "updatedAt": now,
+            }
+        )
+        .eq("id", ride_id)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to start ride",
+        )
+
+    requester_id = ride.get("requestUserId")
+    if requester_id:
+        _notify(
+            requester_id,
+            "Chuyến đi đã bắt đầu! 🚗",
+            "Tài xế đã xác nhận khởi hành. Chúc bạn đi vui!",
+        )
+
+    return cast(dict, result.data[0])
+
+
+@router.post("/{ride_id}/finish")
+def finish_ride(ride_id: str, current_user: CurrentUser) -> dict:
+    ride = _get_or_404(ride_id)
+    user_id = current_user["user_id"]
+    _require_participant(ride, user_id)
+
+    if ride.get("status") != RideStatus.in_progress.value:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ride must be in progress to finish",
+        )
+
+    is_offerer = ride.get("offerUserId") == user_id
+    flag_field = "finishedByOfferer" if is_offerer else "finishedByRequester"
+    other_flag = "finishedByRequester" if is_offerer else "finishedByOfferer"
+    other_id = ride.get("requestUserId") if is_offerer else ride.get("offerUserId")
+
+    now = datetime.now(timezone.utc).isoformat()
+    updates: dict = {flag_field: True, "updatedAt": now}
+
+    if ride.get(other_flag):
+        updates["status"] = RideStatus.awaiting_payment.value
+        updates["finishedAt"] = now
+
+    result = supabase.table("Ride").update(updates).eq("id", ride_id).execute()
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to finish ride",
+        )
+
+    updated_ride = cast(dict, result.data[0])
+
+    if updated_ride.get("status") == RideStatus.awaiting_payment.value:
+        for uid in [ride.get("offerUserId"), ride.get("requestUserId")]:
+            if uid:
+                _notify(
+                    uid,
+                    "Chuyến đi hoàn thành! 💰",
+                    "Vui lòng xác nhận thanh toán chi phí chuyến đi.",
+                )
+    elif other_id:
+        _notify(
+            other_id,
+            "Bạn đồng hành đã xác nhận đến nơi ✓",
+            "Đang chờ bạn xác nhận để hoàn tất chuyến đi.",
+        )
+
+    return updated_ride
+
+
+@router.post("/{ride_id}/pay")
+def confirm_payment(ride_id: str, current_user: CurrentUser) -> dict:
+    ride = _get_or_404(ride_id)
+    user_id = current_user["user_id"]
+    _require_participant(ride, user_id)
+
+    if ride.get("status") != RideStatus.awaiting_payment.value:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Ride must be awaiting payment"
+        )
+
+    is_offerer = ride.get("offerUserId") == user_id
+    flag_field = "paidByOfferer" if is_offerer else "paidByRequester"
+    other_flag = "paidByRequester" if is_offerer else "paidByOfferer"
+    other_id = ride.get("requestUserId") if is_offerer else ride.get("offerUserId")
+
+    now = datetime.now(timezone.utc).isoformat()
+    updates: dict = {flag_field: True, "updatedAt": now}
+
+    if ride.get(other_flag):
+        updates["status"] = RideStatus.completed.value
+        updates["paidAt"] = now
+
+    result = supabase.table("Ride").update(updates).eq("id", ride_id).execute()
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to confirm payment",
+        )
+
+    updated_ride = cast(dict, result.data[0])
+
+    if updated_ride.get("status") == RideStatus.completed.value:
+        for uid in [ride.get("offerUserId"), ride.get("requestUserId")]:
+            if uid:
+                _notify(
+                    uid, "Thanh toán hoàn tất! 🎉", "Cảm ơn bạn đã sử dụng Đi ké với!"
+                )
+    elif other_id:
+        _notify(
+            other_id,
+            "Bạn đồng hành đã xác nhận thanh toán ✓",
+            "Đang chờ bạn xác nhận để hoàn tất.",
+        )
+
+    return updated_ride
+
+
 # --- Helpers ---
 
 
@@ -157,3 +306,19 @@ def _require_participant(ride: dict, user_id: str) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not a participant of this ride",
         )
+
+
+def _notify(user_id: str, title: str, body: str) -> None:
+    try:
+        supabase.table("Notification").insert(
+            {
+                "id": str(uuid.uuid4()),
+                "userId": user_id,
+                "title": title,
+                "body": body,
+                "isRead": False,
+                "createdAt": datetime.now(timezone.utc).isoformat(),
+            }
+        ).execute()
+    except Exception:
+        pass
