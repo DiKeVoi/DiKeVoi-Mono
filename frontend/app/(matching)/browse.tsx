@@ -226,8 +226,9 @@ export default function BrowseScreen() {
   const { data: posts, isLoading, error, refetch, isRefetching } = useRidePosts(queryType);
   const { data: myPosts = [] } = useMyRidePosts();
 
-  const visiblePosts = (posts ?? []).filter((p) => p.status === "open");
-
+  const visiblePosts = (posts ?? []).filter(
+    (p) => p.status === "open" && new Date(p.departureTime) > new Date()
+  );
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900" edges={["top"]}>
       {/* Header */}
