@@ -33,9 +33,16 @@ function formatTime(iso: string) {
 function formatDate(iso: string) {
   const d = new Date(iso);
   const now = new Date();
-  const diff = Math.floor((d.getTime() - now.getTime()) / 86_400_000);
-  if (diff === 0) return "Hôm nay";
-  if (diff === 1) return "Ngày mai";
+
+  const dDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const diffTime = dDate.getTime() - nowDate.getTime();
+  const diffDays = Math.round(diffTime / 86_400_000);
+
+  if (diffDays === 0) return "Hôm nay";
+  if (diffDays === 1) return "Ngày mai";
+  
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
