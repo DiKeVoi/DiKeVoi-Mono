@@ -1,18 +1,30 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 
-jest.mock('expo-router', () => ({
-  Link: ({ children }: any) => children,
-  Redirect: () => null,
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: () => ({}),
-  usePathname: () => '/',
-  router: {
-    back: jest.fn(),
-    push: jest.fn(),
-    replace: jest.fn(),
-  },
-}));
+jest.mock('expo-router', () => {
+  const mockPush = jest.fn();
+  const mockBack = jest.fn();
+  const mockReplace = jest.fn();
+  const mockCanGoBack = jest.fn(() => true);
+  return {
+    Link: ({ children }: any) => children,
+    Redirect: () => null,
+    useRouter: () => ({
+      push: mockPush,
+      replace: mockReplace,
+      back: mockBack,
+      canGoBack: mockCanGoBack,
+    }),
+    useLocalSearchParams: () => ({}),
+    usePathname: () => '/',
+    router: {
+      back: mockBack,
+      push: mockPush,
+      replace: mockReplace,
+      canGoBack: mockCanGoBack,
+    },
+  };
+});
 
 jest.mock('react-native-safe-area-context', () => {
   const React = require('react');
@@ -65,26 +77,22 @@ describe('MatchingScreen', () => {
   // ---- Navigation interactions ----
 
   it('calls router.back when back button is pressed', () => {
-    const routerModule = require('expo-router');
-    const mockBack = jest.fn();
-    routerModule.router.back = mockBack;
-
+    const { router } = require('expo-router');
     const { UNSAFE_getAllByType } = render(<MatchingScreen />);
     const { TouchableOpacity } = require('react-native');
     const buttons = UNSAFE_getAllByType(TouchableOpacity);
     // First touchable is the header back button
     fireEvent.press(buttons[0]);
-    expect(mockBack).toHaveBeenCalled();
+    expect(router.back).toHaveBeenCalled();
   });
 
   it('calls router.push with "/(matching)/results" when cancel search is pressed', () => {
-    const routerModule = require('expo-router');
-    const mockPush = jest.fn();
-    routerModule.router.push = mockPush;
-
+    const { router } = require('expo-router');
     const { getByText } = render(<MatchingScreen />);
     fireEvent.press(getByText('Hủy tìm kiếm'));
-    expect(mockPush).toHaveBeenCalledWith('/(matching)/results');
+    expect(router.push).toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/(matching)/results' })
+    );
   });
 
   // ---- Animation views render ----

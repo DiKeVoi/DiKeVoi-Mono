@@ -11,6 +11,7 @@ jest.mock('expo-router', () => {
     push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
+    canGoBack: jest.fn(() => true),
   };
   return {
     Link: ({ children }: any) => children,
@@ -24,8 +25,8 @@ jest.mock('expo-router', () => {
 
 jest.mock('@/hooks/AuthContext', () => ({
   useAuth: jest.fn(() => ({
-    login: jest.fn().mockImplementation((_email: string, password: string) => {
-      if (password !== '1234') throw new Error('Invalid credentials');
+    login: jest.fn().mockImplementation((_email: string, otp: string) => {
+      if (otp !== '123456') throw new Error('Invalid OTP');
     }),
     logout: jest.fn(),
     user: null,
@@ -33,11 +34,23 @@ jest.mock('@/hooks/AuthContext', () => ({
   })),
 }));
 
+jest.mock('@/services/auth', () => ({
+  authService: {
+    sendOtp: jest.fn().mockResolvedValue(undefined),
+    verifyOtp: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 import OTPScreen from '../../app/(auth)/otp';
 
 // Access the mocked router functions after module resolution
 function getMockRouter() {
-  return require('expo-router').router as { push: jest.Mock; replace: jest.Mock; back: jest.Mock };
+  return require('expo-router').router as {
+    push: jest.Mock;
+    replace: jest.Mock;
+    back: jest.Mock;
+    canGoBack: jest.Mock;
+  };
 }
 
 function getMockSearchParams() {
@@ -50,7 +63,7 @@ function getTouchables(component: ReturnType<typeof render>) {
   return component.UNSAFE_getAllByType(TouchableOpacity);
 }
 
-// Helper: get TextInput instances (the 4 OTP inputs)
+// Helper: get TextInput instances (the 6 OTP inputs)
 function getOtpInputs(component: ReturnType<typeof render>) {
   const { TextInput } = require('react-native');
   return component.UNSAFE_getAllByType(TextInput);
@@ -60,6 +73,20 @@ describe('OTPScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getMockSearchParams().mockReturnValue({});
+    // Re-apply canGoBack default after clearAllMocks
+    getMockRouter().canGoBack.mockReturnValue(true);
+    // Re-apply auth mock after clearAllMocks
+    const { useAuth } = require('@/hooks/AuthContext');
+    useAuth.mockReturnValue({
+      login: jest.fn().mockImplementation((_email: string, otp: string) => {
+        if (otp !== '123456') throw new Error('Invalid OTP');
+      }),
+      logout: jest.fn(),
+      user: null,
+      isLoading: false,
+    });
+    // Re-apply authService mock after clearAllMocks
+    require('@/services/auth').authService.sendOtp.mockResolvedValue(undefined);
     jest.useFakeTimers();
   });
 
@@ -83,7 +110,7 @@ describe('OTPScreen', () => {
 
   it('renders the instruction text', () => {
     const { getByText } = render(<OTPScreen />);
-    expect(getByText('Vui lòng nhập mã gồm 4 chữ số đã được gửi đến email:')).toBeTruthy();
+    expect(getByText('Vui lòng nhập mã gồm 6 chữ số đã được gửi đến email:')).toBeTruthy();
   });
 
   it('renders fallback email when no param is passed', () => {
@@ -98,10 +125,10 @@ describe('OTPScreen', () => {
     expect(getByText('test@student.edu.vn')).toBeTruthy();
   });
 
-  it('renders 4 OTP TextInput fields', () => {
+  it('renders 6 OTP TextInput fields', () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
-    expect(inputs.length).toBe(4);
+    expect(inputs.length).toBe(6);
   });
 
   it('renders the confirm button', () => {
@@ -132,7 +159,8 @@ describe('OTPScreen', () => {
   // Back navigation
   // -------------------------
 
-  it('calls router.back() when back button is pressed', () => {
+  it('calls router.back() when back button is pressed (canGoBack returns true)', () => {
+    getMockRouter().canGoBack.mockReturnValue(true);
     const comp = render(<OTPScreen />);
     const touchables = getTouchables(comp);
     act(() => {
@@ -173,11 +201,13 @@ describe('OTPScreen', () => {
     const inputs = getOtpInputs(comp);
     const touchables = getTouchables(comp);
 
-    // Fill all 4 inputs with wrong OTP to enable button, then trigger wrong-OTP error
+    // Fill all 6 inputs with wrong OTP to enable button, then trigger wrong-OTP error
     fireEvent.changeText(inputs[0], '9');
     fireEvent.changeText(inputs[1], '9');
     fireEvent.changeText(inputs[2], '9');
     fireEvent.changeText(inputs[3], '9');
+    fireEvent.changeText(inputs[4], '9');
+    fireEvent.changeText(inputs[5], '9');
     act(() => { touchables[1].props.onPress(); });
     expect(comp.getByText('Mã OTP không chính xác. Vui lòng thử lại.')).toBeTruthy();
 
@@ -194,24 +224,25 @@ describe('OTPScreen', () => {
     const comp = render(<OTPScreen />);
     const touchables = getTouchables(comp);
     act(() => { touchables[1].props.onPress(); });
-    expect(comp.getByText('Vui lòng nhập đủ 4 số OTP.')).toBeTruthy();
+    expect(comp.getByText('Vui lòng nhập đủ 6 số OTP.')).toBeTruthy();
   });
 
-  it('shows error when verify is called with fewer than 4 digits', () => {
+  it('shows error when verify is called with fewer than 6 digits', () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
     const touchables = getTouchables(comp);
     fireEvent.changeText(inputs[0], '1');
     fireEvent.changeText(inputs[1], '2');
+    fireEvent.changeText(inputs[2], '3');
     act(() => { touchables[1].props.onPress(); });
-    expect(comp.getByText('Vui lòng nhập đủ 4 số OTP.')).toBeTruthy();
+    expect(comp.getByText('Vui lòng nhập đủ 6 số OTP.')).toBeTruthy();
   });
 
   // -------------------------
   // handleVerify – wrong OTP
   // -------------------------
 
-  it('shows error when incorrect OTP "9999" is entered', () => {
+  it('shows error when incorrect OTP "999999" is entered', () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
     const touchables = getTouchables(comp);
@@ -219,6 +250,8 @@ describe('OTPScreen', () => {
     fireEvent.changeText(inputs[1], '9');
     fireEvent.changeText(inputs[2], '9');
     fireEvent.changeText(inputs[3], '9');
+    fireEvent.changeText(inputs[4], '9');
+    fireEvent.changeText(inputs[5], '9');
     act(() => { touchables[1].props.onPress(); });
     expect(comp.getByText('Mã OTP không chính xác. Vui lòng thử lại.')).toBeTruthy();
   });
@@ -227,13 +260,15 @@ describe('OTPScreen', () => {
   // handleVerify – correct OTP
   // -------------------------
 
-  it('navigates to /(tabs)/home on correct OTP "1234"', async () => {
+  it('navigates to /(tabs)/home on correct OTP "123456"', async () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
     fireEvent.changeText(inputs[0], '1');
     fireEvent.changeText(inputs[1], '2');
     fireEvent.changeText(inputs[2], '3');
     fireEvent.changeText(inputs[3], '4');
+    fireEvent.changeText(inputs[4], '5');
+    fireEvent.changeText(inputs[5], '6');
     const touchables = getTouchables(comp);
     await act(async () => { touchables[1].props.onPress(); });
     expect(getMockRouter().replace).toHaveBeenCalledWith('/(tabs)/home');
@@ -246,6 +281,8 @@ describe('OTPScreen', () => {
     fireEvent.changeText(inputs[1], '2');
     fireEvent.changeText(inputs[2], '3');
     fireEvent.changeText(inputs[3], '4');
+    fireEvent.changeText(inputs[4], '5');
+    fireEvent.changeText(inputs[5], '6');
     await act(async () => { fireEvent.press(comp.getByText('Xác nhận')); });
     expect(getMockRouter().replace).toHaveBeenCalledWith('/(tabs)/home');
   });
@@ -261,13 +298,15 @@ describe('OTPScreen', () => {
     expect(touchables[1].props.disabled).toBe(true);
   });
 
-  it('confirm button is enabled when all 4 digits are entered', () => {
+  it('confirm button is enabled when all 6 digits are entered', () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
     fireEvent.changeText(inputs[0], '1');
     fireEvent.changeText(inputs[1], '2');
     fireEvent.changeText(inputs[2], '3');
     fireEvent.changeText(inputs[3], '4');
+    fireEvent.changeText(inputs[4], '5');
+    fireEvent.changeText(inputs[5], '6');
     const touchables = getTouchables(comp);
     expect(touchables[1].props.disabled).toBe(false);
   });
@@ -319,7 +358,7 @@ describe('OTPScreen', () => {
     expect(comp.queryByText(/\d+s/)).toBeNull();
   });
 
-  it('resend resets OTP fields and countdown when triggered at 0', () => {
+  it('resend resets OTP fields and countdown when triggered at 0', async () => {
     const comp = render(<OTPScreen />);
 
     // Fill in some digits
@@ -333,8 +372,9 @@ describe('OTPScreen', () => {
     }
 
     // Press resend (re-query touchables after re-renders)
+    // handleResendOtp is async (calls authService.sendOtp), so use async act
     const touchables = getTouchables(comp);
-    act(() => { touchables[touchables.length - 1].props.onPress(); });
+    await act(async () => { touchables[touchables.length - 1].props.onPress(); });
 
     // OTP inputs should be cleared (re-query after state update)
     const resetInputs = getOtpInputs(comp);
@@ -397,6 +437,20 @@ describe('OTPScreen', () => {
     expect(inputs[2].props.value).toBe('');
   });
 
+  it('handles Backspace on empty input at index 4 (attempts to focus index 3)', () => {
+    const comp = render(<OTPScreen />);
+    const inputs = getOtpInputs(comp);
+    fireEvent(inputs[4], 'keyPress', { nativeEvent: { key: 'Backspace' } });
+    expect(inputs[3].props.value).toBe('');
+  });
+
+  it('handles Backspace on empty input at index 5 (attempts to focus index 4)', () => {
+    const comp = render(<OTPScreen />);
+    const inputs = getOtpInputs(comp);
+    fireEvent(inputs[5], 'keyPress', { nativeEvent: { key: 'Backspace' } });
+    expect(inputs[4].props.value).toBe('');
+  });
+
   it('handles non-Backspace key event without side effects', () => {
     const comp = render(<OTPScreen />);
     const inputs = getOtpInputs(comp);
@@ -410,7 +464,7 @@ describe('OTPScreen', () => {
 
   it('does not render error text initially', () => {
     const { queryByText } = render(<OTPScreen />);
-    expect(queryByText('Vui lòng nhập đủ 4 số OTP.')).toBeNull();
+    expect(queryByText('Vui lòng nhập đủ 6 số OTP.')).toBeNull();
     expect(queryByText('Mã OTP không chính xác. Vui lòng thử lại.')).toBeNull();
   });
 
@@ -423,6 +477,8 @@ describe('OTPScreen', () => {
     fireEvent.changeText(inputs[1], '9');
     fireEvent.changeText(inputs[2], '9');
     fireEvent.changeText(inputs[3], '9');
+    fireEvent.changeText(inputs[4], '9');
+    fireEvent.changeText(inputs[5], '9');
     act(() => { touchables[1].props.onPress(); });
     expect(comp.getByText('Mã OTP không chính xác. Vui lòng thử lại.')).toBeTruthy();
 
@@ -443,6 +499,8 @@ describe('OTPScreen', () => {
     fireEvent.changeText(inputs[1], '9');
     fireEvent.changeText(inputs[2], '9');
     fireEvent.changeText(inputs[3], '9');
+    fireEvent.changeText(inputs[4], '9');
+    fireEvent.changeText(inputs[5], '9');
     act(() => { touchables[1].props.onPress(); });
 
     // After error, inputs should have error styling (border-red-500)
@@ -472,7 +530,7 @@ describe('OTPScreen', () => {
     expect(btnText.props.className).toContain('text-slate-500');
   });
 
-  it('confirm button text has active (white) color when 4 digits entered', () => {
+  it('confirm button text has active (white) color when 6 digits entered', () => {
     const { getByText, UNSAFE_getAllByType } = render(<OTPScreen />);
     const { TextInput } = require('react-native');
     const inputs = UNSAFE_getAllByType(TextInput);
@@ -480,6 +538,8 @@ describe('OTPScreen', () => {
     fireEvent.changeText(inputs[1], '2');
     fireEvent.changeText(inputs[2], '3');
     fireEvent.changeText(inputs[3], '4');
+    fireEvent.changeText(inputs[4], '5');
+    fireEvent.changeText(inputs[5], '6');
     const btnText = getByText('Xác nhận');
     expect(btnText.props.className).toContain('text-white');
   });

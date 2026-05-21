@@ -70,11 +70,6 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
     </View>
     <Text
       className="text-lg font-bold text-[#152249] ml-4"
-      style={
-        {
-          "fontFamily": "Plus Jakarta Sans",
-        }
-      }
     >
       Yêu cầu kết nối
     </Text>
@@ -121,23 +116,40 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
             className="flex-row justify-between items-start mb-6"
           >
             <View
-              className="flex-row flex-1"
+              className="flex-row flex-1 items-center"
             >
-              <Image
-                className="w-16 h-16 rounded-2xl"
-                source={
-                  {
-                    "uri": "https://i.pravatar.cc/150?u=avatar_a",
+              <View
+                className="w-16 h-16 rounded-2xl bg-slate-200 items-center justify-center"
+              >
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#94A3B8",
+                        "fontSize": 36,
+                      },
+                      undefined,
+                      {
+                        "fontFamily": "material",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
                   }
-                }
-              />
+                >
+                  
+                </Text>
+              </View>
               <View
                 className="ml-4 flex-1"
               >
                 <Text
-                  className="text-[20px] font-bold text-[#152249] mb-2"
+                  className="text-[18px] font-bold text-[#152249] mb-2"
                 >
-                  Nguyễn Văn A
+                  Người đi ké
                 </Text>
                 <View
                   className="flex-row items-center gap-2"
@@ -151,40 +163,6 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
                       Đi ké
                     </Text>
                   </View>
-                  <View
-                    className="bg-slate-100 p-1 rounded-md"
-                  >
-                    <Text
-                      allowFontScaling={false}
-                      selectable={false}
-                      style={
-                        [
-                          {
-                            "color": "#64748B",
-                            "fontSize": 14,
-                          },
-                          undefined,
-                          {
-                            "fontFamily": "material",
-                            "fontStyle": "normal",
-                            "fontWeight": "normal",
-                          },
-                          {},
-                        ]
-                      }
-                    >
-                      
-                    </Text>
-                  </View>
-                  <View
-                    className="bg-slate-100 px-2.5 py-1 rounded-md"
-                  >
-                    <Text
-                      className="text-slate-500 text-[10px] font-bold"
-                    >
-                      Nam
-                    </Text>
-                  </View>
                 </View>
               </View>
             </View>
@@ -192,14 +170,9 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
               className="items-end"
             >
               <Text
-                className="text-[10px] font-bold text-slate-400 mb-1"
+                className="text-[10px] font-bold text-slate-400"
               >
-                10/10/2026
-              </Text>
-              <Text
-                className="text-[16px] font-bold text-[#152249]"
-              >
-                08:30 AM
+                08:30 - 10/10/2026
               </Text>
             </View>
           </View>
@@ -228,9 +201,11 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
               󰟙
             </Text>
             <Text
-              className="ml-2 text-[14px] text-slate-500 font-medium"
+              className="ml-2 text-[14px] text-slate-500 font-medium flex-1"
             >
-              KTX Khu B → Trường Đại học KHTN
+              KTX Khu B
+               → 
+              Trường Đại học KHTN
             </Text>
           </View>
         </View>
@@ -245,7 +220,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
           <Text
             className="text-[12px] font-bold text-slate-500 uppercase tracking-widest"
           >
-            Chi tiết chuyến đi của bạn
+            Chi tiết thương lượng
           </Text>
         </View>
         <View
@@ -280,11 +255,11 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
             >
               KTX Khu B
                → 
-              ĐH Bách Khoa
+              Trường Đại học KHTN
             </Text>
           </View>
           <View
-            className="h-px bg-[#C6C6CF]/10 w-full mb-4"
+            className="h-px bg-[#C6C6CF]/30 w-full mb-4"
           />
           <View>
             <Text
@@ -319,7 +294,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
               <Text
                 className="text-sm font-bold text-[#1A1C1C]"
               >
-                08:00 - 10/10/2026
+                08:30 - 10/10/2026
               </Text>
             </View>
           </View>
@@ -333,7 +308,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
             {
               "busy": undefined,
               "checked": undefined,
-              "disabled": undefined,
+              "disabled": false,
               "expanded": undefined,
               "selected": undefined,
             }
@@ -398,7 +373,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
             {
               "busy": undefined,
               "checked": undefined,
-              "disabled": undefined,
+              "disabled": false,
               "expanded": undefined,
               "selected": undefined,
             }
@@ -430,7 +405,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
           <Text
             className="text-[#152249] font-bold text-base"
           >
-            Hủy kết nối
+            Từ chối
           </Text>
         </View>
       </View>

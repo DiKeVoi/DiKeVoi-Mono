@@ -1,9 +1,10 @@
 jest.mock('expo-router', () => ({
   Link: ({ children, asChild }: any) => (children),
   Redirect: () => null,
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) }),
   useLocalSearchParams: () => ({}),
   usePathname: () => '/',
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
 }));
 
 jest.mock('expo-haptics', () => ({
@@ -89,6 +90,64 @@ jest.mock('react-native-maps', () => {
 });
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons');
+
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    SafeAreaView: ({ children, ...props }: any) => React.createElement(View, props, children),
+    SafeAreaProvider: ({ children }: any) => children,
+    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  };
+});
+
+jest.mock('@/lib/supabase', () => ({
+  supabase: {
+    channel: jest.fn(() => ({
+      on: jest.fn().mockReturnThis(),
+      subscribe: jest.fn().mockReturnThis(),
+    })),
+    removeChannel: jest.fn(),
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: null, error: null }),
+    })),
+  },
+}));
+
+jest.mock('@/hooks/useRides', () => ({
+  useRides: () => ({ data: [], isLoading: false }),
+  useActiveRides: () => ({ data: [], isLoading: false }),
+  useRide: () => ({ data: null, isLoading: false }),
+  useUpdateRideStatus: () => ({ mutate: jest.fn(), isPending: false }),
+  useStartRide: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useFinishRide: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useConfirmPayment: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  RIDES_KEY: 'rides',
+}));
+
+jest.mock('@/hooks/useNegotiations', () => ({
+  useNegotiations: () => ({ data: [], isLoading: false }),
+  useNegotiation: () => ({ data: null, isLoading: false }),
+  useNegotiationUsers: () => ({ data: null, isLoading: false }),
+  useCreateNegotiation: () => ({ mutateAsync: jest.fn().mockResolvedValue({ id: 'neg-1' }), isPending: false }),
+  useUpdateNegotiation: () => ({ mutate: jest.fn(), isPending: false }),
+  useConfirmNegotiation: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  NEGOTIATIONS_KEY: 'negotiations',
+}));
+
+jest.mock('@/hooks/useUser', () => ({
+  useUser: () => ({
+    user: { id: 'user-1', email: 'user@student.edu.vn', displayName: 'Nguyễn Văn A', gender: 'male', photoUrl: null, isVerified: true, createdAt: '2023-01-01' },
+    isLoading: false,
+    updateUser: jest.fn().mockResolvedValue({}),
+    isPending: false,
+  }),
+}));
 
 jest.mock('@/hooks/AuthContext', () => ({
   AuthProvider: ({ children }: any) => children,

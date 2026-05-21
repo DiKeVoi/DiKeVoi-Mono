@@ -86,7 +86,12 @@ def test_signup_with_optional_fields(
 
 
 def test_otp_verify_success(client: TestClient, mock_supabase: MagicMock) -> None:
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+    # OTP query: .select("id").eq().eq().eq().gte().limit().execute().data
+    mock_supabase.table.return_value.select.return_value.eq.return_value.eq.return_value.eq.return_value.gte.return_value.limit.return_value.execute.return_value.data = [
+        {"id": "otp-id-123"}
+    ]
+    # User lookup: .select("id, email, ...").eq().limit().execute().data
+    mock_supabase.table.return_value.select.return_value.eq.return_value.limit.return_value.execute.return_value.data = [
         {"id": "user-123", "email": "user@example.com"}
     ]
 
@@ -103,7 +108,7 @@ def test_otp_verify_success(client: TestClient, mock_supabase: MagicMock) -> Non
 
 def test_otp_verify_invalid_otp(client: TestClient, mock_supabase: MagicMock) -> None:
     otp_chain = (
-        mock_supabase.table.return_value.select.return_value.eq.return_value.eq.return_value.eq.return_value.gt.return_value.limit.return_value.execute.return_value
+        mock_supabase.table.return_value.select.return_value.eq.return_value.eq.return_value.eq.return_value.gte.return_value.limit.return_value.execute.return_value
     )
     otp_chain.data = []
 

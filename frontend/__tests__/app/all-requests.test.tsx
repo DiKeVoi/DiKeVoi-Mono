@@ -14,9 +14,10 @@ describe('AllRequests screen', () => {
   });
 
   it('renders MyRequests in full view mode', () => {
-    const { getByText, queryByText } = render(<AllRequests />);
-    expect(getByText('Yêu cầu của tôi')).toBeTruthy();
-    expect(queryByText('Xem tất cả')).toBeNull();
+    const { getAllByText, queryByText } = render(<AllRequests />);
+    const items = getAllByText(/Đang tìm kiếm|Đã ghép cặp|Đang chờ xác nhận/);
+    expect(items.length).toBeGreaterThan(0);
+    expect(queryByText('Yêu cầu của tôi')).toBeNull();
   });
 
   it('shows all 5 requests', () => {

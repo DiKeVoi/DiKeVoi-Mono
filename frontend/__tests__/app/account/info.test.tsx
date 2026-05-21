@@ -1,26 +1,58 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 import PersonalInfoScreen from '../../../app/(tabs)/account/Info';
 
-// router is used directly in the component (not useRouter)
-const mockRouterBack = jest.fn();
-const mockRouterPush = jest.fn();
-jest.mock('expo-router', () => ({
-  router: {
+jest.mock('expo-router', () => {
+  const router = {
     push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
-  },
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: () => ({}),
-  usePathname: () => '/',
-  Link: ({ children }: any) => children,
-  Redirect: () => null,
+    canGoBack: jest.fn(() => true),
+  };
+  return {
+    router,
+    useRouter: () => router,
+    useLocalSearchParams: () => ({}),
+    usePathname: () => '/',
+    Link: ({ children }: any) => children,
+    Redirect: () => null,
+  };
+});
+
+jest.mock('expo-image-picker', () => ({
+  requestMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
+  launchImageLibraryAsync: jest.fn().mockResolvedValue({ canceled: true, assets: [] }),
 }));
 
-// Suppress console.log from handleSave
-jest.spyOn(console, 'log').mockImplementation(() => {});
+jest.mock('@/hooks/useImage', () => ({
+  useAvatarUpload: () => ({
+    pickAndUploadImage: jest.fn().mockResolvedValue(null),
+    isUploading: false,
+  }),
+}));
+
+// Override global useUser mock with stable user reference to prevent useEffect re-triggers
+jest.mock('@/hooks/useUser', () => {
+  const updateUser = jest.fn().mockResolvedValue({});
+  const user = {
+    id: 'user-1',
+    email: 'user@student.edu.vn',
+    displayName: 'Nguyễn Văn A',
+    gender: 'male',
+    photoUrl: null,
+    isVerified: true,
+    createdAt: '2023-01-01',
+  };
+  return {
+    useUser: () => ({
+      user,
+      isLoading: false,
+      isUpdating: false,
+      updateUser,
+    }),
+  };
+});
 
 describe('PersonalInfoScreen (Info.tsx)', () => {
   beforeEach(() => {
@@ -52,9 +84,9 @@ describe('PersonalInfoScreen (Info.tsx)', () => {
     expect(getByText('Email sinh viên')).toBeTruthy();
   });
 
-  it('renders the email validation hint', () => {
+  it('renders the email note text', () => {
     const { getByText } = render(<PersonalInfoScreen />);
-    expect(getByText('* Email phải kết thúc bằng @student.edu.vn')).toBeTruthy();
+    expect(getByText('* Email không thể thay đổi')).toBeTruthy();
   });
 
   it('renders the gender field label', () => {
@@ -76,33 +108,27 @@ describe('PersonalInfoScreen (Info.tsx)', () => {
 
   it('renders full name input with mock data value', () => {
     const { getByDisplayValue } = render(<PersonalInfoScreen />);
-    expect(getByDisplayValue('Nguyễn Văn An')).toBeTruthy();
+    // Global mock: user.displayName = 'Nguyễn Văn A'
+    expect(getByDisplayValue('Nguyễn Văn A')).toBeTruthy();
   });
 
-  it('renders email input with mock data value', () => {
-    const { getByDisplayValue } = render(<PersonalInfoScreen />);
-    expect(getByDisplayValue('an.nv20456@student.edu.vn')).toBeTruthy();
+  it('renders email from user data', () => {
+    const { getByText } = render(<PersonalInfoScreen />);
+    // Email is rendered as ThemedText, not TextInput
+    expect(getByText('user@student.edu.vn')).toBeTruthy();
   });
 
   it('allows changing the full name', () => {
     const { getByDisplayValue } = render(<PersonalInfoScreen />);
-    const input = getByDisplayValue('Nguyễn Văn An');
+    const input = getByDisplayValue('Nguyễn Văn A');
     fireEvent.changeText(input, 'Trần Thị Bình');
     expect(getByDisplayValue('Trần Thị Bình')).toBeTruthy();
-  });
-
-  it('allows changing the email', () => {
-    const { getByDisplayValue } = render(<PersonalInfoScreen />);
-    const input = getByDisplayValue('an.nv20456@student.edu.vn');
-    fireEvent.changeText(input, 'test@student.edu.vn');
-    expect(getByDisplayValue('test@student.edu.vn')).toBeTruthy();
   });
 
   it('pressing Nữ (female) changes gender selection', () => {
     const { getByText } = render(<PersonalInfoScreen />);
     const femaleButton = getByText('Nữ');
     fireEvent.press(femaleButton);
-    // After pressing female, the female button should now be rendered (still present)
     expect(getByText('Nữ')).toBeTruthy();
   });
 
@@ -122,16 +148,13 @@ describe('PersonalInfoScreen (Info.tsx)', () => {
     expect(getByText('Nam')).toBeTruthy();
   });
 
-  it('pressing Lưu thay đổi calls console.log with updated values', () => {
-    const { getByText, getByDisplayValue } = render(<PersonalInfoScreen />);
-    const nameInput = getByDisplayValue('Nguyễn Văn An');
-    fireEvent.changeText(nameInput, 'New Name');
-    fireEvent.press(getByText('Lưu thay đổi'));
-    expect(console.log).toHaveBeenCalledWith('Đã lưu thông tin:', {
-      fullName: 'New Name',
-      email: 'an.nv20456@student.edu.vn',
-      gender: 'male',
+  it('pressing Lưu thay đổi calls updateUser', async () => {
+    const { getByText } = render(<PersonalInfoScreen />);
+    await act(async () => {
+      fireEvent.press(getByText('Lưu thay đổi'));
     });
+    const { useUser } = require('@/hooks/useUser');
+    expect(useUser().updateUser).toHaveBeenCalled();
   });
 
   it('pressing back button does not throw', () => {
@@ -142,22 +165,28 @@ describe('PersonalInfoScreen (Info.tsx)', () => {
     expect(() => fireEvent.press(touchables[0])).not.toThrow();
   });
 
-  it('pressing save with female gender passes correct gender', () => {
+  it('pressing save with female gender calls updateUser with gender female', async () => {
     const { getByText } = render(<PersonalInfoScreen />);
     fireEvent.press(getByText('Nữ'));
-    fireEvent.press(getByText('Lưu thay đổi'));
-    expect(console.log).toHaveBeenCalledWith('Đã lưu thông tin:', expect.objectContaining({
-      gender: 'female',
-    }));
+    await act(async () => {
+      fireEvent.press(getByText('Lưu thay đổi'));
+    });
+    const { useUser } = require('@/hooks/useUser');
+    expect(useUser().updateUser).toHaveBeenCalledWith(
+      expect.objectContaining({ gender: 'female' })
+    );
   });
 
-  it('pressing save with other gender passes correct gender', () => {
+  it('pressing save with other gender calls updateUser with gender other', async () => {
     const { getByText } = render(<PersonalInfoScreen />);
     fireEvent.press(getByText('Khác'));
-    fireEvent.press(getByText('Lưu thay đổi'));
-    expect(console.log).toHaveBeenCalledWith('Đã lưu thông tin:', expect.objectContaining({
-      gender: 'other',
-    }));
+    await act(async () => {
+      fireEvent.press(getByText('Lưu thay đổi'));
+    });
+    const { useUser } = require('@/hooks/useUser');
+    expect(useUser().updateUser).toHaveBeenCalledWith(
+      expect.objectContaining({ gender: 'other' })
+    );
   });
 
   describe('Platform-specific behavior', () => {

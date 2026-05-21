@@ -8,8 +8,8 @@ const mockMarkAllAsRead = jest.fn();
 const mockMarkAsRead = jest.fn();
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
-  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: mockBack }),
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
+  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: mockBack, canGoBack: jest.fn(() => true) }),
   useLocalSearchParams: () => ({}),
   usePathname: () => '/',
   Link: ({ children }: any) => children,

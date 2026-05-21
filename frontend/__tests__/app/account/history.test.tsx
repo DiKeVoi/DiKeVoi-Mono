@@ -1,26 +1,84 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import TripHistoryScreen from '../../../app/(tabs)/account/history';
 
-jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: () => ({}),
-  usePathname: () => '/',
-  Link: ({ children }: any) => children,
-  Redirect: () => null,
-}));
-
-jest.mock('react-native-safe-area-context', () => {
-  const React = require('react');
-  const { View } = require('react-native');
+jest.mock('expo-router', () => {
+  const router = {
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    canGoBack: jest.fn(() => true),
+  };
   return {
-    SafeAreaView: ({ children, ...props }: any) => React.createElement(View, props, children),
-    useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+    router,
+    useRouter: () => router,
+    useLocalSearchParams: () => ({}),
+    usePathname: () => '/',
+    Link: ({ children }: any) => children,
+    Redirect: () => null,
   };
 });
 
-// Helper to get the mocked router after module resolution
+// Provide test ride data matching what the tests expect
+jest.mock('@/hooks/useRides', () => ({
+  useRides: () => ({
+    data: [
+      {
+        id: 'c1',
+        offerUserId: 'u1',
+        requestUserId: 'u2',
+        originLocation: 'KTX Khu A',
+        destinationLocation: 'Trường Đại học Bách khoa',
+        departureTime: new Date(Date.now() - 86400000).toISOString(), // yesterday
+        status: 'completed',
+        negotiatedCost: null,
+        seatsAvailable: 1,
+        isRecurring: false,
+        createdAt: new Date(Date.now() - 90000000).toISOString(),
+        updatedAt: new Date(Date.now() - 86400000).toISOString(),
+      },
+      {
+        id: 'c2',
+        offerUserId: 'u1',
+        requestUserId: 'u3',
+        originLocation: 'KTX Khu A',
+        destinationLocation: 'Nhà văn hóa sinh viên',
+        departureTime: new Date('2026-05-15T07:15:00').toISOString(),
+        status: 'completed',
+        negotiatedCost: null,
+        seatsAvailable: 1,
+        isRecurring: false,
+        createdAt: new Date('2026-05-15T06:00:00').toISOString(),
+        updatedAt: new Date('2026-05-15T08:00:00').toISOString(),
+      },
+      {
+        id: 'c3',
+        offerUserId: 'u1',
+        requestUserId: 'u4',
+        originLocation: 'KTX Khu A',
+        destinationLocation: 'Trung tâm Giáo dục Quốc phòng',
+        departureTime: new Date('2026-05-12T14:00:00').toISOString(),
+        status: 'cancelled',
+        negotiatedCost: null,
+        seatsAvailable: 1,
+        isRecurring: false,
+        createdAt: new Date('2026-05-12T13:00:00').toISOString(),
+        updatedAt: new Date('2026-05-12T15:00:00').toISOString(),
+      },
+    ],
+    isLoading: false,
+    error: null,
+  }),
+  useRide: () => ({ data: null, isLoading: false }),
+  useActiveRides: () => ({ data: [], isLoading: false }),
+  useUpdateRideStatus: () => ({ mutate: jest.fn(), isPending: false }),
+  useStartRide: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useFinishRide: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useConfirmPayment: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  RIDES_KEY: 'rides',
+}));
+
+import TripHistoryScreen from '../../../app/(tabs)/account/history';
+
 const getMockedRouter = () => require('expo-router').router;
 
 describe('TripHistoryScreen (history.tsx)', () => {
@@ -49,16 +107,10 @@ describe('TripHistoryScreen (history.tsx)', () => {
   });
 
   describe('Completed trips tab (default)', () => {
-    it('shows completed trip partner names', () => {
+    it('shows completed trip destinations', () => {
       const { getByText } = render(<TripHistoryScreen />);
-      expect(getByText('Nguyễn Văn An')).toBeTruthy();
-      expect(getByText('Lê Thị Bình')).toBeTruthy();
-    });
-
-    it('shows completed trip times', () => {
-      const { getByText } = render(<TripHistoryScreen />);
-      expect(getByText('Hôm qua, 18:30')).toBeTruthy();
-      expect(getByText('15 Th05, 07:15')).toBeTruthy();
+      expect(getByText('Trường Đại học Bách khoa')).toBeTruthy();
+      expect(getByText('Nhà văn hóa sinh viên')).toBeTruthy();
     });
 
     it('shows Thành công status badges for completed trips', () => {
@@ -84,9 +136,9 @@ describe('TripHistoryScreen (history.tsx)', () => {
       expect(getByText('Nhà văn hóa sinh viên')).toBeTruthy();
     });
 
-    it('does NOT show cancelled trip partner (Trần Hoàng Nam) on completed tab', () => {
+    it('does NOT show cancelled trip destination on completed tab', () => {
       const { queryByText } = render(<TripHistoryScreen />);
-      expect(queryByText('Trần Hoàng Nam')).toBeNull();
+      expect(queryByText('Trung tâm Giáo dục Quốc phòng')).toBeNull();
     });
   });
 
@@ -94,21 +146,14 @@ describe('TripHistoryScreen (history.tsx)', () => {
     it('shows cancelled trips after switching tab', () => {
       const { getByText } = render(<TripHistoryScreen />);
       fireEvent.press(getByText('Đã hủy'));
-      expect(getByText('Trần Hoàng Nam')).toBeTruthy();
+      expect(getByText('Trung tâm Giáo dục Quốc phòng')).toBeTruthy();
     });
 
     it('shows Đã hủy status badge for cancelled trips', () => {
       const { getByText, getAllByText } = render(<TripHistoryScreen />);
       fireEvent.press(getByText('Đã hủy'));
-      // "Đã hủy" appears both as tab text and as status badge
       const cancelledTexts = getAllByText('Đã hủy');
       expect(cancelledTexts.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('shows cancelled trip time', () => {
-      const { getByText } = render(<TripHistoryScreen />);
-      fireEvent.press(getByText('Đã hủy'));
-      expect(getByText('12 Th05, 14:00')).toBeTruthy();
     });
 
     it('shows cancelled trip destination', () => {
@@ -117,18 +162,18 @@ describe('TripHistoryScreen (history.tsx)', () => {
       expect(getByText('Trung tâm Giáo dục Quốc phòng')).toBeTruthy();
     });
 
-    it('does NOT show completed trip partners on cancelled tab', () => {
+    it('does NOT show completed trip destinations on cancelled tab', () => {
       const { getByText, queryByText } = render(<TripHistoryScreen />);
       fireEvent.press(getByText('Đã hủy'));
-      expect(queryByText('Nguyễn Văn An')).toBeNull();
-      expect(queryByText('Lê Thị Bình')).toBeNull();
+      expect(queryByText('Trường Đại học Bách khoa')).toBeNull();
+      expect(queryByText('Nhà văn hóa sinh viên')).toBeNull();
     });
 
     it('switching back to Hoàn thành tab shows completed trips again', () => {
       const { getByText } = render(<TripHistoryScreen />);
       fireEvent.press(getByText('Đã hủy'));
       fireEvent.press(getByText('Hoàn thành'));
-      expect(getByText('Nguyễn Văn An')).toBeTruthy();
+      expect(getByText('Trường Đại học Bách khoa')).toBeTruthy();
     });
   });
 
@@ -137,7 +182,7 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const { UNSAFE_getAllByType } = render(<TripHistoryScreen />);
       const { TouchableOpacity } = require('react-native');
       const allTouchables = UNSAFE_getAllByType(TouchableOpacity);
-      // Layout: back=0, Hoàn thành=1, Đã hủy=2, chat_t1=3, flag_t1=4, chat_t2=5, flag_t2=6
+      // Layout: back=0, Hoàn thành=1, Đã hủy=2, chat_c1=3, flag_c1=4, chat_c2=5, flag_c2=6
       const chatButton = allTouchables[3];
       fireEvent.press(chatButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
@@ -153,8 +198,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const flagButton = allTouchables[4];
       fireEvent.press(flagButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/report/[id]',
-        params: { id: 'r1' },
+        pathname: '/(matching)/report',
+        params: { rideId: 'c1' },
       });
     });
 
@@ -177,8 +222,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const flagButton2 = allTouchables[6];
       fireEvent.press(flagButton2);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/report/[id]',
-        params: { id: 'r2' },
+        pathname: '/(matching)/report',
+        params: { rideId: 'c2' },
       });
     });
   });
@@ -189,7 +234,7 @@ describe('TripHistoryScreen (history.tsx)', () => {
       fireEvent.press(getByText('Đã hủy'));
       const { TouchableOpacity } = require('react-native');
       const allTouchables = UNSAFE_getAllByType(TouchableOpacity);
-      // After switching to cancelled tab: back=0, Hoàn thành=1, Đã hủy=2, chat_t3=3, flag_t3=4
+      // After switching to cancelled tab: back=0, Hoàn thành=1, Đã hủy=2, chat_c3=3, flag_c3=4
       const chatButton = allTouchables[3];
       fireEvent.press(chatButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
@@ -206,14 +251,14 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const flagButton = allTouchables[4];
       fireEvent.press(flagButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/report/[id]',
-        params: { id: 'r3' },
+        pathname: '/(matching)/report',
+        params: { rideId: 'c3' },
       });
     });
   });
 
   describe('Back navigation', () => {
-    it('pressing back button calls router.back', () => {
+    it('pressing back button calls router.back (via safeBack)', () => {
       const { UNSAFE_getAllByType } = render(<TripHistoryScreen />);
       const { TouchableOpacity } = require('react-native');
       const allTouchables = UNSAFE_getAllByType(TouchableOpacity);

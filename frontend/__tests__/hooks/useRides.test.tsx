@@ -1,3 +1,5 @@
+jest.unmock("@/hooks/useRides");
+
 import { renderHook, waitFor } from "@testing-library/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";

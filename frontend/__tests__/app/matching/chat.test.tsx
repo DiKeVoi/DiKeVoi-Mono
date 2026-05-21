@@ -1,203 +1,135 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 
-jest.mock('expo-router', () => ({
-  Link: ({ children }: any) => children,
-  Redirect: () => null,
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: () => ({}),
-  usePathname: () => '/',
-  router: {
-    back: jest.fn(),
+jest.mock('expo-router', () => {
+  const router = {
     push: jest.fn(),
     replace: jest.fn(),
-  },
-}));
-
-jest.mock('react-native-safe-area-context', () => {
-  const React = require('react');
+    back: jest.fn(),
+    canGoBack: jest.fn(() => true),
+  };
   return {
-    SafeAreaView: ({ children, ...props }: any) =>
-      React.createElement('SafeAreaView', props, children),
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    Link: ({ children }: any) => children,
+    Redirect: () => null,
+    useRouter: () => router,
+    useLocalSearchParams: () => ({ negotiationId: 'neg-1' }),
+    usePathname: () => '/',
+    router,
   };
 });
+
+// Helper to get fresh router mock reference
+const getMockRouter = () => require('expo-router').router;
+
+jest.mock('@/hooks/useNegotiations', () => ({
+  useNegotiation: () => ({
+    data: {
+      id: 'neg-1',
+      offererUid: 'user-other',
+      status: 'pending',
+      fare: null,
+      note: null,
+      departureTime: null,
+      pickupLocation: 'KTX Khu B',
+      dropoffLocation: 'Trường Đại học Bách Khoa',
+      confirmedByOfferer: false,
+      confirmedByRequester: false,
+      lastEditedBy: null,
+    },
+    isLoading: false,
+  }),
+  useUpdateNegotiation: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useConfirmNegotiation: () => ({ mutateAsync: jest.fn().mockResolvedValue({ rideId: null }), isPending: false }),
+}));
+
+jest.mock('@/hooks/AuthContext', () => ({
+  AuthProvider: ({ children }: any) => children,
+  useAuth: () => ({ user: { id: 'user-1' }, logout: jest.fn(), login: jest.fn(), isLoading: false }),
+}));
+
+jest.mock('@/lib/confirm', () => ({
+  confirmAction: jest.fn((title: string, msg: string, cb: () => void) => cb()),
+}));
 
 import ChatScreen from '../../../app/(matching)/chat';
 
 describe('ChatScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders without crashing', () => {
     const { toJSON } = render(<ChatScreen />);
     expect(toJSON()).toBeTruthy();
   });
 
-  it('renders the partner name in the header', () => {
-    const { getByText } = render(<ChatScreen />);
-    expect(getByText('Nguyễn Văn An')).toBeTruthy();
+  it('renders the negotiation screen', () => {
+    const { toJSON } = render(<ChatScreen />);
+    expect(toJSON()).toBeTruthy();
   });
 
-  it('renders the partner online status', () => {
+  it('renders the route locations', () => {
     const { getByText } = render(<ChatScreen />);
-    expect(getByText('Đang hoạt động')).toBeTruthy();
+    expect(getByText('KTX Khu B')).toBeTruthy();
+    expect(getByText('Trường Đại học Bách Khoa')).toBeTruthy();
   });
 
-  it('renders the negotiation timer', () => {
-    const { getByText } = render(<ChatScreen />);
-    expect(getByText('04:59')).toBeTruthy();
-  });
-
-  it('renders the negotiation card prompt text', () => {
-    const { getByText } = render(<ChatScreen />);
-    expect(getByText('Cùng nhau xác nhận chuyến đi trong:')).toBeTruthy();
-  });
-
-  it('renders the confirm trip button', () => {
+  it('renders the confirm status header', () => {
     const { getByText } = render(<ChatScreen />);
     expect(getByText('Xác nhận chuyến đi')).toBeTruthy();
   });
 
-  it('renders the cancel trip button', () => {
+  it('renders the role label for requester', () => {
     const { getByText } = render(<ChatScreen />);
-    expect(getByText('Hủy chuyến đi')).toBeTruthy();
+    // user-1 is the requester (offererUid is user-other), isOfferer=false => shows partner as "Người cho đi ké"
+    expect(getByText('Người cho đi ké')).toBeTruthy();
   });
 
-  it('renders initial chat messages', () => {
+  it('renders the negotiating status', () => {
     const { getByText } = render(<ChatScreen />);
-    expect(getByText(/KTX Khu B/)).toBeTruthy();
-    expect(getByText(/Mình vẫn còn chỗ/)).toBeTruthy();
+    expect(getByText('Đang thương lượng')).toBeTruthy();
   });
 
-  it('renders the system message about trip join request', () => {
+  it('renders the propose price button when no fare set', () => {
     const { getByText } = render(<ChatScreen />);
-    expect(getByText('An đã gửi đề nghị tham gia chuyến đi.')).toBeTruthy();
+    expect(getByText('Đề xuất giá')).toBeTruthy();
   });
 
-  it('renders the "Hôm nay" date separator', () => {
+  it('renders the confirm action button', () => {
     const { getByText } = render(<ChatScreen />);
-    expect(getByText('Hôm nay')).toBeTruthy();
+    expect(getByText('Đồng ý & Xác nhận chuyến')).toBeTruthy();
   });
 
-  it('renders the text input with placeholder', () => {
-    const { getByPlaceholderText } = render(<ChatScreen />);
-    expect(getByPlaceholderText('Nhập tin nhắn...')).toBeTruthy();
+  it('renders the cancel button', () => {
+    const { getByText } = render(<ChatScreen />);
+    expect(getByText('Hủy thương lượng')).toBeTruthy();
   });
 
-  it('does not send an empty message', () => {
-    const { getByPlaceholderText, getAllByText } = render(<ChatScreen />);
-    const input = getByPlaceholderText('Nhập tin nhắn...');
-
-    // Count messages before
-    const messagesBefore = getAllByText(/14:2/).length;
-
-    // Send without typing anything
-    fireEvent(input, 'submitEditing');
-
-    // Message count should not increase
-    const messagesAfter = getAllByText(/14:2/).length;
-    expect(messagesAfter).toBe(messagesBefore);
+  it('renders no-fare placeholder', () => {
+    const { getByText } = render(<ChatScreen />);
+    expect(getByText('Chưa có đề xuất giá — hãy bắt đầu thương lượng')).toBeTruthy();
   });
 
-  it('updates input text when typing', () => {
-    const { getByPlaceholderText } = render(<ChatScreen />);
-    const input = getByPlaceholderText('Nhập tin nhắn...');
-    fireEvent.changeText(input, 'Hello there');
-    expect(input.props.value).toBe('Hello there');
+  it('shows propose form when Đề xuất giá is pressed', () => {
+    const { getByText } = render(<ChatScreen />);
+    fireEvent.press(getByText('Đề xuất giá'));
+    expect(getByText('Đề xuất điều kiện')).toBeTruthy();
   });
 
-  it('sends a message when send button is pressed', async () => {
-    const { getByPlaceholderText, getByText, queryByText, UNSAFE_getAllByType } =
-      render(<ChatScreen />);
-    const input = getByPlaceholderText('Nhập tin nhắn...');
-
-    await act(async () => {
-      fireEvent.changeText(input, 'Button send test');
-    });
-
-    const { TouchableOpacity } = require('react-native');
-    const buttons = UNSAFE_getAllByType(TouchableOpacity);
-    // Last button is the send button
-    const sendButton = buttons[buttons.length - 1];
-
-    await act(async () => {
-      fireEvent.press(sendButton);
-    });
-
-    expect(queryByText('Button send test')).toBeTruthy();
-  });
-
-  it('clears input after sending via send button', async () => {
-    const { getByPlaceholderText, UNSAFE_getAllByType } = render(<ChatScreen />);
-    const input = getByPlaceholderText('Nhập tin nhắn...');
-
-    await act(async () => {
-      fireEvent.changeText(input, 'Hello');
-    });
-
-    const { TouchableOpacity } = require('react-native');
-    const buttons = UNSAFE_getAllByType(TouchableOpacity);
-    const sendButton = buttons[buttons.length - 1];
-
-    await act(async () => {
-      fireEvent.press(sendButton);
-    });
-
-    // Re-query the input to get the updated value
-    const updatedInput = getByPlaceholderText('Nhập tin nhắn...');
-    expect(updatedInput.props.value).toBe('');
-  });
-
-  it('does not send whitespace-only messages', async () => {
-    const { getByPlaceholderText, UNSAFE_getAllByType } = render(<ChatScreen />);
-    const input = getByPlaceholderText('Nhập tin nhắn...');
-
-    await act(async () => {
-      fireEvent.changeText(input, '   ');
-    });
-
-    const { TouchableOpacity } = require('react-native');
-    const buttons = UNSAFE_getAllByType(TouchableOpacity);
-    const sendButton = buttons[buttons.length - 1];
-
-    await act(async () => {
-      fireEvent.press(sendButton);
-    });
-
-    // The whitespace text should not appear as a message bubble
-    // Input should remain unchanged (empty string trim check)
-    const updatedInput = getByPlaceholderText('Nhập tin nhắn...');
-    expect(updatedInput.props.value).toBe('   ');
-  });
-
-  it('navigates back when back button is pressed', () => {
-    const mockBack = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.back = mockBack;
-
+  it('renders back navigation on press', () => {
     const { UNSAFE_getAllByType } = render(<ChatScreen />);
     const { TouchableOpacity } = require('react-native');
     const buttons = UNSAFE_getAllByType(TouchableOpacity);
-    // First button is the back button
+    // First button is back/home navigation
     fireEvent.press(buttons[0]);
-    expect(mockBack).toHaveBeenCalled();
+    expect(getMockRouter().replace).toHaveBeenCalledWith('/home');
   });
 
-  it('navigates to finish screen when confirm button pressed', () => {
-    const mockPush = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.push = mockPush;
-
+  it('navigates to negotiations when cancel is pressed', async () => {
     const { getByText } = render(<ChatScreen />);
-    fireEvent.press(getByText('Xác nhận chuyến đi'));
-    expect(mockPush).toHaveBeenCalledWith('/(matching)/finish');
-  });
-
-  it('navigates to results screen when cancel button pressed', () => {
-    const mockReplace = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.replace = mockReplace;
-
-    const { getByText } = render(<ChatScreen />);
-    fireEvent.press(getByText('Hủy chuyến đi'));
-    expect(mockReplace).toHaveBeenCalledWith('/(matching)/results');
+    await act(async () => {
+      fireEvent.press(getByText('Hủy thương lượng'));
+    });
+    expect(getMockRouter().replace).toHaveBeenCalledWith('/(matching)/negotiations');
   });
 });

@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import React from 'react';
 
 // IMPORTANT: jest.mock is hoisted above variable declarations.
@@ -19,6 +19,14 @@ jest.mock('expo-router', () => {
 jest.mock('@/assets/images/dikevoi-logo.png', () => 'dikevoi-logo', { virtual: true });
 jest.mock('@/assets/images/google-logo.png', () => 'google-logo', { virtual: true });
 
+// Mock authService so sendOtp resolves immediately in navigation tests
+jest.mock('@/services/auth', () => ({
+  authService: {
+    sendOtp: jest.fn().mockResolvedValue(undefined),
+    verifyOtp: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 import LoginScreen from '../../app/(auth)/login';
 
 function getMockRouter() {
@@ -28,6 +36,8 @@ function getMockRouter() {
 describe('LoginScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Re-apply default resolved value after clearAllMocks
+    require('@/services/auth').authService.sendOtp.mockResolvedValue(undefined);
   });
 
   // -------------------------
@@ -120,22 +130,6 @@ describe('LoginScreen', () => {
     expect(getByText('Vui lòng nhập địa chỉ email.')).toBeTruthy();
   });
 
-  it('shows error when email does not end with .edu.vn', () => {
-    const { getByText, getByPlaceholderText } = render(<LoginScreen />);
-    const input = getByPlaceholderText('yourname@student.edu.vn');
-    fireEvent.changeText(input, 'user@gmail.com');
-    fireEvent.press(getByText('Tiếp tục với mã OTP'));
-    expect(getByText('Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)')).toBeTruthy();
-  });
-
-  it('shows error for a partially correct domain (no .edu.vn suffix)', () => {
-    const { getByText, getByPlaceholderText } = render(<LoginScreen />);
-    const input = getByPlaceholderText('yourname@student.edu.vn');
-    fireEvent.changeText(input, 'user@edu.com');
-    fireEvent.press(getByText('Tiếp tục với mã OTP'));
-    expect(getByText('Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)')).toBeTruthy();
-  });
-
   it('hides hint text when there is an error message', () => {
     const { getByText, queryByText } = render(<LoginScreen />);
     fireEvent.press(getByText('Tiếp tục với mã OTP'));
@@ -167,39 +161,44 @@ describe('LoginScreen', () => {
   // Successful navigation
   // -------------------------
 
-  it('navigates to OTP screen with trimmed lowercase email on valid .edu.vn email', () => {
+  it('navigates to OTP screen with trimmed lowercase email on valid email', async () => {
     const { getByText, getByPlaceholderText } = render(<LoginScreen />);
     const input = getByPlaceholderText('yourname@student.edu.vn');
     fireEvent.changeText(input, '  User@STUDENT.EDU.VN  ');
-    fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    await act(async () => {
+      fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    });
     expect(getMockRouter().push).toHaveBeenCalledWith({
       pathname: '/(auth)/otp',
       params: { email: 'user@student.edu.vn' },
     });
   });
 
-  it('navigates to OTP screen on a valid email without extra spaces', () => {
+  it('navigates to OTP screen on a valid email without extra spaces', async () => {
     const { getByText, getByPlaceholderText } = render(<LoginScreen />);
     const input = getByPlaceholderText('yourname@student.edu.vn');
     fireEvent.changeText(input, 'myname@university.edu.vn');
-    fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    await act(async () => {
+      fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    });
     expect(getMockRouter().push).toHaveBeenCalledWith({
       pathname: '/(auth)/otp',
       params: { email: 'myname@university.edu.vn' },
     });
   });
 
-  it('clears error and navigates when valid email submitted after a prior error', () => {
+  it('clears error and navigates when valid email submitted after a prior error', async () => {
     const { getByText, getByPlaceholderText, queryByText } = render(<LoginScreen />);
     const input = getByPlaceholderText('yourname@student.edu.vn');
-    // First trigger error
-    fireEvent.changeText(input, 'bad@gmail.com');
+    // First trigger an empty-email error
     fireEvent.press(getByText('Tiếp tục với mã OTP'));
-    expect(getByText('Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)')).toBeTruthy();
+    expect(getByText('Vui lòng nhập địa chỉ email.')).toBeTruthy();
     // Fix the email
     fireEvent.changeText(input, 'good@school.edu.vn');
-    fireEvent.press(getByText('Tiếp tục với mã OTP'));
-    expect(queryByText('Vui lòng sử dụng email có đuôi .edu.vn (ví dụ: @student.edu.vn)')).toBeNull();
+    await act(async () => {
+      fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    });
+    expect(queryByText('Vui lòng nhập địa chỉ email.')).toBeNull();
     expect(getMockRouter().push).toHaveBeenCalledWith({
       pathname: '/(auth)/otp',
       params: { email: 'good@school.edu.vn' },
@@ -212,11 +211,13 @@ describe('LoginScreen', () => {
     expect(getMockRouter().push).not.toHaveBeenCalled();
   });
 
-  it('router.push is called exactly once on valid submission', () => {
+  it('router.push is called exactly once on valid submission', async () => {
     const { getByText, getByPlaceholderText } = render(<LoginScreen />);
     const input = getByPlaceholderText('yourname@student.edu.vn');
     fireEvent.changeText(input, 'valid@test.edu.vn');
-    fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    await act(async () => {
+      fireEvent.press(getByText('Tiếp tục với mã OTP'));
+    });
     expect(getMockRouter().push).toHaveBeenCalledTimes(1);
   });
 

@@ -30,8 +30,9 @@ describe('Home screen', () => {
   });
 
   it('renders MyRequests with limited view', () => {
-    const { getByText } = render(<Home />);
-    expect(getByText('Yêu cầu của tôi')).toBeTruthy();
+    const { getAllByText, getByText } = render(<Home />);
+    const items = getAllByText(/Đang tìm kiếm|Đã ghép cặp|Đang chờ xác nhận/);
+    expect(items.length).toBeGreaterThan(0);
     expect(getByText('Xem tất cả')).toBeTruthy();
   });
 });

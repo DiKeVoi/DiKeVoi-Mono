@@ -1,13 +1,18 @@
 jest.unmock("@/hooks/useRidePosts");
+jest.mock("@/hooks/AuthContext", () => ({
+  useAuth: jest.fn(),
+}));
 
-import { renderHook, waitFor } from "@testing-library/react-native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
 import { useMyRidePosts } from "@/hooks/useRidePosts";
+import { useAuth } from "@/hooks/AuthContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { renderHook, waitFor } from "@testing-library/react-native";
+import React from "react";
 
 jest.mock("@/services/ridePosts", () => ({
   ridePostsService: {
-    list: jest.fn().mockResolvedValue([
+    list: jest.fn().mockResolvedValue([]),
+    listMine: jest.fn().mockResolvedValue([
       {
         id: "rp-1",
         userId: "user-1",
@@ -24,11 +29,10 @@ jest.mock("@/services/ridePosts", () => ({
         updatedAt: "2026-05-07T09:00:00",
       },
     ]),
+    create: jest.fn().mockResolvedValue({}),
+    remove: jest.fn().mockResolvedValue(undefined),
   },
-}));
-
-jest.mock("@/hooks/AuthContext", () => ({
-  useAuth: () => ({ user: { id: "user-1" } }),
+  CreateRidePostPayload: {},
 }));
 
 const createWrapper = () => {
@@ -39,11 +43,29 @@ const createWrapper = () => {
 };
 
 describe("useMyRidePosts", () => {
+  beforeEach(() => {
+    (useAuth as jest.Mock).mockReturnValue({ user: { id: "user-1" } });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("returns posts belonging to current user", async () => {
     const { result } = renderHook(() => useMyRidePosts(), {
       wrapper: createWrapper(),
     });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(
+      () => {
+        if (result.current.isError) {
+          throw new Error(
+            `Query failed: ${(result.current.error as any)?.message}`,
+          );
+        }
+        expect(result.current.isSuccess).toBe(true);
+      },
+      { timeout: 5000 },
+    );
     expect(result.current.data).toHaveLength(1);
     expect(result.current.data![0].userId).toBe("user-1");
   });
