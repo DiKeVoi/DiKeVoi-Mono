@@ -25,6 +25,13 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('@/services/notifications', () => ({
+  notificationsService: {
+    markRead: jest.fn().mockResolvedValue(undefined),
+    markAllRead: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 // Override global notification mock for per-test control
 jest.mock('@/hooks/NotificationContext', () => ({
   useNotification: () => ({
