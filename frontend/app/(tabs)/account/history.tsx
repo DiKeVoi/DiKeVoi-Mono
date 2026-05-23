@@ -6,11 +6,6 @@ import { router } from "expo-router";
 import { useRides } from "@/hooks/useRides";
 import { useSafeBack } from "@/hooks/useSafeBack";
 import type { Ride } from "@/types/api";
-import { useGetNegotiationByRide } from "@/hooks/useNegotiations";
-
-import { useAuth } from "@/hooks/AuthContext";
-import { useReports } from "@/hooks/useReports";
-import { Report } from "@/types/api";
 function formatDepartureTime(iso: string): string {
   const date = new Date(iso);
   const now = new Date();
@@ -23,12 +18,7 @@ function formatDepartureTime(iso: string): string {
   return `${date.getDate()} Th${String(date.getMonth() + 1).padStart(2, "0")}, ${timeStr}`;
 }
 
-function RideCard({ ride, currentUserId, reports }: { ride: Ride, currentUserId: string, reports: Report[] }) {
-  const { data: negotiation} = useGetNegotiationByRide(ride.id);
-  const isOfferUser = ride.offerUserId === currentUserId;
-  const reportedUserId = isOfferUser ? ride.requestUserId : ride.offerUserId;
-  const isReported = reports?.some((r) => r.rideId === ride.id);
-  
+function RideCard({ ride }: { ride: Ride }) {
   return (
     <View className="bg-white rounded-[16px] p-4 mb-4 shadow-sm border border-slate-100">
       <View className="flex-row items-center justify-between mb-4">
@@ -85,37 +75,31 @@ function RideCard({ ride, currentUserId, reports }: { ride: Ride, currentUserId:
         </View>
       </View>
 
-      <View className="flex-row justify-end gap-2 mt-4 pt-3 border-t border-slate-50 items-center">
+      <View className="flex-row justify-end gap-2 mt-4 pt-3 border-t border-slate-50">
         <TouchableOpacity
           className="h-8 w-8 rounded-full bg-[#152249]/5 flex items-center justify-center"
           activeOpacity={0.7}
           onPress={() =>
             router.push({
-              pathname: "/(matching)/chat", 
-              params: { negotiationId: negotiation?.id } ,
+              pathname: "/(matching)/chat/[id]",
+              params: { id: ride.id, readonly: "true" },
             })
           }
         >
           <MaterialIcons name="chat" size={16} color="#152249" />
         </TouchableOpacity>
-
-        {isReported ? (
-          <View className="flex-row items-center gap-1 px-2 py-1 bg-slate-100 rounded-lg h-8">
-            <MaterialIcons name="check" size={14} color="#64748B" />
-            <Text className="text-[10px] font-bold text-slate-500 uppercase">Đã báo cáo</Text>
-          </View>
-        ) : (
-          <TouchableOpacity
-            className="h-8 w-8 rounded-full bg-red-50 flex items-center justify-center"
-            activeOpacity={0.7}
-            onPress={() => router.push({ 
-              pathname: "/report", 
-              params: { rideId: ride.id, reportedUserId: reportedUserId } 
-            })}
-          >
-            <MaterialIcons name="outlined-flag" size={16} color="#EF4444" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          className="h-8 w-8 rounded-full bg-[#152249]/5 flex items-center justify-center"
+          activeOpacity={0.7}
+          onPress={() =>
+            router.push({
+              pathname: "/(matching)/report",
+              params: { rideId: ride.id },
+            })
+          }
+        >
+          <MaterialIcons name="flag" size={16} color="#152249" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -124,9 +108,6 @@ function RideCard({ ride, currentUserId, reports }: { ride: Ride, currentUserId:
 export default function TripHistoryScreen() {
   const safeBack = useSafeBack("/account" as any);
   const [activeTab, setActiveTab] = useState<"completed" | "cancelled">("completed");
-  
-  const { user } = useAuth();
-  const { data: reports } = useReports();
   const { data: rides, isLoading, error } = useRides();
 
   const filteredRides = (rides ?? []).filter((r) => r.status === activeTab);
@@ -195,14 +176,7 @@ export default function TripHistoryScreen() {
             <Text className="text-slate-400 mt-4 font-medium">Chưa có chuyến đi nào.</Text>
           </View>
         ) : (
-          filteredRides.map((ride) => (
-            <RideCard 
-              key={ride.id} 
-              ride={ride} 
-              currentUserId={user?.id || ""} 
-              reports={reports || []} 
-            />
-          ))
+          filteredRides.map((ride) => <RideCard key={ride.id} ride={ride} />)
         )}
       </ScrollView>
     </SafeAreaView>

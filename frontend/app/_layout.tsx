@@ -17,7 +17,11 @@ import { NotificationProvider } from "@/hooks/NotificationContext";
 import * as Sentry from '@sentry/react-native';
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/AuthContext";
+<<<<<<< HEAD
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+=======
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
+>>>>>>> d4c01fa8adf7a584a99259b4f5b57cc8f9dacc52
 Sentry.init({
   dsn: 'https://c7fa84c2b600f6fee938f559c1066615@o4511351405543424.ingest.us.sentry.io/4511351422844928',
 

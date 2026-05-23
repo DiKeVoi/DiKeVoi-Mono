@@ -15,16 +15,27 @@ export default function AllNotificationsScreen() {
   
   const { notifications, markAllAsRead, markAsRead } = useNotification();
 
-  const handlePressNotification = async (item: Notification) => {
+  const handlePressNotification = (item: Notification) => {
     markAsRead(item.id);
 
-    try {
-      await notificationsService.markRead(item.id.toString());
-    } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái đã đọc:", error);
+    switch (item.type) {
+      case "ride_request":
+        router.push("/(tabs)/matching/connection-request" as any);
+        break;
+      case "ride_confirmed":
+      case "negotiation_accepted":
+      case "negotiation_offer":
+        if (item.relatedId) {
+          router.push({ pathname: "/(matching)/chat/[id]" as any, params: { id: item.relatedId } });
+        }
+        break;
+      default:
+        break;
     }
 
-    router.push("/active-rides");
+    notificationsService.markRead(item.id.toString()).catch((error) => {
+      console.error("Lỗi khi cập nhật trạng thái đã đọc:", error);
+    });
   };
 
   const handleMarkAllAsRead = async () => {

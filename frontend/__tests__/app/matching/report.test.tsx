@@ -1,31 +1,62 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 
-jest.mock('expo-router', () => ({
-  Link: ({ children }: any) => children,
-  Redirect: () => null,
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: () => ({}),
-  usePathname: () => '/',
-  router: {
-    back: jest.fn(),
+jest.mock('expo-router', () => {
+  const router = {
     push: jest.fn(),
     replace: jest.fn(),
-  },
-}));
-
-jest.mock('react-native-safe-area-context', () => {
-  const React = require('react');
+    back: jest.fn(),
+    canGoBack: jest.fn(() => true),
+  };
   return {
-    SafeAreaView: ({ children, ...props }: any) =>
-      React.createElement('SafeAreaView', props, children),
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    Link: ({ children }: any) => children,
+    Redirect: () => null,
+    useRouter: () => router,
+    useLocalSearchParams: () => ({ rideId: 'ride-1', reportedUserId: 'user-other' }),
+    usePathname: () => '/',
+    router,
   };
 });
+
+const getMockRouter = () => require('expo-router').router;
+
+jest.mock('@/hooks/useRides', () => ({
+  useRide: () => ({
+    data: {
+      id: 'ride-1',
+      originLocation: 'KTX Khu B',
+      destinationLocation: 'Trường Đại học Bách Khoa',
+      departureTime: null,
+      status: 'completed',
+    },
+    isLoading: false,
+  }),
+  useRides: () => ({ data: [], isLoading: false }),
+  useActiveRides: () => ({ data: [], isLoading: false }),
+  useUpdateRideStatus: () => ({ mutate: jest.fn(), isPending: false }),
+  useStartRide: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useFinishRide: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  useConfirmPayment: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  RIDES_KEY: 'rides',
+}));
+
+jest.mock('@/hooks/useReports', () => ({
+  useCreateReport: () => ({
+    mutateAsync: jest.fn().mockResolvedValue({}),
+    isPending: false,
+  }),
+  useReports: () => ({ data: [], isLoading: false }),
+  useReport: () => ({ data: null, isLoading: false, error: null }),
+  REPORTS_KEY: 'reports',
+}));
 
 import ReportScreen from '../../../app/(matching)/report';
 
 describe('ReportScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders without crashing', () => {
     const { toJSON } = render(<ReportScreen />);
     expect(toJSON()).toBeTruthy();
@@ -48,7 +79,7 @@ describe('ReportScreen', () => {
 
   it('renders the pickup location description', () => {
     const { getByText } = render(<ReportScreen />);
-    expect(getByText('Điểm đón sinh viên')).toBeTruthy();
+    expect(getByText('Điểm đón')).toBeTruthy();
   });
 
   it('renders the destination', () => {
@@ -112,55 +143,25 @@ describe('ReportScreen', () => {
     expect(input.props.value).toBe('Line 1\nLine 2\nLine 3');
   });
 
-  it('navigates back when back button is pressed', () => {
-    const mockBack = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.back = mockBack;
-
+  it('navigates back when back button is pressed (via safeBack)', () => {
     const { UNSAFE_getAllByType } = render(<ReportScreen />);
     const { TouchableOpacity } = require('react-native');
     const buttons = UNSAFE_getAllByType(TouchableOpacity);
     // First button is the back arrow
     fireEvent.press(buttons[0]);
-    expect(mockBack).toHaveBeenCalled();
+    expect(getMockRouter().back).toHaveBeenCalled();
   });
 
-  it('navigates to report-success when send button is pressed', () => {
-    const mockPush = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.push = mockPush;
-
-    const { getByText } = render(<ReportScreen />);
-    fireEvent.press(getByText('Gửi báo cáo'));
-    expect(mockPush).toHaveBeenCalledWith('/(matching)/report-success');
-  });
-
-  it('still navigates to report-success even with empty description', () => {
-    const mockPush = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.push = mockPush;
-
-    const { getByText } = render(<ReportScreen />);
-    // Without entering any text, pressing send still navigates
-    fireEvent.press(getByText('Gửi báo cáo'));
-    expect(mockPush).toHaveBeenCalledWith('/(matching)/report-success');
-  });
-
-  it('navigates to report-success after typing a description', () => {
-    const mockPush = jest.fn();
-    const routerModule = require('expo-router');
-    routerModule.router.push = mockPush;
-
+  it('navigates to report-success when send button is pressed with description', async () => {
     const { getByPlaceholderText, getByText } = render(<ReportScreen />);
     const input = getByPlaceholderText(
       'Ví dụ: Tài xế không đến điểm đón, xe gặp sự cố trên đường,...'
     );
+    fireEvent.changeText(input, 'Tài xế không đến điểm đón');
 
-    act(() => {
-      fireEvent.changeText(input, 'Tài xế không đến điểm đón');
+    await act(async () => {
+      fireEvent.press(getByText('Gửi báo cáo'));
     });
-
-    fireEvent.press(getByText('Gửi báo cáo'));
-    expect(mockPush).toHaveBeenCalledWith('/(matching)/report-success');
+    expect(getMockRouter().push).toHaveBeenCalledWith('/(matching)/report-success');
   });
 });

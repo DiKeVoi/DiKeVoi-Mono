@@ -8,8 +8,8 @@ const mockMarkAllAsRead = jest.fn();
 const mockMarkAsRead = jest.fn();
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
-  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: mockBack }),
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
+  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: mockBack, canGoBack: jest.fn(() => true) }),
   useLocalSearchParams: () => ({}),
   usePathname: () => '/',
   Link: ({ children }: any) => children,
@@ -24,6 +24,13 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
   };
 });
+
+jest.mock('@/services/notifications', () => ({
+  notificationsService: {
+    markRead: jest.fn().mockResolvedValue(undefined),
+    markAllRead: jest.fn().mockResolvedValue(undefined),
+  },
+}));
 
 // Override global notification mock for per-test control
 jest.mock('@/hooks/NotificationContext', () => ({

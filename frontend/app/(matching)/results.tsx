@@ -133,9 +133,7 @@ export default function ResultsScreen() {
   const oppositeType: PostType = myPostType === "offer" ? "request" : "offer";
   const { data: posts, isLoading, error, refetch } = useRidePosts(oppositeType);
 
-  const availablePosts = (posts ?? []).filter(
-    (p) => p.status === "open" && new Date(p.departureTime) > new Date()
-  );
+  const availablePosts = (posts ?? []).filter((p) => p.status === "open");
 
   return (
     <SafeAreaView className="flex-1 bg-[#f8f6f6] dark:bg-[#221610]" edges={["top"]}>

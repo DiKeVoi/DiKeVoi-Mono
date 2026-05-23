@@ -77,6 +77,17 @@ export default function InProgressScreen() {
           </TouchableOpacity>
           <Text className="font-bold text-lg text-[#152249]">Đang di chuyển</Text>
         </View>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/(matching)/report",
+              params: { rideId: ride.id, reportedUserId: reportedUserId ?? "" },
+            })
+          }
+          className="p-1.5 bg-red-50 rounded-lg"
+        >
+          <MaterialIcons name="outlined-flag" size={20} color="#EF4444" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView

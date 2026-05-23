@@ -1,8 +1,13 @@
 {
   "expo": {
+<<<<<<< HEAD
     "name": "DiKeVoi",
     "slug": "dikevoi",
     "owner": "dikevoi",
+=======
+    "name": "dikevoi-app",
+    "slug": "dikevoi-app",
+>>>>>>> d4c01fa8adf7a584a99259b4f5b57cc8f9dacc52
     "version": "1.0.0",
     "runtimeVersion": "1.0.0",
     "assetBundlePatterns": [
@@ -71,5 +76,4 @@
     "updates": {
       "url": "https://u.expo.dev/7d58b9ba-8329-409d-a9b2-ce129c082d2e"
     }
-  }
 }

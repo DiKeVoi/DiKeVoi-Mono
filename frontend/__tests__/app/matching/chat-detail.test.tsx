@@ -3,23 +3,55 @@ import { render, fireEvent, act } from '@testing-library/react-native';
 import ChatDetailScreen from '../../../app/(matching)/chat/[id]';
 
 // Override the global useLocalSearchParams mock for this file
-jest.mock('expo-router', () => ({
-  Link: ({ children }: any) => children,
-  Redirect: () => null,
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: () => ({ id: 'conn123' }),
-  usePathname: () => '/',
-  router: { back: jest.fn(), push: jest.fn(), replace: jest.fn() },
-}));
-
-jest.mock('react-native-safe-area-context', () => {
-  const React = require('react');
+jest.mock('expo-router', () => {
+  const router = {
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    canGoBack: jest.fn(() => true),
+  };
   return {
-    SafeAreaView: ({ children, ...props }: any) =>
-      React.createElement('SafeAreaView', props, children),
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    Link: ({ children }: any) => children,
+    Redirect: () => null,
+    useRouter: () => router,
+    useLocalSearchParams: () => ({ id: 'conn123' }),
+    usePathname: () => '/',
+    router,
   };
 });
+
+const getMockRouter = () => require('expo-router').router;
+
+jest.mock('@/hooks/useNegotiations', () => ({
+  useNegotiation: () => ({
+    data: {
+      id: 'conn123',
+      offererUid: 'user-other',
+      status: 'pending',
+      fare: null,
+      note: null,
+      departureTime: null,
+      pickupLocation: 'điểm đón',
+      dropoffLocation: 'điểm đến',
+      confirmedByOfferer: false,
+      confirmedByRequester: false,
+      lastEditedBy: null,
+    },
+    isLoading: false,
+  }),
+  useNegotiationUsers: () => ({
+    data: {
+      offerer: { id: 'user-other', displayName: 'Nguyễn Văn An', photoUrl: null },
+      requester: { id: 'user-1', displayName: 'Người dùng', photoUrl: null },
+    },
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@/hooks/AuthContext', () => ({
+  AuthProvider: ({ children }: any) => children,
+  useAuth: () => ({ user: { id: 'user-1' }, logout: jest.fn(), login: jest.fn(), isLoading: false }),
+}));
 
 jest.mock('@/components/MessageBubble', () => ({
   MessageBubble: ({ msg }: any) => {
@@ -30,22 +62,24 @@ jest.mock('@/components/MessageBubble', () => ({
 }));
 
 describe('ChatDetailScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders without crashing', () => {
     const { toJSON } = render(<ChatDetailScreen />);
     expect(toJSON()).toBeTruthy();
   });
 
-  it('displays partner name in header', () => {
+  it('displays partner name in header (offerer side sees requester name, user-1 is requester so partner is offerer)', () => {
     const { getByText } = render(<ChatDetailScreen />);
-    expect(getByText('Trò chuyện với Nguyễn Văn An')).toBeTruthy();
+    // user-1 is requester, so partner is offerer: Nguyễn Văn An
+    expect(getByText('Nguyễn Văn An')).toBeTruthy();
   });
 
-  it('renders all initial messages', () => {
-    const { getByTestId } = render(<ChatDetailScreen />);
-    expect(getByTestId('bubble-d1')).toBeTruthy();
-    expect(getByTestId('bubble-m1')).toBeTruthy();
-    expect(getByTestId('bubble-m2')).toBeTruthy();
-    expect(getByTestId('bubble-sys1')).toBeTruthy();
+  it('shows "Đang hoạt động" status', () => {
+    const { getByText } = render(<ChatDetailScreen />);
+    expect(getByText('Đang hoạt động')).toBeTruthy();
   });
 
   it('shows message input area in normal (non-readonly) mode', () => {
@@ -76,15 +110,12 @@ describe('ChatDetailScreen', () => {
   });
 
   it('does not send an empty message', () => {
-    const { getByPlaceholderText, getAllByTestId: _ } = render(<ChatDetailScreen />);
+    const { getByPlaceholderText } = render(<ChatDetailScreen />);
     const input = getByPlaceholderText('Nhập tin nhắn...');
-    const initialBubbleCount = 4; // from MOCK_CHAT_DATA
 
     fireEvent.changeText(input, '');
     fireEvent(input, 'submitEditing');
 
-    // Still only 4 original bubbles
-    // (We verify by checking the value didn't cause a crash)
     expect(input.props.value).toBe('');
   });
 
@@ -97,11 +128,16 @@ describe('ChatDetailScreen', () => {
     expect(input.props.value).toBe('   ');
   });
 
-  it('clears input after sending a valid message via submit editing', () => {
-    const { getByPlaceholderText } = render(<ChatDetailScreen />);
+  it('clears input after sending a valid message via send button', () => {
+    const { getByPlaceholderText, UNSAFE_getAllByType } = render(<ChatDetailScreen />);
     const input = getByPlaceholderText('Nhập tin nhắn...');
     fireEvent.changeText(input, 'Valid message');
-    fireEvent(input, 'submitEditing');
+
+    const { TouchableOpacity } = require('react-native');
+    const buttons = UNSAFE_getAllByType(TouchableOpacity);
+    const sendButton = buttons[buttons.length - 1];
+    fireEvent.press(sendButton);
+
     expect(input.props.value).toBe('');
   });
 
@@ -112,7 +148,6 @@ describe('ChatDetailScreen', () => {
 
     const { TouchableOpacity } = require('react-native');
     const buttons = UNSAFE_getAllByType(TouchableOpacity);
-    // Last TouchableOpacity is the send button
     const sendButton = buttons[buttons.length - 1];
     fireEvent.press(sendButton);
 
@@ -126,28 +161,42 @@ describe('ChatDetailScreen', () => {
     expect(touchables.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('calls router.back when back button is pressed', () => {
-    const { router } = require('expo-router');
+  it('calls safeBack when back button is pressed (safeBack calls router.back when canGoBack)', () => {
     const { UNSAFE_getAllByType } = render(<ChatDetailScreen />);
     const { TouchableOpacity } = require('react-native');
     const touchables = UNSAFE_getAllByType(TouchableOpacity);
     // First TouchableOpacity is back button
     fireEvent.press(touchables[0]);
-    expect(router.back).toHaveBeenCalled();
+    expect(getMockRouter().back).toHaveBeenCalled();
   });
 });
 
-describe('ChatDetailScreen (readonly mode)', () => {
-  it('shows ended conversation notice when readonly=true', () => {
-    // Override the mock specifically for this test using a spy
+describe('ChatDetailScreen (closed negotiation)', () => {
+  it('shows ended conversation notice when negotiation is cancelled', () => {
     const expoRouter = require('expo-router');
-    const originalMock = expoRouter.useLocalSearchParams;
-    expoRouter.useLocalSearchParams = () => ({ id: 'conn123', readonly: 'true' });
+    const negotiationsHook = require('@/hooks/useNegotiations');
+    const originalMock = negotiationsHook.useNegotiation;
+    negotiationsHook.useNegotiation = () => ({
+      data: {
+        id: 'conn123',
+        offererUid: 'user-other',
+        status: 'cancelled',
+        fare: null,
+        note: null,
+        departureTime: null,
+        pickupLocation: 'A',
+        dropoffLocation: 'B',
+        confirmedByOfferer: false,
+        confirmedByRequester: false,
+        lastEditedBy: null,
+      },
+      isLoading: false,
+    });
 
     const { getByText } = render(<ChatDetailScreen />);
     expect(getByText('Cuộc trò chuyện này đã kết thúc.')).toBeTruthy();
 
     // Restore
-    expoRouter.useLocalSearchParams = originalMock;
+    negotiationsHook.useNegotiation = originalMock;
   });
 });
