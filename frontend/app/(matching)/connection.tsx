@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router"; // <-- Import thêm useLocalSearchParams
+import { useLocalSearchParams } from "expo-router"; // <-- Import thêm useLocalSearchParams
 import { useNegotiations } from "@/hooks/useNegotiations";
 import { useSafeBack } from "@/hooks/useSafeBack";
 import { useAuth } from "@/hooks/AuthContext";
