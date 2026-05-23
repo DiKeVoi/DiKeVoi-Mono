@@ -1,10 +1,10 @@
 import { OnboardingData } from "@/types/onboardingData";
 import { ThemedText, ThemedView } from "@components/index";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import { useState } from "react";
 import { Pressable, TouchableHighlight } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 const onboardingData: OnboardingData[] = [
   {
@@ -29,6 +29,10 @@ const onboardingData: OnboardingData[] = [
     image: require("@/assets/pages/onboarding/onboarding-3.svg"),
   },
 ];
+async function markOnboardingViewed() {
+  await AsyncStorage.setItem("hasViewedOnboarding", "true");
+}
+
 export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
@@ -40,17 +44,16 @@ export default function Onboarding() {
           className="mb-4 h-12 w-12"
           contentFit="contain"
         />
-        <Link href="/(tabs)/home" asChild>
-          <Pressable
-            onPress={() => {
-              navigate("/login");
-            }}
-          >
-            <ThemedText className="font-bold text-slate-600 text-base">
-              Bỏ qua
-            </ThemedText>
-          </Pressable>
-        </Link>
+        <Pressable
+          onPress={async () => {
+            await markOnboardingViewed();
+            navigate("/(auth)/login");
+          }}
+        >
+          <ThemedText className="font-bold text-slate-600 text-base">
+            Bỏ qua
+          </ThemedText>
+        </Pressable>
       </ThemedView>
       <ThemedView className="flex-1 w-full items-center justify-center">
         <Animated.View
@@ -94,12 +97,12 @@ export default function Onboarding() {
           ))}
         </ThemedView>
         <TouchableHighlight
-          onPress={() => {
-            setCurrentIndex((prev) =>
-              Math.min(prev + 1, onboardingData.length - 1),
-            );
+          onPress={async () => {
             if (currentIndex === onboardingData.length - 1) {
-              navigate("/login");
+              await markOnboardingViewed();
+              navigate("/(auth)/login");
+            } else {
+              setCurrentIndex((prev) => prev + 1);
             }
           }}
           className="mb-8 rounded-xl w-4/5 h-16 bg-primary py-3 items-center justify-center"
