@@ -13,15 +13,17 @@ export default function Index() {
         // 1. Vào bộ nhớ tìm biến "hasViewedOnboarding"
         const hasViewedOnboarding = await AsyncStorage.getItem("hasViewedOnboarding");
         
+        if (hasViewedOnboarding === null) {
+          // Lần đầu tiên tải app -> Cờ chưa tồn tại -> Đi Onboarding
+          router.replace("/(auth)/onboarding");
+          return;
+        }
         // 2. Giả lập check đăng nhập (Sau này bạn check Token thực tế ở đây)
         const token = await getToken();
         const isLoggedIn = !!token; 
 
         // 3. Quyết định luồng đi
-        if (hasViewedOnboarding === null) {
-          // Lần đầu tiên tải app -> Cờ chưa tồn tại -> Đi Onboarding
-          router.replace("/(auth)/onboarding");
-        } else if (!isLoggedIn) {
+         if (!isLoggedIn) {
           // Đã xem Onboarding nhưng chưa đăng nhập -> Đi Login
           router.replace("/(auth)/login");
         } else {

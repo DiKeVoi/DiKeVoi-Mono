@@ -2,7 +2,7 @@ import { OnboardingData } from "@/types/onboardingData";
 import { ThemedText, ThemedView } from "@components/index";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import { navigate } from "expo-router/build/global-state/routing";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, TouchableHighlight } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
@@ -36,7 +36,7 @@ export default function Onboarding() {
     try {
       await AsyncStorage.setItem('hasViewedOnboarding', 'true');
       
-      navigate("/login"); 
+      router.replace("/(auth)/login");
     } catch (error) {
       console.log(error);
     }
