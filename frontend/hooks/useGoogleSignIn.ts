@@ -1,5 +1,4 @@
 import { setToken } from "@/lib/tokenStorage";
-<<<<<<< HEAD
 import { authService } from "@/services/auth";
 import {
   GoogleSignin,
@@ -8,16 +7,6 @@ import {
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { useAuth } from "./AuthContext";
-=======
-// import { authService } from "@/services/auth";
-// import {
-//   GoogleSignin,
-//   statusCodes,
-// } from "@react-native-google-signin/google-signin";
-// import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
-// import { useAuth } from "./AuthContext";
->>>>>>> d4c01fa8adf7a584a99259b4f5b57cc8f9dacc52
 interface UseGoogleSignInReturn {
   isLoading: boolean;
   errorMessage: string;
