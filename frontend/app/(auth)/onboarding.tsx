@@ -4,7 +4,6 @@ import { Image } from "expo-image";
 import { navigate } from "expo-router/build/global-state/routing";
 import { useState } from "react";
 import { Pressable, TouchableHighlight } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 const onboardingData: OnboardingData[] = [
   {
@@ -29,12 +28,17 @@ const onboardingData: OnboardingData[] = [
     image: require("@/assets/pages/onboarding/onboarding-3.svg"),
   },
 ];
-async function markOnboardingViewed() {
-  await AsyncStorage.setItem("hasViewedOnboarding", "true");
-}
 
-export default function Onboarding() {
+interface OnboardingScreenProps {
+  onFinish?: () => void;
+}
+export default function OnboardingScreen({ onFinish }: OnboardingScreenProps){
   const [currentIndex, setCurrentIndex] = useState(0);
+  const handleFinishOnboarding = async () => {
+    if (onFinish) {
+      onFinish();
+    }
+  };
   return (
     <ThemedView className="flex-1 pt-12 items-center gap-5">
       {/* Top bar */}
@@ -46,7 +50,7 @@ export default function Onboarding() {
         />
         <Pressable
           onPress={async () => {
-            await markOnboardingViewed();
+            await handleFinishOnboarding();
             navigate("/(auth)/login");
           }}
         >
