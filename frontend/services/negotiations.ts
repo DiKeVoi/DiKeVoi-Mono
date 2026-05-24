@@ -29,6 +29,11 @@ export const negotiationsService = {
     return data;
   },
 
+  async getByRide(rideId: string): Promise<Negotiation> {
+    const { data } = await apiClient.get<Negotiation>(`/negotiations/byRide/${rideId}`);
+    return data;
+  },
+
   async getUsers(id: string): Promise<NegotiationUsers> {
     const { data } = await apiClient.get<NegotiationUsers>(`/negotiations/${id}/users`);
     return data;

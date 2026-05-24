@@ -69,6 +69,14 @@ export function useNegotiationUsers(id: string) {
   });
 }
 
+export function useGetNegotiationByRide(rideId: string) {
+  return useQuery({
+    queryKey: ['negotiations', rideId], 
+    queryFn: () => negotiationsService.getByRide(rideId),    
+    enabled: !!rideId, 
+  });
+}
+
 export function useCreateNegotiation() {
   const qc = useQueryClient();
   return useMutation({

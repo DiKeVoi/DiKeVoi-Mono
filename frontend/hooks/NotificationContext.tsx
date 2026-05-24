@@ -1,4 +1,5 @@
 import React, { createContext, useContext } from "react";
+import { useAuth } from "@/hooks/AuthContext";
 import {
   useNotificationList,
   useMarkRead,
@@ -17,8 +18,10 @@ interface NotificationContextValue {
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const { data: notifications = [] } = useNotificationList();
-  const { data: unreadCount = 0 } = useUnreadCount();
+  const { user } = useAuth();
+  const notificationsEnabled = !!user;
+  const { data: notifications = [] } = useNotificationList(notificationsEnabled);
+  const { data: unreadCount = 0 } = useUnreadCount(notificationsEnabled);
   const markRead = useMarkRead();
   const markAllRead = useMarkAllRead();
 

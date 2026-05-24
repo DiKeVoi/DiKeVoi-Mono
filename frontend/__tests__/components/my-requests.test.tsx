@@ -8,6 +8,20 @@ describe('MyRequests', () => {
     expect(toJSON()).toBeTruthy();
   });
 
+<<<<<<< HEAD
+  it('renders the section heading', () => {
+    const { getByText } = render(<MyRequests viewAll={false} />);
+    expect(getByText('Yêu cầu của tôi')).toBeTruthy();
+  });
+
+  it('shows "Xem tất cả" link when viewAll is false', () => {
+    const { getByText } = render(<MyRequests viewAll={false} />);
+    expect(getByText('Xem tất cả')).toBeTruthy();
+  });
+
+  it('hides "Xem tất cả" link when viewAll is true', () => {
+    const { queryByText } = render(<MyRequests viewAll={true} />);
+=======
   it('renders ride post items when data is present', () => {
     const { getAllByText } = render(<MyRequests viewAll={false} />);
     const items = getAllByText(/Đang tìm kiếm|Đã ghép cặp|Đang chờ xác nhận/);
@@ -21,6 +35,7 @@ describe('MyRequests', () => {
 
   it('does not render "Xem tất cả" link', () => {
     const { queryByText } = render(<MyRequests viewAll={false} />);
+>>>>>>> d4c01fa8adf7a584a99259b4f5b57cc8f9dacc52
     expect(queryByText('Xem tất cả')).toBeNull();
   });
 
