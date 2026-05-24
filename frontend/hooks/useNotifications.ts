@@ -3,17 +3,19 @@ import { notificationsService } from "@/services/notifications";
 
 export const NOTIFICATIONS_KEY = "notifications";
 
-export function useNotificationList() {
+export function useNotificationList(enabled = true) {
   return useQuery({
     queryKey: [NOTIFICATIONS_KEY],
     queryFn: () => notificationsService.list(),
+    enabled,
   });
 }
 
-export function useUnreadCount() {
+export function useUnreadCount(enabled = true) {
   return useQuery({
     queryKey: [NOTIFICATIONS_KEY, "unreadCount"],
     queryFn: () => notificationsService.unreadCount(),
+    enabled,
   });
 }
 

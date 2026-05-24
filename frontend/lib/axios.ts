@@ -21,8 +21,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      await clearToken();
-      router.replace("/(auth)/login");
+      const token = await getToken();
+      // Only redirect when a stored session expired — not for unauthenticated screens (e.g. onboarding).
+      if (token) {
+        await clearToken();
+        router.replace("/(auth)/login");
+      }
     }
     return Promise.reject(error);
   }
