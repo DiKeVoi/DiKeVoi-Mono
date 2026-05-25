@@ -68,6 +68,10 @@ jobs:
         working-directory: frontend
         run: npm run test:coverage -- --ci
 
+      - name: Fix lcov paths for SonarCloud
+        working-directory: frontend
+        run: sed -i "s|SF:$(pwd)/|SF:frontend/|g" coverage/lcov.info
+
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:

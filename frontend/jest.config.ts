@@ -36,6 +36,8 @@ const config: Config = {
   ],
   testEnvironment: "node",
   testPathIgnorePatterns: ["/node_modules/", "/e2e/"],
+
 };
+
 
 export default config;
