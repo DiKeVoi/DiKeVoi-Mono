@@ -68,7 +68,7 @@ describe('app/index.tsx (root Index)', () => {
     await act(async () => {
       await flushPromises();
     });
-    expect(getMockRouter().replace).toHaveBeenCalledWith('/(auth)/login');
+    expect(getMockRouter().replace).toHaveBeenCalledWith('/(auth)/onboarding');
   });
 
   it('calls AsyncStorage.getItem with the correct key exactly once', async () => {

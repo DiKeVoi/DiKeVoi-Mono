@@ -35,10 +35,6 @@ describe('Notification', () => {
 
   it('renders the mark-all-read button', () => {
     const { getByText } = render(<Notification />);
-<<<<<<< HEAD
-    expect(getByText('Đánh dấu đã đọc tất cả')).toBeTruthy();
-=======
     expect(getByText('Đánh dấu đã đọc')).toBeTruthy();
->>>>>>> d4c01fa8adf7a584a99259b4f5b57cc8f9dacc52
   });
 });

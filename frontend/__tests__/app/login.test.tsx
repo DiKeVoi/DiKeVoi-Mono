@@ -19,6 +19,21 @@ jest.mock('expo-router', () => {
 jest.mock('@/assets/images/dikevoi-logo.png', () => 'dikevoi-logo', { virtual: true });
 jest.mock('@/assets/images/google-logo.png', () => 'google-logo', { virtual: true });
 
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPlayServices: jest.fn().mockResolvedValue(true),
+    signIn: jest.fn().mockResolvedValue({ idToken: 'mock-id-token' }),
+    signOut: jest.fn().mockResolvedValue(undefined),
+    isSignedIn: jest.fn().mockReturnValue(false),
+  },
+  statusCodes: {
+    SIGN_IN_CANCELLED: 'SIGN_IN_CANCELLED',
+    IN_PROGRESS: 'IN_PROGRESS',
+    PLAY_SERVICES_NOT_AVAILABLE: 'PLAY_SERVICES_NOT_AVAILABLE',
+  },
+}));
+
 // Mock authService so sendOtp resolves immediately in navigation tests
 jest.mock('@/services/auth', () => ({
   authService: {

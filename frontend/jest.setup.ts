@@ -1,16 +1,9 @@
 jest.mock('expo-router', () => ({
   Link: ({ children, asChild }: any) => (children),
   Redirect: () => null,
-<<<<<<< HEAD
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
   useLocalSearchParams: () => ({}),
   usePathname: () => '/',
-=======
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) }),
-  useLocalSearchParams: () => ({}),
-  usePathname: () => '/',
-  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
->>>>>>> d4c01fa8adf7a584a99259b4f5b57cc8f9dacc52
 }));
 
 jest.mock('expo-haptics', () => ({

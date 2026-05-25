@@ -1,6 +1,14 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 
+jest.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({
+    invalidateQueries: jest.fn(),
+  }),
+  useQuery: jest.fn().mockReturnValue({ data: [], isLoading: false, error: null }),
+  useMutation: jest.fn().mockReturnValue({ mutate: jest.fn(), isPending: false }),
+
+}));
 jest.mock('expo-router', () => {
   const router = {
     push: jest.fn(),
@@ -77,7 +85,25 @@ jest.mock('@/hooks/useRides', () => ({
   RIDES_KEY: 'rides',
 }));
 
+jest.mock('@/hooks/useNegotiations', () => ({
+  useNegotiations: () => ({ data: [], isLoading: false }),
+  useNegotiation: () => ({ data: null, isLoading: false }),
+  useNegotiationUsers: () => ({ data: null, isLoading: false }),
+  useGetNegotiationByRide: () => ({ data: null, isLoading: false }),
+  useCreateNegotiation: () => ({ mutateAsync: jest.fn().mockResolvedValue({ id: 'neg-1' }), isPending: false }),
+  useUpdateNegotiation: () => ({ mutate: jest.fn(), isPending: false }),
+  useConfirmNegotiation: () => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false }),
+  NEGOTIATIONS_KEY: 'negotiations',
+}));
+
+jest.mock('@/hooks/useUser', () => ({
+  useUser: () => ({
+    user: { id: 'user-1', email: 'user1@example.com' },
+  }),
+}));
+
 import TripHistoryScreen from '../../../app/(tabs)/account/history';
+import { useQuery } from '@tanstack/react-query';
 
 const getMockedRouter = () => require('expo-router').router;
 
@@ -186,8 +212,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const chatButton = allTouchables[3];
       fireEvent.press(chatButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/chat/[id]',
-        params: { id: 'c1', readonly: 'true' },
+        pathname: '/(matching)/chat',
+        params: { negotiationId: undefined },
       });
     });
 
@@ -198,8 +224,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const flagButton = allTouchables[4];
       fireEvent.press(flagButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/report',
-        params: { rideId: 'c1' },
+        pathname: '/report',
+        params: { rideId: 'c1', reportedUserId: 'u1' },
       });
     });
 
@@ -210,8 +236,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const chatButton2 = allTouchables[5];
       fireEvent.press(chatButton2);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/chat/[id]',
-        params: { id: 'c2', readonly: 'true' },
+        pathname: '/(matching)/chat',
+        params: { negotiationId: undefined },
       });
     });
 
@@ -222,8 +248,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const flagButton2 = allTouchables[6];
       fireEvent.press(flagButton2);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/report',
-        params: { rideId: 'c2' },
+        pathname: '/report',
+        params: { rideId: 'c2', reportedUserId: 'u1' },
       });
     });
   });
@@ -238,8 +264,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const chatButton = allTouchables[3];
       fireEvent.press(chatButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/chat/[id]',
-        params: { id: 'c3', readonly: 'true' },
+        pathname: '/(matching)/chat',
+        params: { negotiationId: undefined },
       });
     });
 
@@ -251,8 +277,8 @@ describe('TripHistoryScreen (history.tsx)', () => {
       const flagButton = allTouchables[4];
       fireEvent.press(flagButton);
       expect(getMockedRouter().push).toHaveBeenCalledWith({
-        pathname: '/(matching)/report',
-        params: { rideId: 'c3' },
+        pathname: '/report',
+        params: { rideId: 'c3', reportedUserId: 'u1' },
       });
     });
   });
