@@ -172,7 +172,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
               <Text
                 className="text-[10px] font-bold text-slate-400"
               >
-                08:30 - 10/10/2026
+                01:30 - 10/10/2026
               </Text>
             </View>
           </View>
@@ -294,7 +294,7 @@ exports[`ConnectionRequest screen matches snapshot 1`] = `
               <Text
                 className="text-sm font-bold text-[#1A1C1C]"
               >
-                08:30 - 10/10/2026
+                01:30 - 10/10/2026
               </Text>
             </View>
           </View>
