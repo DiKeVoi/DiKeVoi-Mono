@@ -170,16 +170,12 @@ def get_negotiation(negotiation_id: str, current_user: CurrentUser) -> dict:
     _require_participant(neg, current_user["user_id"])
     return neg
 
+
 @router.get("/byRide/{rideId}")
 def get_negotiations_by_ride(
     rideId: str,
 ) -> list:
-    query = (
-        supabase.table("Negotiation")
-        .select("*")
-        .eq("rideId", rideId)
-        .limit(1)
-    )
+    query = supabase.table("Negotiation").select("*").eq("rideId", rideId).limit(1)
     return query.execute().data
 
 

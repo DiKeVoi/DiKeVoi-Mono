@@ -126,7 +126,7 @@ def _ensure_user(
         if auth_provider == "google" and existing.get("authProvider") != "google":
             updates["authProvider"] = "google"
         elif auth_provider == "email" and existing.get("authProvider") != "email":
-             updates["authProvider"] = "email"
+            updates["authProvider"] = "email"
 
         if is_verified and not existing.get("isVerified"):
             updates["isVerified"] = True
